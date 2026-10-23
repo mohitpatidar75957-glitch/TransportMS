@@ -20,21 +20,21 @@ public class Driver {
     @Column(name = "license_number", unique = true)
     private String licenseNumber;
 
-    @Column(name = "license_expiry", nullable = false)
+    @Column(name = "license_expiry", nullable = true)
     private LocalDate licenseExpiry;
 
-    @Column(name = "aadhar_number", nullable = false)
+    @Column(name = "aadhar_number", nullable = true)
     private String aadharNumber;
 
-    @Column(name = "pan_number", nullable = false)
+    @Column(name = "pan_number", nullable = true)
     private String panNumber;
 
     private String phone;
 
-    @Column(name = "alt_phone", nullable = false)
+    @Column(name = "alt_phone", nullable = true)
     private String altPhone;
 
-    @Column(name = "blood_group", nullable = false)
+    @Column(name = "blood_group", nullable = true)
     private String bloodGroup;
 
     @Column(columnDefinition = "TEXT")
@@ -42,13 +42,13 @@ public class Driver {
 
     private String status; // Available, On Trip, On Leave
 
-    @Column(name = "joined_date", nullable = false)
+    @Column(name = "joined_date", nullable = true)
     private LocalDate joinedDate;
 
-    @Column(name = "salary_type", nullable = false)
+    @Column(name = "salary_type", nullable = true)
     private String salaryType; // Monthly, Per Trip, Percentage
 
-    @Column(name = "salary_amount", nullable = false)
+    @Column(name = "salary_amount", nullable = true)
     private Double salaryAmount;
 
     @ManyToOne

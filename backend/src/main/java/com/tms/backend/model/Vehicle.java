@@ -39,10 +39,10 @@ public class Vehicle {
 
     private String model;
     
-    @Column(name = "chassis_number", nullable = false)
+    @Column(name = "chassis_number", nullable = true)
     private String chassisNumber;
     
-    @Column(name = "engine_number", nullable = false)
+    @Column(name = "engine_number", nullable = true)
     private String engineNumber;
 
     private String fuelType;
