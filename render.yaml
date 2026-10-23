@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: transport-ms-backend
+    runtime: java
+    rootDir: backend
+    buildCommand: ./mvnw clean package -DskipTests
+    startCommand: java -jar target/backend-0.0.1-SNAPSHOT.jar
+    plan: free
+    region: singapore
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:postgresql://db.jmmszinwlkzkslddldzq.supabase.co:5432/postgres?sslmode=require
+      - key: SPRING_DATASOURCE_USERNAME
+        value: postgres
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: MohitTMS@2026
+      - key: PORT
+        value: 8080
