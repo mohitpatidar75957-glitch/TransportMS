@@ -6,9 +6,9 @@ services:
     region: singapore
     envVars:
       - key: SPRING_DATASOURCE_URL
-        value: jdbc:postgresql://db.jmmszinwlkzkslddldzq.supabase.co:5432/postgres?sslmode=require
+        value: jdbc:postgresql://aws-0-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require
       - key: SPRING_DATASOURCE_USERNAME
-        value: postgres
+        value: postgres.jmmszinwlkzkslddldzq
       - key: SPRING_DATASOURCE_PASSWORD
         value: MohitTMS@2026
       - key: PORT
