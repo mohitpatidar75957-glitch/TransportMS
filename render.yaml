@@ -1,10 +1,7 @@
 services:
   - type: web
     name: transport-ms-backend
-    runtime: java
-    rootDir: backend
-    buildCommand: ./mvnw clean package -DskipTests
-    startCommand: java -jar target/backend-0.0.1-SNAPSHOT.jar
+    runtime: docker
     plan: free
     region: singapore
     envVars:
