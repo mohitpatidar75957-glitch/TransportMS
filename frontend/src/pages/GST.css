@@ -1,0 +1,84 @@
+.gst-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.gst-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.stat-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-details h3 {
+  margin: 0 0 4px 0;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+}
+
+.stat-details p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-collected {
+  background-color: rgba(9, 132, 227, 0.1);
+  color: #0984e3;
+}
+
+.badge-paid {
+  background-color: rgba(253, 160, 133, 0.1);
+  color: #fda085;
+}
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge.filed {
+  background-color: rgba(32, 201, 151, 0.1);
+  color: #20c997;
+}
+
+.status-badge.pending {
+  background-color: rgba(255, 171, 0, 0.1);
+  color: #ffab00;
+}
+
+/* Removed GST Table Compression to match base theme */

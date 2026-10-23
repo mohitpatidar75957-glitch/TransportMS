@@ -1,0 +1,179 @@
+/* ============================================
+   NOTIFICATIONS PAGE — ENTERPRISE CLEAN LIGHT THEME
+   Matches the rest of Transport MS light dashboard
+   ============================================ */
+
+.notifications-page {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  min-height: calc(100vh - 80px);
+  background-color: transparent;
+  width: 100%;
+}
+
+.notification-page-card {
+  width: 100%;
+  max-width: 100%;
+  background-color: var(--bg-secondary, #ffffff);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  margin-top: 0px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 120px); 
+  border: 1px solid var(--border-color, #e2e8f0);
+}
+
+.notification-page-header {
+  background-color: #f8fafc;
+  padding: 20px 24px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.notifications-list {
+  padding: 20px 24px;
+  overflow-y: auto;
+  background-color: var(--bg-secondary, #ffffff);
+}
+
+/* custom scrollbar for notifications list */
+.notifications-list::-webkit-scrollbar {
+  width: 6px;
+}
+.notifications-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.notifications-list::-webkit-scrollbar-thumb {
+  background-color: var(--border-color, #cbd5e1);
+  border-radius: 10px;
+}
+
+.notification-page-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+}
+
+.notification-page-subtitle {
+  font-size: 0.84rem;
+  color: var(--text-secondary, #64748b);
+  margin-top: 2px;
+  margin-left: 28px;
+}
+
+.notification-page-body {
+  padding: 60px 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--bg-secondary, #ffffff);
+}
+
+.empty-notification-circle {
+  width: 80px;
+  height: 80px;
+  background-color: #f1f5f9;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.notification-page-body h3 {
+  margin: 0 0 10px 0;
+  font-size: 1.25rem;
+  color: var(--text-primary, #0f172a);
+  font-weight: 700;
+}
+
+.notification-page-body p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-secondary, #64748b);
+  line-height: 1.5;
+}
+
+.notification-item {
+  padding: 14px 18px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  transition: all 0.2s ease;
+  background-color: #ffffff;
+}
+
+.notification-item:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.notification-item.unread {
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-left: 4px solid #2563eb;
+}
+
+.notification-item.read {
+  background-color: #ffffff;
+}
+
+.notification-item h4 {
+  margin: 0 0 4px 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.notification-item.unread h4 {
+  color: #1e3a8a;
+}
+
+.notification-item.read h4 {
+  color: var(--text-primary, #0f172a);
+}
+
+.notification-item p {
+  margin: 0 0 6px 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary, #475569);
+  line-height: 1.4;
+}
+
+.notification-item small {
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+.mark-read-btn {
+  background: #ffffff;
+  border: 1px solid #2563eb;
+  color: #2563eb;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.mark-read-btn:hover {
+  background-color: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+}

@@ -1,0 +1,11 @@
+﻿Registration Number,Name,Type,Capacity,Status,Ownership,Mileage,Model,Chassis Number,Engine Number,Insurance Expiry,PUC Expiry,Permit Expiry,Fitness Expiry
+MH-01-AB-1111,Tata Signa,Truck,25 Tons,Active,Owned,4.5,2023,CH-0001,EN-0001,2027-01-10,2027-01-10,2027-01-10,2027-01-10
+MH-02-BC-2222,Ashok Leyland Ecomet,Truck,16 Tons,Active,Owned,5.2,2022,CH-0002,EN-0002,2027-02-15,2027-02-15,2027-02-15,2027-02-15
+GJ-03-CD-3333,Eicher Pro 2049,Mini Truck,5 Tons,Active,Leased,8.5,2023,CH-0003,EN-0003,2027-03-20,2027-03-20,2027-03-20,2027-03-20
+RJ-14-DE-4444,Mahindra Blazo,Truck,35 Tons,Active,Owned,3.8,2021,CH-0004,EN-0004,2027-04-05,2027-04-05,2027-04-05,2027-04-05
+DL-05-EF-5555,Tata Ultra,Truck,10 Tons,Under Maintenance,Owned,6.0,2022,CH-0005,EN-0005,2026-10-12,2026-10-12,2026-10-12,2026-10-12
+UP-16-FG-6666,BharatBenz 2823C,Truck,28 Tons,Active,Owned,4.2,2023,CH-0006,EN-0006,2027-06-18,2027-06-18,2027-06-18,2027-06-18
+KA-07-GH-7777,Tata LPT 1918,Truck,19 Tons,Active,Leased,4.8,2021,CH-0007,EN-0007,2027-07-22,2027-07-22,2027-07-22,2027-07-22
+TN-08-HI-8888,Eicher Pro 3019,Truck,19 Tons,Active,Owned,5.0,2022,CH-0008,EN-0008,2027-08-30,2027-08-30,2027-08-30,2027-08-30
+WB-09-IJ-9999,Ashok Leyland Boss,Truck,12 Tons,Inactive,Leased,5.5,2020,CH-0009,EN-0009,2025-12-01,2025-12-01,2025-12-01,2025-12-01
+HR-38-JK-1010,Mahindra Furio,Truck,14 Tons,Active,Owned,5.3,2023,CH-0010,EN-0010,2027-09-15,2027-09-15,2027-09-15,2027-09-15

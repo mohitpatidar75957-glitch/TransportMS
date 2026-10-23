@@ -1,0 +1,362 @@
+.attendance-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Page Header */
+.attendance-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  cursor: default;
+}
+
+.attendance-header-left h2 {
+  font-size: 1.375rem;
+  margin: 0 0 4px 0;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.attendance-header-left p {
+  color: var(--text-secondary);
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.attendance-date-picker input[type="date"] {
+  background-color: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.attendance-date-picker input[type="date"]:focus {
+  border-color: var(--accent-color);
+}
+
+/* Panel */
+.attendance-panel {
+  background-color: var(--panel-bg);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.attendance-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.attendance-panel-header h3 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.save-attendance-btn {
+  background-color: #ff4757;
+  color: white;
+  border: 1px solid transparent;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.save-attendance-btn:hover {
+  background-color: #26b960;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(46, 213, 115, 0.3);
+}
+
+/* Table */
+.attendance-table-wrap {
+  overflow-x: auto;
+}
+
+.attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.attendance-table th {
+  padding: 12px 16px;
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-color);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.attendance-table td {
+  padding: 12px 16px;
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+}
+
+.attendance-table tbody tr:hover {
+  background-color: var(--hover-color);
+}
+
+/* Driver Name Link */
+.driver-name-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-primary);
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.driver-name-link:hover {
+  color: var(--accent-color);
+}
+
+.driver-name-link .link-icon {
+  color: var(--text-secondary);
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.driver-name-link:hover .link-icon {
+  opacity: 1;
+  color: var(--accent-color);
+}
+
+/* Staff Name */
+.staff-name {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* Role Badge */
+.attendance-table .role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700 !important;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.attendance-table .role-badge.super-admin {
+  background-color: #dbeafe !important;
+  color: #1e40af !important;
+  border: 1px solid #93c5fd !important;
+}
+
+.attendance-table .role-badge.manager {
+  background-color: #ede9fe !important;
+  color: #5b21b6 !important;
+  border: 1px solid #c4b5fd !important;
+}
+
+.attendance-table .role-badge.accountant {
+  background-color: #d1fae5 !important;
+  color: #065f46 !important;
+  border: 1px solid #6ee7b7 !important;
+}
+
+.attendance-table .role-badge.dispatcher {
+  background-color: #ffedd5 !important;
+  color: #9a3412 !important;
+  border: 1px solid #fdba74 !important;
+}
+
+.attendance-table .role-badge.hr {
+  background-color: #fce7f3 !important;
+  color: #9d174d !important;
+  border: 1px solid #f9a8d4 !important;
+}
+
+.attendance-table .role-badge.default-role {
+  background-color: #f1f5f9 !important;
+  color: #334155 !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+/* Staff & Labor Section Divider */
+.staff-section-divider {
+  padding: 16px 20px 8px;
+  border-top: 2px solid var(--border-color);
+}
+
+.staff-section-divider h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* Status Toggle Buttons (P / A / L) */
+.status-toggle-group {
+  display: flex;
+  gap: 6px;
+}
+
+.status-toggle-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  background-color: transparent;
+}
+
+/* Present - Green */
+.status-toggle-btn.present {
+  color: #2ed573;
+  border-color: rgba(46, 213, 115, 0.3);
+  background-color: rgba(46, 213, 115, 0.08);
+}
+
+.status-toggle-btn.present:hover {
+  background-color: rgba(46, 213, 115, 0.15);
+}
+
+.status-toggle-btn.present.active {
+  background-color: #2ed573;
+  color: white;
+  border-color: #2ed573;
+  box-shadow: 0 2px 8px rgba(46, 213, 115, 0.4);
+}
+
+/* Absent - Orange/Amber */
+.status-toggle-btn.absent {
+  color: #ffa502;
+  border-color: rgba(255, 165, 2, 0.3);
+  background-color: rgba(255, 165, 2, 0.08);
+}
+
+.status-toggle-btn.absent:hover {
+  background-color: rgba(255, 165, 2, 0.15);
+}
+
+.status-toggle-btn.absent.active {
+  background-color: #ffa502;
+  color: white;
+  border-color: #ffa502;
+  box-shadow: 0 2px 8px rgba(255, 165, 2, 0.4);
+}
+
+/* Leave - Yellow/Gold */
+.status-toggle-btn.leave-btn {
+  color: #eccc68;
+  border-color: rgba(236, 204, 104, 0.3);
+  background-color: rgba(236, 204, 104, 0.08);
+}
+
+.status-toggle-btn.leave-btn:hover {
+  background-color: rgba(236, 204, 104, 0.15);
+}
+
+.status-toggle-btn.leave-btn.active {
+  background-color: #eccc68;
+  color: #333;
+  border-color: #eccc68;
+  box-shadow: 0 2px 8px rgba(236, 204, 104, 0.4);
+}
+
+/* Remarks Input */
+.remarks-input {
+  width: 100%;
+  min-width: 160px;
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.remarks-input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
+.remarks-input:focus {
+  border-color: var(--accent-color);
+}
+
+/* Footer with Save All button */
+.attendance-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+.save-all-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--accent-color);
+  color: white;
+  border: 1px solid transparent;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.save-all-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .attendance-page-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .attendance-panel-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .status-toggle-btn {
+    width: 26px;
+    height: 26px;
+    font-size: 0.6875rem;
+  }
+
+  .attendance-footer {
+    justify-content: center;
+  }
+}

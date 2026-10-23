@@ -1,0 +1,219 @@
+/* SystemSettings.css - Ultra-Premium Glassmorphism Design matching Driver Portal */
+
+.settings-page-wrapper {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+  color: var(--text-primary);
+}
+
+.settings-card-container {
+  width: 100%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Header inside settings panel */
+.settings-header-banner {
+  padding: 22px 28px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  position: relative;
+  z-index: 1;
+}
+
+.settings-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-breadcrumb {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+.settings-main-heading {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  letter-spacing: -0.4px;
+}
+
+.settings-status-pill {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  background: var(--accent-light);
+  color: var(--accent-color);
+  border: 1px solid var(--accent-color);
+  padding: 3px 9px;
+  border-radius: 20px;
+}
+
+/* Tab Navigation Bar */
+.settings-tab-bar {
+  display: flex;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-color);
+  overflow-x: auto;
+  position: relative;
+  z-index: 1;
+  scrollbar-width: none;
+}
+
+.settings-tab-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.settings-tab-btn {
+  padding: 16px 22px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border-bottom: 2px solid transparent;
+  outline: none;
+}
+
+.settings-tab-btn:hover {
+  color: var(--text-primary);
+  background: var(--hover-color);
+}
+
+.settings-tab-btn.active {
+  color: var(--accent-color);
+  border-bottom-color: var(--accent-color);
+  background: var(--accent-light);
+}
+
+.settings-tab-btn.active.general {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.settings-tab-btn.active.health {
+  color: #16a34a;
+  border-bottom-color: #16a34a;
+  background: rgba(22, 163, 74, 0.08);
+}
+
+.settings-tab-btn.active.backups {
+  color: #ea580c;
+  border-bottom-color: #ea580c;
+  background: rgba(234, 88, 12, 0.08);
+}
+
+.settings-tab-btn.active.webhooks {
+  color: #9333ea;
+  border-bottom-color: #9333ea;
+  background: rgba(147, 51, 234, 0.08);
+}
+
+.settings-tab-btn.active.govt {
+  color: #059669;
+  border-bottom-color: #059669;
+  background: rgba(5, 150, 105, 0.08);
+}
+
+/* Settings Content Body */
+.settings-tab-content {
+  padding: 28px;
+  position: relative;
+  z-index: 1;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* Form inputs & styling */
+.settings-section-title {
+  font-size: 16px;
+  color: var(--text-primary);
+  font-weight: 700;
+  margin: 0 0 20px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.settings-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.settings-input:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.settings-primary-btn {
+  background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+  color: #031124;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.25);
+}
+
+.settings-primary-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
+}
+
+/* Responsive tweaks for mobile & tablets */
+@media (max-width: 768px) {
+  .settings-header-banner {
+    padding: 18px 16px;
+  }
+
+  .settings-tab-content {
+    padding: 20px 16px;
+  }
+
+  .settings-main-heading {
+    font-size: 18px;
+  }
+
+  .settings-tab-btn {
+    padding: 14px 16px;
+    font-size: 12.5px;
+  }
+}
