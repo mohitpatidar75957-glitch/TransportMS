@@ -178,8 +178,8 @@ const Login = () => {
             {/* Animated Truck Icon */}
             <div className="brand-icon-wrapper">
               <div className="brand-icon-glow"></div>
-              <div className="brand-icon">
-                <FaTruckMoving size={36} />
+              <div className="brand-icon" style={{ backgroundColor: '#ffffff', padding: '6px' }}>
+                <img src="/logo.png" alt="TransportMS" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </div>
             </div>
 
@@ -246,8 +246,10 @@ const Login = () => {
         <div className="login-form-panel">
           <div className="login-card">
             {/* Logo for mobile */}
-            <div className="mobile-logo">
-              <FaTruckMoving size={28} />
+            <div className="mobile-logo" style={{ display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'center' }}>
+              <div style={{ width: '36px', height: '36px', backgroundColor: '#ffffff', borderRadius: '8px', padding: '3px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <img src="/logo.png" alt="TransportMS" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              </div>
               <span>TransportMS</span>
             </div>
 

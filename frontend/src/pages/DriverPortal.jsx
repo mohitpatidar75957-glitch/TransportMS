@@ -680,7 +680,10 @@ const DriverPortal = () => {
           <div className="header-left-group">
             <div className="driver-header-titles">
               <h2 className="driver-main-heading">
-                <MdLocalShipping size={28} style={{ color: 'var(--accent-color)', flexShrink: 0 }} /> {t.appName}
+                <div className="driver-brand-logo-wrap">
+                  <img src="/logo.png" alt="Driver Portal Logo" className="driver-brand-logo-img" />
+                </div>
+                {t.appName}
                 <span className="driver-portal-pill">MOBILE DISPATCH</span>
               </h2>
             </div>

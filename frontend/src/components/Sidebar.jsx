@@ -103,8 +103,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       <div className={`sidebar-overlay ${isOpen ? 'active' : ''}`} onClick={toggleSidebar}></div>
       <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <div className="logo-icon">
-            <MdLocalShipping size={24} />
+          <div className="logo-icon-img-wrap">
+            <img src="/logo.png" alt="Transport MS Logo" className="brand-logo-img" />
           </div>
           <div className="logo-text">
             <h2>Transport MS</h2>
