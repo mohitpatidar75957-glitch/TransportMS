@@ -41,14 +41,20 @@ const originalFetch = window.fetch;
 window.fetch = async (...args) => {
   let [resource, config] = args;
   
-  // Inject JWT Token
-  const token = localStorage.getItem('token');
-  if (token && typeof resource === 'string' && resource.startsWith('/api/')) {
-    config = config || {};
-    config.headers = {
-      ...config.headers,
-      'Authorization': `Bearer ${token}`
-    };
+  const apiBase = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/$/, '') : '';
+  if (typeof resource === 'string' && resource.startsWith('/api/')) {
+    if (apiBase) {
+      resource = `${apiBase}${resource}`;
+    }
+    // Inject JWT Token
+    const token = localStorage.getItem('token');
+    if (token) {
+      config = config || {};
+      config.headers = {
+        ...config.headers,
+        'Authorization': `Bearer ${token}`
+      };
+    }
   }
   
   const response = await originalFetch(resource, config);
