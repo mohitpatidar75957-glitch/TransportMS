@@ -15,7 +15,8 @@ import {
   MdRefresh,
   MdNavigation,
   MdLocationPin,
-  MdPerson
+  MdPerson,
+  MdLocalShipping
 } from 'react-icons/md';
 import { 
   getOfflineQueue, 
