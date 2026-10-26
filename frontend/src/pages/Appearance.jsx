@@ -12,6 +12,21 @@ export const defaultTheme = {
   textPrimary: '#0f172a'
 };
 
+// Helper to compute contrast text color (black vs white)
+const getContrastTextColor = (hexColor) => {
+  if (!hexColor || !hexColor.startsWith('#')) return '#ffffff';
+  let hex = hexColor.replace('#', '');
+  if (hex.length === 3) {
+    hex = hex.split('').map(c => c + c).join('');
+  }
+  const r = parseInt(hex.substring(0, 2), 16) || 0;
+  const g = parseInt(hex.substring(2, 4), 16) || 0;
+  const b = parseInt(hex.substring(4, 6), 16) || 0;
+  // Calculate relative luminance (YIQ equation)
+  const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+  return (yiq >= 160) ? '#0f172a' : '#ffffff';
+};
+
 // Helper to apply theme to document root
 export const applyTheme = (settings) => {
   const root = document.documentElement;
@@ -20,6 +35,12 @@ export const applyTheme = (settings) => {
   root.style.setProperty('--bg-primary', settings.bgPrimary);
   root.style.setProperty('--sidebar-bg', settings.sidebarBg);
   root.style.setProperty('--text-primary', settings.textPrimary);
+
+  // Dynamic high-contrast text and border for active sidebar items
+  const activeTextColor = getContrastTextColor(settings.accentColor);
+  root.style.setProperty('--sidebar-active-bg', settings.accentColor);
+  root.style.setProperty('--sidebar-active-text', activeTextColor);
+  root.style.setProperty('--sidebar-active-border', activeTextColor === '#0f172a' ? '#0f172a' : '#ffffff');
   
   const isLight = settings.bgPrimary === '#f4f6f9' || settings.bgPrimary === '#ffffff' || settings.bgPrimary === '#f8fafc';
   root.setAttribute('data-theme', isLight ? 'light' : 'dark');

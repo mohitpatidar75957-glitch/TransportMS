@@ -107,9 +107,9 @@
 }
 
 .menu-item.active {
-  background-color: var(--accent-color) !important;
-  color: #ffffff !important;
-  border-left: 4px solid #ffffff;
+  background-color: var(--sidebar-active-bg, var(--accent-color)) !important;
+  color: var(--sidebar-active-text, #ffffff) !important;
+  border-left: 4px solid var(--sidebar-active-border, #1e293b);
   font-weight: 600;
 }
 
@@ -118,9 +118,9 @@
 }
 
 .menu-item.dashboard-item.active {
-  border-left: 4px solid #ffffff;
-  background-color: var(--accent-color) !important;
-  color: #ffffff !important;
+  border-left: 4px solid var(--sidebar-active-border, #1e293b);
+  background-color: var(--sidebar-active-bg, var(--accent-color)) !important;
+  color: var(--sidebar-active-text, #ffffff) !important;
 }
 
 .menu-item .icon {
@@ -137,7 +137,7 @@
 }
 
 .menu-item.active .icon {
-  color: #ffffff !important;
+  color: var(--sidebar-active-text, #ffffff) !important;
 }
 
 .badge {
