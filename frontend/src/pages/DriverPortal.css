@@ -72,16 +72,11 @@
 }
 
 .driver-brand-logo-wrap {
-  width: 42px;
-  height: 42px;
-  border-radius: 10px;
-  background-color: #ffffff;
-  padding: 3px;
+  width: 48px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  border: 1px solid var(--border-color);
   flex-shrink: 0;
 }
 
@@ -89,6 +84,7 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.12));
 }
 
 .driver-portal-pill {
