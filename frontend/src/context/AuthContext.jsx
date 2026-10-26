@@ -126,6 +126,8 @@ export const AuthProvider = ({ children }) => {
     } catch (e) {}
   };
 
+  const [activeRole, setActiveRole] = useState(ROLES[currentRoleKey] || ROLES.SUPER_ADMIN);
+
   useEffect(() => {
     let newActiveRole = { ...(ROLES[currentRoleKey] || ROLES.SUPER_ADMIN) };
     
