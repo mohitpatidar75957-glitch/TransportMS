@@ -32,8 +32,31 @@ const DriverPortal = () => {
   const [lang, setLang] = useState('en'); 
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [queueCount, setQueueCount] = useState(getOfflineQueue().length);
-  const [trips, setTrips] = useState([]);
-  const [selectedTrip, setSelectedTrip] = useState(null);
+  const [trips, setTrips] = useState(() => {
+    try {
+      const cached = getCachedDriverTrips();
+      return Array.isArray(cached) ? cached.filter(tr => {
+        const s = String(tr?.status || '').toLowerCase().trim();
+        return s !== 'closed' && s !== 'completed' && s !== 'cancelled';
+      }) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
+  const [selectedTrip, setSelectedTrip] = useState(() => {
+    try {
+      const cached = getCachedDriverTrips();
+      const active = Array.isArray(cached) ? cached.filter(tr => {
+        const s = String(tr?.status || '').toLowerCase().trim();
+        return s !== 'closed' && s !== 'completed' && s !== 'cancelled';
+      }) : [];
+      return active.length > 0 ? active[0] : null;
+    } catch (e) {
+      return null;
+    }
+  });
+
   const [isSyncing, setIsSyncing] = useState(false);
 
   // In-App Toast state
@@ -656,7 +679,7 @@ const DriverPortal = () => {
           <div className="header-left-group">
             <div className="driver-header-titles">
               <h2 className="driver-main-heading">
-                🚚 {t.appName}
+                <MdLocalShipping size={28} style={{ color: 'var(--accent-color)', flexShrink: 0 }} /> {t.appName}
                 <span className="driver-portal-pill">MOBILE DISPATCH</span>
               </h2>
             </div>
@@ -714,7 +737,7 @@ const DriverPortal = () => {
           <div className="trip-selector-card">
             <div className="trip-selector-top">
               <label className="selector-title">
-                🚚 {t.selectTripLabel} <span className="count-pill">({trips.length} {t.tripsSuffix})</span>
+                <MdLocalShipping size={18} style={{ color: 'var(--accent-color)', verticalAlign: 'middle', marginRight: '6px' }} /> {t.selectTripLabel} <span className="count-pill">({trips.length} {t.tripsSuffix})</span>
               </label>
               <button 
                 type="button"

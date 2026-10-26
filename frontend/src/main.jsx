@@ -36,13 +36,19 @@ const root = document.getElementById('root');
 root.style.minHeight = '100vh';
 root.style.background = '#121212';
 
-// Global API Interceptor: Prevents frontend crashes and injects JWT token
+// In-memory + LocalStorage SWR (Stale-While-Revalidate) Cache for GET /api/*
+const apiCache = new Map();
+
+// Global API Interceptor: Prevents frontend crashes, injects JWT token, and provides instant caching
 const originalFetch = window.fetch;
 window.fetch = async (...args) => {
   let [resource, config] = args;
   
   const apiBase = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/$/, '') : '';
-  if (typeof resource === 'string' && resource.startsWith('/api/')) {
+  const isApiReq = typeof resource === 'string' && resource.startsWith('/api/');
+  const isGet = !config || !config.method || config.method.toUpperCase() === 'GET';
+
+  if (isApiReq) {
     if (apiBase) {
       resource = `${apiBase}${resource}`;
     }
@@ -55,6 +61,11 @@ window.fetch = async (...args) => {
         'Authorization': `Bearer ${token}`
       };
     }
+  }
+
+  // Invalidate cache on mutations (POST, PUT, DELETE, PATCH)
+  if (isApiReq && !isGet) {
+    apiCache.clear();
   }
   
   const response = await originalFetch(resource, config);
@@ -69,8 +80,38 @@ window.fetch = async (...args) => {
     }
   }
 
+  // Cache successful GET API responses for instant subsequent renders
+  if (response.ok && isApiReq && isGet) {
+    const cloned = response.clone();
+    const cacheKey = typeof resource === 'string' ? resource : '';
+    if (cacheKey) {
+      cloned.json().then(data => {
+        try {
+          apiCache.set(cacheKey, data);
+          sessionStorage.setItem('tms_cache_' + cacheKey, JSON.stringify(data));
+        } catch (e) {}
+      }).catch(() => {});
+    }
+  }
+
   // Only intercept failed requests for JSON mock logic
   if (!response.ok) {
+    // If request failed, try to serve from cache if available
+    const cacheKey = typeof resource === 'string' ? resource : '';
+    const cachedData = apiCache.get(cacheKey) || (() => {
+      try {
+        const stored = sessionStorage.getItem('tms_cache_' + cacheKey);
+        return stored ? JSON.parse(stored) : null;
+      } catch (e) { return null; }
+    })();
+
+    if (cachedData) {
+      return new Response(JSON.stringify(cachedData), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     const contentType = response.headers.get('content-type');
     if (contentType && contentType.includes('application/json')) {
       const cloned = response.clone();
@@ -79,7 +120,6 @@ window.fetch = async (...args) => {
         // Detect standard Spring Boot Error JSON
         if (data && typeof data === 'object' && data.status && data.error && data.path) {
           console.warn('[API Interceptor] Caught Spring Boot Error:', data.status, data.error, data.path);
-          // If path doesn't end with a number, it's likely a collection fetch (e.g. /api/v1/fleet/vehicles)
           const isCollection = !/\/\d+$/.test(data.path);
           return isCollection ? [] : null;
         }
