@@ -3,7 +3,7 @@ import {
   MdMap, MdDirectionsCar, MdPerson, MdDateRange, 
   MdLocationOn, MdAdd, MdClose, MdLocalGasStation, 
   MdAttachMoney, MdSearch, MdCheckCircle, MdArrowForward, MdInventory,
-  MdTrendingUp
+  MdTrendingUp, MdAddRoad
 } from 'react-icons/md';
 import './NewTrip.css';
 import { 
@@ -1289,7 +1289,7 @@ const NewTrip = () => {
       )}
 
       <div className="new-trip-header">
-        <h1><MdMap /> New Trip</h1>
+        <h1><MdAddRoad /> New Trip</h1>
         <p>Create and plan a new trip with smart route recommendations</p>
       </div>
 
