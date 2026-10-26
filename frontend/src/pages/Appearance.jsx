@@ -37,11 +37,18 @@ export const applyTheme = (settings) => {
   root.style.setProperty('--sidebar-bg', settings.sidebarBg);
   root.style.setProperty('--text-primary', settings.textPrimary);
 
-  // Dynamic high-contrast text and border for active sidebar items
+  // Dynamic high-contrast text and border for active sidebar items & buttons
   const activeTextColor = getContrastTextColor(settings.accentColor);
   root.style.setProperty('--sidebar-active-bg', settings.accentColor);
   root.style.setProperty('--sidebar-active-text', activeTextColor);
   root.style.setProperty('--sidebar-active-border', activeTextColor === '#0f172a' ? '#0f172a' : '#2563eb');
+  
+  // Dynamic button & badge text colors so light accent colors don't wash out white text
+  root.style.setProperty('--btn-primary-text', activeTextColor);
+  root.style.setProperty('--btn-primary-border', activeTextColor === '#0f172a' ? 'rgba(0, 0, 0, 0.2)' : 'transparent');
+  root.style.setProperty('--badge-text', activeTextColor === '#0f172a' ? '#0f172a' : settings.accentColor);
+  root.style.setProperty('--badge-bg', activeTextColor === '#0f172a' ? 'rgba(15, 23, 42, 0.08)' : 'rgba(37, 99, 235, 0.12)');
+  root.style.setProperty('--badge-border', activeTextColor === '#0f172a' ? 'rgba(15, 23, 42, 0.25)' : 'rgba(37, 99, 235, 0.25)');
   
   const isLight = settings.bgPrimary === '#f4f6f9' || settings.bgPrimary === '#ffffff' || settings.bgPrimary === '#f8fafc';
   root.setAttribute('data-theme', isLight ? 'light' : 'dark');

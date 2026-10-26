@@ -29,14 +29,19 @@
   align-items: center;
   gap: 8px;
   background-color: var(--accent-color);
-  color: white;
-  border: 1px solid transparent;
+  color: var(--btn-primary-text, #ffffff);
+  border: 1px solid var(--btn-primary-border, transparent);
   padding: 10px 20px;
   border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.2s ease;
+}
+
+.primary-btn svg {
+  color: var(--btn-primary-text, #ffffff);
+  fill: currentColor;
 }
 
 .primary-btn:hover {
