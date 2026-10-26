@@ -2111,7 +2111,7 @@ const NewTrip = () => {
             onClick={handleFindRoutes}
             disabled={loading}
           >
-            {loading ? 'Calculating Best Routes...' : <><MdSearch size={24}/> FIND BEST ROUTES</>}
+            {loading ? 'Calculating Best Routes...' : <><MdSearch size={20}/> Find Best Routes</>}
           </button>
         </div>
       </div>
