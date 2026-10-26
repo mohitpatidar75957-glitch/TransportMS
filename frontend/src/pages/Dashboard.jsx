@@ -12,16 +12,33 @@ const Dashboard = () => {
     return <CustomerDashboard />;
   }
 
-  const [recentUsers, setRecentUsers] = useState([]);
-  const [vehicles, setVehicles] = useState([]);
-  const [activeDrivers, setActiveDrivers] = useState(0);
-  const [totalProfit, setTotalProfit] = useState(0);
-  const [chartData, setChartData] = useState([]);
-  const [maxProfit, setMaxProfit] = useState(0);
-  const [alerts, setAlerts] = useState([]);
-  const [tripsCount, setTripsCount] = useState(0);
-  const [activeTripsCount, setActiveTripsCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const [recentUsers, setRecentUsers] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('cached_recentUsers')) || []; } catch { return []; }
+  });
+  const [vehicles, setVehicles] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('cached_vehicles')) || []; } catch { return []; }
+  });
+  const [activeDrivers, setActiveDrivers] = useState(() => {
+    try { return Number(localStorage.getItem('cached_activeDrivers')) || 0; } catch { return 0; }
+  });
+  const [totalProfit, setTotalProfit] = useState(() => {
+    try { return Number(localStorage.getItem('cached_totalProfit')) || 0; } catch { return 0; }
+  });
+  const [chartData, setChartData] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('cached_chartData')) || []; } catch { return []; }
+  });
+  const [maxProfit, setMaxProfit] = useState(() => {
+    try { return Number(localStorage.getItem('cached_maxProfit')) || 1000; } catch { return 1000; }
+  });
+  const [alerts, setAlerts] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('cached_alerts')) || []; } catch { return []; }
+  });
+  const [tripsCount, setTripsCount] = useState(() => {
+    try { return Number(localStorage.getItem('cached_tripsCount')) || 0; } catch { return 0; }
+  });
+  const [activeTripsCount, setActiveTripsCount] = useState(() => {
+    try { return Number(localStorage.getItem('cached_activeTripsCount')) || 0; } catch { return 0; }
+  });
 
   const isManager = roleKey === 'MANAGER';
 
@@ -30,83 +47,98 @@ const Dashboard = () => {
   }
 
   useEffect(() => {
-    Promise.allSettled([
-      // Fetch Active Drivers from Fleet
-      fetch('/api/v1/fleet/drivers')
-        .then(res => res.json())
-        .then(data => {
-          const availableDrivers = (Array.isArray(data) ? data : []).filter(d => (d.status || 'Available').toLowerCase() === 'available');
-          setActiveDrivers(availableDrivers.length);
-        }),
+    // 1. Fetch Active Drivers - Updates immediately
+    fetch('/api/v1/fleet/drivers')
+      .then(res => res.json())
+      .then(data => {
+        const availableDrivers = (Array.isArray(data) ? data : []).filter(d => (d.status || 'Available').toLowerCase() === 'available');
+        setActiveDrivers(availableDrivers.length);
+        localStorage.setItem('cached_activeDrivers', availableDrivers.length);
+      })
+      .catch(() => {});
 
-      // Fetch Users for Recent Registrations Table
-      fetch('/api/users')
-        .then(res => res.json())
-        .then(data => {
-          const sorted = (Array.isArray(data) ? data : [])
-            .filter(u => u.role === 'DRIVER')
-            .sort((a, b) => b.id - a.id)
-            .slice(0, 5);
-          setRecentUsers(sorted);
-        }),
+    // 2. Fetch Users - Updates immediately
+    fetch('/api/users')
+      .then(res => res.json())
+      .then(data => {
+        const sorted = (Array.isArray(data) ? data : [])
+          .filter(u => u.role === 'DRIVER')
+          .sort((a, b) => b.id - a.id)
+          .slice(0, 5);
+        setRecentUsers(sorted);
+        localStorage.setItem('cached_recentUsers', JSON.stringify(sorted));
+      })
+      .catch(() => {});
 
-      // Fetch Vehicles
-      fetch('/api/v1/fleet/vehicles')
-        .then(res => res.json())
-        .then(data => {
-          setVehicles(Array.isArray(data) ? data : []);
-        }),
+    // 3. Fetch Vehicles - Updates immediately
+    fetch('/api/v1/fleet/vehicles')
+      .then(res => res.json())
+      .then(data => {
+        const vList = Array.isArray(data) ? data : [];
+        setVehicles(vList);
+        localStorage.setItem('cached_vehicles', JSON.stringify(vList));
+      })
+      .catch(() => {});
 
-      // Fetch Trips for Profit / Operational Calculation
-      fetch('/api/v1/fleet/trips')
-        .then(res => res.json())
-        .then(data => {
-          const trips = Array.isArray(data) ? data : [];
-          setTripsCount(trips.length);
-          const activeCount = trips.filter(t => (t.status || '').toLowerCase() === 'in transit' || (t.status || '').toLowerCase() === 'active').length;
-          setActiveTripsCount(activeCount);
+    // 4. Fetch Trips - Updates immediately
+    fetch('/api/v1/fleet/trips')
+      .then(res => res.json())
+      .then(data => {
+        const trips = Array.isArray(data) ? data : [];
+        setTripsCount(trips.length);
+        localStorage.setItem('cached_tripsCount', trips.length);
 
-          // Total Profit
-          const total = trips.reduce((sum, trip) => sum + (trip.freightAmount || 0), 0);
-          setTotalProfit(total);
+        const activeCount = trips.filter(t => (t.status || '').toLowerCase() === 'in transit' || (t.status || '').toLowerCase() === 'active').length;
+        setActiveTripsCount(activeCount);
+        localStorage.setItem('cached_activeTripsCount', activeCount);
 
-          // Chart Data (Last 6 Months)
-          const today = new Date();
-          const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-          let last6Months = [];
-          
-          for (let i = 5; i >= 0; i--) {
-            const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-            last6Months.push({
-              monthIndex: d.getMonth(),
-              year: d.getFullYear(),
-              label: monthNames[d.getMonth()],
-              profit: 0
-            });
-          }
+        // Total Profit
+        const total = trips.reduce((sum, trip) => sum + (trip.freightAmount || 0), 0);
+        setTotalProfit(total);
+        localStorage.setItem('cached_totalProfit', total);
 
-          trips.forEach(trip => {
-            if (trip.startDate && trip.freightAmount) {
-              const tripDate = new Date(trip.startDate);
-              const dataPoint = last6Months.find(m => m.monthIndex === tripDate.getMonth() && m.year === tripDate.getFullYear());
-              if (dataPoint) {
-                dataPoint.profit += trip.freightAmount;
-              }
-            }
+        // Chart Data (Last 6 Months)
+        const today = new Date();
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        let last6Months = [];
+        
+        for (let i = 5; i >= 0; i--) {
+          const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+          last6Months.push({
+            monthIndex: d.getMonth(),
+            year: d.getFullYear(),
+            label: monthNames[d.getMonth()],
+            profit: 0
           });
+        }
 
-          const max = Math.max(...last6Months.map(m => m.profit), 1000);
-          setMaxProfit(max);
-          setChartData(last6Months);
-        }),
+        trips.forEach(trip => {
+          if (trip.startDate && trip.freightAmount) {
+            const tripDate = new Date(trip.startDate);
+            const dataPoint = last6Months.find(m => m.monthIndex === tripDate.getMonth() && m.year === tripDate.getFullYear());
+            if (dataPoint) {
+              dataPoint.profit += trip.freightAmount;
+            }
+          }
+        });
 
-      // Fetch Alerts
-      fetch('/api/v1/fleet/alerts/expiring-documents')
-        .then(res => res.json())
-        .then(data => setAlerts(Array.isArray(data) ? data : []))
-    ]).finally(() => {
-      setIsLoading(false);
-    });
+        const max = Math.max(...last6Months.map(m => m.profit), 1000);
+        setMaxProfit(max);
+        setChartData(last6Months);
+        localStorage.setItem('cached_maxProfit', max);
+        localStorage.setItem('cached_chartData', JSON.stringify(last6Months));
+      })
+      .catch(() => {});
+
+    // 5. Fetch Alerts - Updates immediately
+    fetch('/api/v1/fleet/alerts/expiring-documents')
+      .then(res => res.json())
+      .then(data => {
+        const aList = Array.isArray(data) ? data : [];
+        setAlerts(aList);
+        localStorage.setItem('cached_alerts', JSON.stringify(aList));
+      })
+      .catch(() => {});
   }, []);
 
   return (
@@ -121,13 +153,13 @@ const Dashboard = () => {
           <>
             <div className="stat-card blue">
               <h3>Total Admins</h3>
-              <div className="stat-value">{isLoading ? '...' : 1}</div>
+              <div className="stat-value">1</div>
               <p>System administrators</p>
             </div>
             
             <div className="stat-card dark">
               <h3>Total Freight Profit</h3>
-              <div className="stat-value">{isLoading ? '...' : `₹${totalProfit.toLocaleString('en-IN')}`}</div>
+              <div className="stat-value">₹{totalProfit.toLocaleString('en-IN')}</div>
               <p>Total profit from trips</p>
             </div>
           </>
@@ -135,13 +167,13 @@ const Dashboard = () => {
 
         <div className="stat-card green">
           <h3>Active Vehicles</h3>
-          <div className="stat-value">{isLoading ? '...' : vehicles.length}</div>
+          <div className="stat-value">{vehicles.length}</div>
           <p>Currently registered</p>
         </div>
         
         <div className="stat-card cyan">
           <h3>Active Drivers</h3>
-          <div className="stat-value">{isLoading ? '...' : activeDrivers}</div>
+          <div className="stat-value">{activeDrivers}</div>
           <p>Available for trips</p>
         </div>
 
