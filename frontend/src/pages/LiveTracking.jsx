@@ -229,8 +229,17 @@ const LiveTracking = () => {
         </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
           {/* Map Layer Dropdown */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--bg-secondary)', padding: '4px 10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-            <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>Map:</span>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            background: 'var(--bg-secondary)',
+            padding: '4px 12px',
+            borderRadius: '10px',
+            border: '1px solid var(--border-color)',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.06)'
+          }}>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>🗺️ Map:</span>
             <select
               value={mapStyle}
               onChange={(e) => {
@@ -239,13 +248,15 @@ const LiveTracking = () => {
                 localStorage.setItem('tms_map_style', val);
               }}
               style={{
-                background: 'transparent',
+                background: 'var(--bg-secondary)',
                 border: 'none',
                 color: 'var(--text-primary)',
                 fontSize: '13px',
                 fontWeight: '600',
                 cursor: 'pointer',
-                outline: 'none'
+                outline: 'none',
+                padding: '6px 4px',
+                borderRadius: '6px'
               }}
             >
               <option value="osm">OpenStreetMap (Default & Clean)</option>
@@ -425,20 +436,57 @@ const LiveTracking = () => {
 
       {/* Start Tracking Modal */}
       {showStartModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ backgroundColor: 'var(--panel-bg)', padding: '24px', borderRadius: '8px', width: '400px', color: 'var(--text-primary)' }}>
-            <h3 style={{ marginTop: 0 }}>Share Live Tracking Link</h3>
-            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '20px' }}>Enter the driver's phone number and vehicle details. A tracking session will be created, and you can share the link with the driver on WhatsApp.</p>
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(4px)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '16px'
+        }}>
+          <div style={{
+            backgroundColor: 'var(--bg-secondary)',
+            border: '1px solid var(--border-color)',
+            boxShadow: '0 20px 45px rgba(0, 0, 0, 0.35)',
+            padding: '28px',
+            borderRadius: '14px',
+            width: '440px',
+            maxWidth: '100%',
+            color: 'var(--text-primary)'
+          }}>
+            <h3 style={{ marginTop: 0, fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              📡 Share Live Tracking Link
+            </h3>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '20px' }}>
+              Select the vehicle and driver to generate a real-time GPS tracking session link. You can send this link to the driver on WhatsApp.
+            </p>
             
             {!generatedLink ? (
               <form onSubmit={handleStartTracking}>
-                <div className="form-group" style={{ marginBottom: '15px' }}>
-                  <label>Vehicle ID</label>
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                    Vehicle No / ID *
+                  </label>
                   <select 
-                    className="form-control" 
                     required 
                     value={newSessionData.vehicleId} 
                     onChange={e => setNewSessionData({...newSessionData, vehicleId: e.target.value})}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border-color)',
+                      backgroundColor: 'var(--bg-primary)',
+                      color: 'var(--text-primary)',
+                      fontSize: '14px',
+                      outline: 'none'
+                    }}
                   >
                     <option value="">Select a Vehicle</option>
                     {dbVehicles.map(v => (
@@ -446,10 +494,11 @@ const LiveTracking = () => {
                     ))}
                   </select>
                 </div>
-                <div className="form-group" style={{ marginBottom: '15px' }}>
-                  <label>Select Driver</label>
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                    Driver (Phone) *
+                  </label>
                   <select 
-                    className="form-control" 
                     required 
                     value={newSessionData.driverPhone} 
                     onChange={e => {
@@ -464,6 +513,16 @@ const LiveTracking = () => {
                         setNewSessionData({ ...newSessionData, driverPhone: '', driverName: '' });
                       }
                     }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border-color)',
+                      backgroundColor: 'var(--bg-primary)',
+                      color: 'var(--text-primary)',
+                      fontSize: '14px',
+                      outline: 'none'
+                    }}
                   >
                     <option value="">Select a Driver</option>
                     {dbDrivers.filter(d => d.phone).map(d => (
@@ -471,27 +530,78 @@ const LiveTracking = () => {
                     ))}
                   </select>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
-                  <button type="button" className="btn-secondary" onClick={() => setShowStartModal(false)}>Cancel</button>
-                  <button type="submit" className="btn-primary">Generate Link</button>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '24px' }}>
+                  <button 
+                    type="button" 
+                    onClick={() => setShowStartModal(false)}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border-color)',
+                      backgroundColor: 'var(--bg-surface)',
+                      color: 'var(--text-secondary)',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="primary-btn"
+                    style={{
+                      padding: '8px 18px',
+                      borderRadius: '8px',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Generate Link
+                  </button>
                 </div>
               </form>
             ) : (
               <div>
-                <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '15px', borderRadius: '8px', marginBottom: '15px', wordBreak: 'break-all', fontSize: '13px' }}>
-                  <a href={generatedLink} target="_blank" rel="noreferrer" style={{ color: '#3498db' }}>{generatedLink}</a>
+                <div style={{ backgroundColor: 'var(--bg-primary)', border: '1px dashed var(--border-color)', padding: '14px', borderRadius: '8px', marginBottom: '16px', wordBreak: 'break-all', fontSize: '13px' }}>
+                  <span style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px' }}>Driver Tracking Link:</span>
+                  <a href={generatedLink} target="_blank" rel="noreferrer" style={{ color: 'var(--accent-color)', fontWeight: '600' }}>{generatedLink}</a>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <a 
                     href={`https://wa.me/91${newSessionData.driverPhone}?text=${encodeURIComponent(`Hi ${newSessionData.driverName}, please start your live tracking for vehicle ${newSessionData.vehicleId} by clicking this link: ${generatedLink}`)}`} 
                     target="_blank" 
                     rel="noreferrer"
-                    className="btn-primary" 
-                    style={{ backgroundColor: '#25D366', border: 'none', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '10px', textDecoration: 'none', color: 'white', borderRadius: '4px' }}
+                    style={{
+                      backgroundColor: '#25D366',
+                      border: 'none',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '12px',
+                      textDecoration: 'none',
+                      color: 'white',
+                      borderRadius: '8px',
+                      fontWeight: '600',
+                      fontSize: '14px'
+                    }}
                   >
-                    Share via WhatsApp
+                    💬 Share via WhatsApp
                   </a>
-                  <button className="btn-secondary" onClick={() => setShowStartModal(false)} style={{ padding: '10px' }}>Close</button>
+                  <button 
+                    onClick={() => setShowStartModal(false)} 
+                    style={{
+                      padding: '10px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border-color)',
+                      backgroundColor: 'var(--bg-surface)',
+                      color: 'var(--text-secondary)',
+                      cursor: 'pointer',
+                      fontWeight: '600'
+                    }}
+                  >
+                    Close
+                  </button>
                 </div>
               </div>
             )}

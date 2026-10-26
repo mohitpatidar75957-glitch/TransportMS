@@ -35,6 +35,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/users/**").permitAll() // Allow users API
                 .requestMatchers("/api/v1/compliance/**").permitAll() // Allow Compliance Tally & E-Way JSON downloads
                 .requestMatchers("/api/v1/fleet/**").permitAll() // Allow fleet and maintenance records
+                .requestMatchers("/api/tracking/**").permitAll() // Allow public live GPS tracking for driver phone link
                 .requestMatchers("/api/v1/finance/**", "/api/v1/management/**").permitAll() // Allow finance & management settings
                 .requestMatchers("/api/v1/resources/**", "/api/v1/ocr/**").permitAll() // Allow fuel records, anomaly checks & OCR without third-party fees
                 .requestMatchers("/api/v1/hr/**").permitAll() // Allow HR staff, managers & attendance
