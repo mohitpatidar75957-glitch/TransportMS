@@ -136,6 +136,12 @@ const LiveTracking = () => {
   const [dbVehicles, setDbVehicles] = useState([]);
   const [dbDrivers, setDbDrivers] = useState([]);
 
+  // Map Layer & CARTO API Key state
+  const [mapStyle, setMapStyle] = useState(() => localStorage.getItem('tms_map_style') || 'osm');
+  const [cartoKey, setCartoKey] = useState(() => localStorage.getItem('tms_carto_api_key') || '');
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+  const [tempApiKey, setTempApiKey] = useState(cartoKey);
+
   const { currentUser, roleKey } = useAuth();
 
   const fetchSessions = () => {
@@ -221,7 +227,54 @@ const LiveTracking = () => {
           <h2>{roleKey === 'CUSTOMER' ? 'Live Shipment Tracking' : 'Live Fleet Tracking'}</h2>
           <p>{roleKey === 'CUSTOMER' ? 'Track your active consignments live on map' : 'Real-time GPS tracking using Driver\'s Phone Number'}</p>
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+          {/* Map Layer Dropdown */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--bg-secondary)', padding: '4px 10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+            <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>Map:</span>
+            <select
+              value={mapStyle}
+              onChange={(e) => {
+                const val = e.target.value;
+                setMapStyle(val);
+                localStorage.setItem('tms_map_style', val);
+              }}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-primary)',
+                fontSize: '13px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                outline: 'none'
+              }}
+            >
+              <option value="osm">OpenStreetMap (Default & Clean)</option>
+              <option value="carto">CARTO Voyager {cartoKey ? '(Key Active)' : '(Needs Key)'}</option>
+              <option value="satellite">Satellite View (Esri)</option>
+            </select>
+          </div>
+
+          {mapStyle === 'carto' && (
+            <button
+              onClick={() => { setTempApiKey(cartoKey); setShowApiKeyModal(true); }}
+              className="secondary-btn"
+              style={{
+                fontSize: '12px',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                backgroundColor: cartoKey ? '#10b981' : '#f59e0b',
+                color: '#fff',
+                border: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              🔑 {cartoKey ? 'CARTO Key Set' : 'Add CARTO Key'}
+            </button>
+          )}
+
           {roleKey !== 'CUSTOMER' && (
             <button className="primary-btn" onClick={() => { setShowStartModal(true); setGeneratedLink(''); setNewSessionData({ vehicleId: '', driverPhone: '', driverName: '' }); }} style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#3498db' }}>
               <MdShare /> Share Tracking Link
@@ -293,13 +346,30 @@ const LiveTracking = () => {
             zoom={5} 
             style={{ width: '100%', height: '100%' }}
           >
-            {/* CARTO Voyager TileLayer - Clean modern aesthetic from screenshot, 100% Free & No API key needed */}
-            <TileLayer
-              attribution='&copy; <a href="https://carto.com/attributions">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-              subdomains="abcd"
-              maxZoom={20}
-            />
+            {/* Map Layer Switcher */}
+            {mapStyle === 'carto' ? (
+              <TileLayer
+                key={`carto-${cartoKey}`}
+                attribution='&copy; <a href="https://carto.com/attributions">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                url={`https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png${cartoKey ? `?api_key=${cartoKey}` : ''}`}
+                subdomains="abcd"
+                maxZoom={20}
+              />
+            ) : mapStyle === 'satellite' ? (
+              <TileLayer
+                key="satellite"
+                attribution='&copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                maxZoom={19}
+              />
+            ) : (
+              <TileLayer
+                key="osm"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                maxZoom={19}
+              />
+            )}
             
             {sessions.map(s => {
               if (s.latitude && s.longitude) {
@@ -425,6 +495,80 @@ const LiveTracking = () => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* CARTO API Key Modal */}
+      {showApiKeyModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 9999,
+          backdropFilter: 'blur(3px)'
+        }}>
+          <div className="panel" style={{ width: '460px', maxWidth: '92%', borderRadius: '14px', padding: '24px', boxShadow: '0 20px 40px rgba(0,0,0,0.3)' }}>
+            <h3 style={{ marginTop: 0, display: 'flex', alignItems: 'center', gap: '8px', fontSize: '18px' }}>
+              🔑 Enter CARTO API Key
+            </h3>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '16px' }}>
+              CARTO maps ke tiles se watermark hatane ke liye apni API Key paste karein. Agar key nahi hai toh aap upar se <b>OpenStreetMap</b> select kar sakte hain jo bilkul free aur bina key ke chalta hai.
+            </p>
+            
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>CARTO API Key:</label>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="e.g. default_public_... or your CARTO key"
+                value={tempApiKey}
+                onChange={(e) => setTempApiKey(e.target.value.trim())}
+                style={{ width: '100%', padding: '10px 12px', fontSize: '13px' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', marginTop: '20px' }}>
+              {cartoKey ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCartoKey('');
+                    setTempApiKey('');
+                    localStorage.removeItem('tms_carto_api_key');
+                    setShowApiKeyModal(false);
+                  }}
+                  style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline' }}
+                >
+                  Remove Key
+                </button>
+              ) : <div></div>}
+
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => setShowApiKeyModal(false)}
+                  style={{ padding: '8px 14px', borderRadius: '8px' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={() => {
+                    setCartoKey(tempApiKey);
+                    if (tempApiKey) {
+                      localStorage.setItem('tms_carto_api_key', tempApiKey);
+                    } else {
+                      localStorage.removeItem('tms_carto_api_key');
+                    }
+                    setShowApiKeyModal(false);
+                  }}
+                  style={{ padding: '8px 16px', borderRadius: '8px', backgroundColor: '#10b981' }}
+                >
+                  Save Key
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
