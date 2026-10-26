@@ -329,34 +329,35 @@ const VehicleSelect = ({ vehicles, value, onChange, placeholder = 'Select Vehicl
       <div
         onClick={() => setIsOpen(p => !p)}
         style={{
-          width: '100%', padding: '12px 16px', backgroundColor: 'rgba(0, 0, 0, 0.2)',
-          border: `1.5px solid ${isOpen ? '#0984e3' : 'rgba(255, 255, 255, 0.1)'}`,
+          width: '100%', padding: '12px 16px', 
+          backgroundColor: 'var(--bg-secondary)',
+          border: `1.5px solid ${isOpen ? '#2563eb' : 'var(--border-color)'}`,
           borderRadius: '8px', color: 'var(--text-primary)', cursor: 'pointer',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           fontFamily: 'inherit', fontSize: '0.95rem', boxSizing: 'border-box',
-          boxShadow: isOpen ? '0 0 0 3px rgba(9,132,227,0.12)' : 'none',
+          boxShadow: isOpen ? '0 0 0 3px rgba(37, 99, 235, 0.12)' : 'none',
           transition: 'border-color 0.2s, box-shadow 0.2s', userSelect: 'none',
         }}
       >
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {selected ? formatSelectedText(selected) : <span style={{ opacity: 0.5 }}>{placeholder}</span>}
+          {selected ? formatSelectedText(selected) : <span style={{ color: 'var(--text-secondary)', opacity: 0.8 }}>{placeholder}</span>}
         </span>
-        <span style={{ fontSize: '0.75rem', opacity: 0.7, transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>▼</span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>▼</span>
       </div>
 
       {isOpen && (
         <div style={{
           position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 99999,
-          background: '#1a2332', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '10px',
-          boxShadow: '0 16px 48px rgba(0,0,0,0.7)', maxHeight: '360px', overflowY: 'auto',
+          background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '10px',
+          boxShadow: '0 12px 32px rgba(0, 0, 0, 0.12)', maxHeight: '360px', overflowY: 'auto',
         }}>
           {cargoWeight && parseFloat(cargoWeight) > 0 && (
             <div style={{
-              padding: '10px 14px', background: 'rgba(9, 132, 227, 0.15)',
-              borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex',
+              padding: '10px 14px', background: 'rgba(37, 99, 235, 0.08)',
+              borderBottom: '1px solid var(--border-color)', display: 'flex',
               alignItems: 'center', justifyContent: 'space-between'
             }}>
-              <span style={{ fontSize: '0.8rem', color: '#74b9ff', fontWeight: 600 }}>
+              <span style={{ fontSize: '0.8rem', color: '#2563eb', fontWeight: 600 }}>
                 ⚖️ Cargo: {cargoWeight} Ton — Sorted by Capacity Fit
               </span>
               <button
@@ -364,8 +365,9 @@ const VehicleSelect = ({ vehicles, value, onChange, placeholder = 'Select Vehicl
                 onClick={(e) => { e.stopPropagation(); setFilterSuitableOnly(p => !p); }}
                 style={{
                   fontSize: '0.75rem', padding: '3px 8px', borderRadius: '4px',
-                  background: filterSuitableOnly ? '#0984e3' : 'rgba(255,255,255,0.1)',
-                  color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600
+                  background: filterSuitableOnly ? '#2563eb' : 'var(--bg-surface)',
+                  color: filterSuitableOnly ? '#fff' : 'var(--text-primary)',
+                  border: '1px solid var(--border-color)', cursor: 'pointer', fontWeight: 600
                 }}
               >
                 {filterSuitableOnly ? '✓ Only ≥ ' + cargoWeight + 'T' : 'Show All'}
@@ -374,7 +376,7 @@ const VehicleSelect = ({ vehicles, value, onChange, placeholder = 'Select Vehicl
           )}
 
           {processedVehicles.length === 0 ? (
-            <div style={{ padding: '16px', textAlign: 'center', color: '#94a3b8', fontSize: '0.85rem' }}>
+            <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
               No vehicles found matching {cargoWeight} Ton capacity.
             </div>
           ) : (
@@ -384,7 +386,7 @@ const VehicleSelect = ({ vehicles, value, onChange, placeholder = 'Select Vehicl
               const capacityText = formatCapacityText(v.capacity);
               const capNum = parseCapacityNum(v.capacity);
               const statusLabel = getStatusText(v);
-              const statusColor = isAvailable ? '#2ecc71' : (v.status === 'In Maintenance' ? '#f39c12' : '#e74c3c');
+              const statusColor = isAvailable ? '#10b981' : (v.status === 'In Maintenance' ? '#f59e0b' : '#ef4444');
 
               const weightNum = parseFloat(cargoWeight);
               const hasWeight = weightNum && weightNum > 0;
@@ -399,23 +401,23 @@ const VehicleSelect = ({ vehicles, value, onChange, placeholder = 'Select Vehicl
                   style={{
                     padding: '12px 16px', cursor: isAvailable ? 'pointer' : 'not-allowed',
                     opacity: isAvailable ? (isUnderCapacity ? 0.7 : 1) : 0.5,
-                    background: isSel ? 'rgba(9,132,227,0.22)' : (isBestFit ? 'rgba(46, 204, 113, 0.08)' : 'transparent'),
-                    borderTop: '1px solid rgba(255,255,255,0.06)',
+                    background: isSel ? 'rgba(37, 99, 235, 0.12)' : (isBestFit ? 'rgba(16, 185, 129, 0.08)' : 'transparent'),
+                    borderTop: index === 0 ? 'none' : '1px solid var(--border-color)',
                     display: 'flex', flexDirection: 'column', gap: '4px'
                   }}
-                  onMouseEnter={e => { if (isAvailable && !isSel) e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
-                  onMouseLeave={e => { if (isAvailable && !isSel) e.currentTarget.style.background = isBestFit ? 'rgba(46, 204, 113, 0.08)' : 'transparent'; }}
+                  onMouseEnter={e => { if (isAvailable && !isSel) e.currentTarget.style.background = 'var(--hover-color)'; }}
+                  onMouseLeave={e => { if (isAvailable && !isSel) e.currentTarget.style.background = isBestFit ? 'rgba(16, 185, 129, 0.08)' : 'transparent'; }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontWeight: 600, color: isSel ? '#74b9ff' : '#dfe6e9', fontSize: '0.95rem' }}>
-                        {v.registrationNumber} <span style={{ color: '#94a3b8', fontWeight: 500 }}>— {capacityText}</span>
+                      <span style={{ fontWeight: 600, color: isSel ? '#2563eb' : 'var(--text-primary)', fontSize: '0.95rem' }}>
+                        {v.registrationNumber} <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>— {capacityText}</span>
                       </span>
                       {isBestFit && (
                         <span style={{
                           fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px',
-                          background: 'rgba(46, 204, 113, 0.2)', color: '#2ecc71',
-                          border: '1px solid rgba(46, 204, 113, 0.4)', fontWeight: 700
+                          background: 'rgba(16, 185, 129, 0.15)', color: '#10b981',
+                          border: '1px solid rgba(16, 185, 129, 0.3)', fontWeight: 700
                         }}>
                           🎯 BEST FIT
                         </span>
@@ -423,21 +425,21 @@ const VehicleSelect = ({ vehicles, value, onChange, placeholder = 'Select Vehicl
                       {isUnderCapacity && (
                         <span style={{
                           fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px',
-                          background: 'rgba(231, 76, 60, 0.2)', color: '#e74c3c',
-                          border: '1px solid rgba(231, 76, 60, 0.4)', fontWeight: 700
+                          background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444',
+                          border: '1px solid rgba(239, 68, 68, 0.3)', fontWeight: 700
                         }}>
                           ⚠️ Too Small ({capNum}T &lt; {weightNum}T)
                         </span>
                       )}
                     </div>
                     <span style={{ 
-                      fontSize: '0.78rem', 
+                      fontSize: '0.75rem', 
                       fontWeight: 600, 
                       color: statusColor, 
-                      backgroundColor: `rgba(${isAvailable ? '46, 204, 113' : (v.status === 'In Maintenance' ? '243, 156, 18' : '231, 76, 60')}, 0.15)`, 
+                      backgroundColor: `rgba(${isAvailable ? '16, 185, 129' : (v.status === 'In Maintenance' ? '245, 158, 11' : '239, 68, 68')}, 0.12)`, 
                       padding: '3px 9px', 
                       borderRadius: '12px',
-                      border: `1px solid rgba(${isAvailable ? '46, 204, 113' : (v.status === 'In Maintenance' ? '243, 156, 18' : '231, 76, 60')}, 0.3)`
+                      border: `1px solid rgba(${isAvailable ? '16, 185, 129' : (v.status === 'In Maintenance' ? '245, 158, 11' : '239, 68, 68')}, 0.25)`
                     }}>
                       {statusLabel}
                     </span>
@@ -445,7 +447,7 @@ const VehicleSelect = ({ vehicles, value, onChange, placeholder = 'Select Vehicl
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.83rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
                     <span>{v.name ? `${v.name} (${v.type || v.vehicleType || 'Truck'})` : (v.type || v.vehicleType || 'Truck')}</span>
                     {hasWeight && !isUnderCapacity ? (
-                      <span style={{ color: utilPct >= 70 ? '#2ecc71' : '#38bdf8', fontWeight: 600 }}>
+                      <span style={{ color: utilPct >= 70 ? '#10b981' : '#2563eb', fontWeight: 600 }}>
                         {utilPct}% Load Capacity Utilized
                       </span>
                     ) : (
