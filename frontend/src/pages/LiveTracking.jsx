@@ -20,11 +20,11 @@ const createTruckIcon = (vehicleId, isSelected) => {
     className: 'custom-map-truck-pin',
     html: `
       <div style="
+        width: 120px;
         display: flex;
         flex-direction: column;
         align-items: center;
-        transform: translate(-50%, -100%);
-        cursor: pointer;
+        pointer-events: auto;
       ">
         <div style="
           background: #0f172a;
@@ -45,11 +45,11 @@ const createTruckIcon = (vehicleId, isSelected) => {
           ${vehicleId}
         </div>
         <div style="
-          width: 38px;
-          height: 38px;
+          width: 36px;
+          height: 36px;
           border-radius: 50%;
           background: ${isSelected ? 'linear-gradient(135deg, #2563eb, #1d4ed8)' : 'linear-gradient(135deg, #0f172a, #1e293b)'};
-          border: 2.5px solid #ffffff;
+          border: 2px solid #ffffff;
           box-shadow: 0 4px 14px rgba(0,0,0,0.35);
           display: flex;
           align-items: center;
@@ -69,9 +69,9 @@ const createTruckIcon = (vehicleId, isSelected) => {
         "></div>
       </div>
     `,
-    iconSize: [40, 65],
-    iconAnchor: [20, 65],
-    popupAnchor: [0, -60]
+    iconSize: [120, 70],
+    iconAnchor: [60, 70],
+    popupAnchor: [0, -68]
   });
 };
 
@@ -82,11 +82,11 @@ const createHubIcon = (hubName, type = 'destination') => {
     className: 'custom-map-hub-pin',
     html: `
       <div style="
+        width: 100px;
         display: flex;
         flex-direction: column;
         align-items: center;
-        transform: translate(-50%, -100%);
-        cursor: pointer;
+        pointer-events: auto;
       ">
         <div style="
           background: ${isDest ? '#dc2626' : '#0284c7'};
@@ -104,8 +104,8 @@ const createHubIcon = (hubName, type = 'destination') => {
           ${hubName}
         </div>
         <div style="
-          width: 32px;
-          height: 32px;
+          width: 30px;
+          height: 30px;
           border-radius: 50%;
           background: ${isDest ? 'linear-gradient(135deg, #ef4444, #dc2626)' : 'linear-gradient(135deg, #0284c7, #0369a1)'};
           border: 2px solid #ffffff;
@@ -120,9 +120,9 @@ const createHubIcon = (hubName, type = 'destination') => {
         </div>
       </div>
     `,
-    iconSize: [36, 55],
-    iconAnchor: [18, 55],
-    popupAnchor: [0, -50]
+    iconSize: [100, 55],
+    iconAnchor: [50, 50],
+    popupAnchor: [0, -48]
   });
 };
 
