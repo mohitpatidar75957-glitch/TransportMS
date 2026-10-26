@@ -21,6 +21,7 @@ const Dashboard = () => {
   const [alerts, setAlerts] = useState([]);
   const [tripsCount, setTripsCount] = useState(0);
   const [activeTripsCount, setActiveTripsCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   const isManager = roleKey === 'MANAGER';
 
@@ -29,83 +30,83 @@ const Dashboard = () => {
   }
 
   useEffect(() => {
-    // Fetch Active Drivers from Fleet
-    fetch('/api/v1/fleet/drivers')
-      .then(res => res.json())
-      .then(data => {
-        const availableDrivers = data.filter(d => (d.status || 'Available').toLowerCase() === 'available');
-        setActiveDrivers(availableDrivers.length);
-      })
-      .catch(err => console.error('Failed to fetch fleet drivers:', err));
+    Promise.allSettled([
+      // Fetch Active Drivers from Fleet
+      fetch('/api/v1/fleet/drivers')
+        .then(res => res.json())
+        .then(data => {
+          const availableDrivers = (Array.isArray(data) ? data : []).filter(d => (d.status || 'Available').toLowerCase() === 'available');
+          setActiveDrivers(availableDrivers.length);
+        }),
 
-    // Fetch Users for Recent Registrations Table
-    fetch('/api/users')
-      .then(res => res.json())
-      .then(data => {
-        const sorted = data
-          .filter(u => u.role === 'DRIVER')
-          .sort((a, b) => b.id - a.id)
-          .slice(0, 5);
-        setRecentUsers(sorted);
-      })
-      .catch(err => console.error('Failed to fetch users:', err));
+      // Fetch Users for Recent Registrations Table
+      fetch('/api/users')
+        .then(res => res.json())
+        .then(data => {
+          const sorted = (Array.isArray(data) ? data : [])
+            .filter(u => u.role === 'DRIVER')
+            .sort((a, b) => b.id - a.id)
+            .slice(0, 5);
+          setRecentUsers(sorted);
+        }),
 
-    // Fetch Vehicles
-    fetch('/api/v1/fleet/vehicles')
-      .then(res => res.json())
-      .then(data => {
-        setVehicles(data);
-      })
-      .catch(err => console.error('Failed to fetch vehicles:', err));
+      // Fetch Vehicles
+      fetch('/api/v1/fleet/vehicles')
+        .then(res => res.json())
+        .then(data => {
+          setVehicles(Array.isArray(data) ? data : []);
+        }),
 
-    // Fetch Trips for Profit / Operational Calculation
-    fetch('/api/v1/fleet/trips')
-      .then(res => res.json())
-      .then(data => {
-        setTripsCount(data.length);
-        const activeCount = data.filter(t => (t.status || '').toLowerCase() === 'in transit' || (t.status || '').toLowerCase() === 'active').length;
-        setActiveTripsCount(activeCount);
+      // Fetch Trips for Profit / Operational Calculation
+      fetch('/api/v1/fleet/trips')
+        .then(res => res.json())
+        .then(data => {
+          const trips = Array.isArray(data) ? data : [];
+          setTripsCount(trips.length);
+          const activeCount = trips.filter(t => (t.status || '').toLowerCase() === 'in transit' || (t.status || '').toLowerCase() === 'active').length;
+          setActiveTripsCount(activeCount);
 
-        // Total Profit
-        const total = data.reduce((sum, trip) => sum + (trip.freightAmount || 0), 0);
-        setTotalProfit(total);
+          // Total Profit
+          const total = trips.reduce((sum, trip) => sum + (trip.freightAmount || 0), 0);
+          setTotalProfit(total);
 
-        // Chart Data (Last 6 Months)
-        const today = new Date();
-        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        let last6Months = [];
-        
-        for (let i = 5; i >= 0; i--) {
-          const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-          last6Months.push({
-            monthIndex: d.getMonth(),
-            year: d.getFullYear(),
-            label: monthNames[d.getMonth()],
-            profit: 0
-          });
-        }
-
-        data.forEach(trip => {
-          if (trip.startDate && trip.freightAmount) {
-            const tripDate = new Date(trip.startDate);
-            const dataPoint = last6Months.find(m => m.monthIndex === tripDate.getMonth() && m.year === tripDate.getFullYear());
-            if (dataPoint) {
-              dataPoint.profit += trip.freightAmount;
-            }
+          // Chart Data (Last 6 Months)
+          const today = new Date();
+          const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+          let last6Months = [];
+          
+          for (let i = 5; i >= 0; i--) {
+            const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+            last6Months.push({
+              monthIndex: d.getMonth(),
+              year: d.getFullYear(),
+              label: monthNames[d.getMonth()],
+              profit: 0
+            });
           }
-        });
 
-        const max = Math.max(...last6Months.map(m => m.profit), 1000); // at least 1000 to prevent division by zero
-        setMaxProfit(max);
-        setChartData(last6Months);
-      })
-      .catch(err => console.error('Failed to fetch trips for profit:', err));
+          trips.forEach(trip => {
+            if (trip.startDate && trip.freightAmount) {
+              const tripDate = new Date(trip.startDate);
+              const dataPoint = last6Months.find(m => m.monthIndex === tripDate.getMonth() && m.year === tripDate.getFullYear());
+              if (dataPoint) {
+                dataPoint.profit += trip.freightAmount;
+              }
+            }
+          });
 
-    // Fetch Alerts
-    fetch('/api/v1/fleet/alerts/expiring-documents')
-      .then(res => res.json())
-      .then(data => setAlerts(Array.isArray(data) ? data : []))
-      .catch(err => console.error('Failed to fetch alerts:', err));
+          const max = Math.max(...last6Months.map(m => m.profit), 1000);
+          setMaxProfit(max);
+          setChartData(last6Months);
+        }),
+
+      // Fetch Alerts
+      fetch('/api/v1/fleet/alerts/expiring-documents')
+        .then(res => res.json())
+        .then(data => setAlerts(Array.isArray(data) ? data : []))
+    ]).finally(() => {
+      setIsLoading(false);
+    });
   }, []);
 
   return (
@@ -120,13 +121,13 @@ const Dashboard = () => {
           <>
             <div className="stat-card blue">
               <h3>Total Admins</h3>
-              <div className="stat-value">1</div>
+              <div className="stat-value">{isLoading ? '...' : 1}</div>
               <p>System administrators</p>
             </div>
             
             <div className="stat-card dark">
               <h3>Total Freight Profit</h3>
-              <div className="stat-value">₹{totalProfit.toLocaleString('en-IN')}</div>
+              <div className="stat-value">{isLoading ? '...' : `₹${totalProfit.toLocaleString('en-IN')}`}</div>
               <p>Total profit from trips</p>
             </div>
           </>
@@ -134,13 +135,13 @@ const Dashboard = () => {
 
         <div className="stat-card green">
           <h3>Active Vehicles</h3>
-          <div className="stat-value">{vehicles.length}</div>
+          <div className="stat-value">{isLoading ? '...' : vehicles.length}</div>
           <p>Currently registered</p>
         </div>
         
         <div className="stat-card cyan">
           <h3>Active Drivers</h3>
-          <div className="stat-value">{activeDrivers}</div>
+          <div className="stat-value">{isLoading ? '...' : activeDrivers}</div>
           <p>Available for trips</p>
         </div>
 

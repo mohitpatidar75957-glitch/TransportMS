@@ -28,6 +28,8 @@ public class FleetController {
     @Autowired private InvoiceRepository invoiceRepository;
     @Autowired private OrderRepository orderRepository;
     @Autowired private PayrollRepository payrollRepository;
+    @Autowired private ExpenseRepository expenseRepository;
+    @Autowired private VehicleMaintenanceRepository maintenanceRepository;
     @Autowired private com.tms.backend.service.AuditService auditService;
     @Autowired private com.tms.backend.service.WebhookService webhookService;
     @Autowired private com.tms.backend.service.TripService tripService;
@@ -96,6 +98,7 @@ public class FleetController {
     public ResponseEntity<?> deleteVehicle(@PathVariable Long id) {
         return vehicleRepository.findById(id).map(v -> {
             try {
+                // 1. Unassign drivers
                 List<Driver> drivers = driverRepository.findAll();
                 for (Driver d : drivers) {
                     if (d.getAssignedVehicle() != null && id.equals(d.getAssignedVehicle().getId())) {
@@ -103,6 +106,7 @@ public class FleetController {
                         driverRepository.save(d);
                     }
                 }
+                // 2. Unlink trips
                 List<Trip> trips = tripRepository.findAll();
                 for (Trip t : trips) {
                     if (t.getVehicle() != null && id.equals(t.getVehicle().getId())) {
@@ -110,6 +114,28 @@ public class FleetController {
                         tripRepository.save(t);
                     }
                 }
+                // 3. Unlink expenses
+                List<Expense> expenses = expenseRepository.findAll();
+                for (Expense e : expenses) {
+                    if (e.getVehicle() != null && id.equals(e.getVehicle().getId())) {
+                        e.setVehicle(null);
+                        expenseRepository.save(e);
+                    }
+                }
+                // 4. Unlink fuel records
+                List<FuelRecord> fuels = fuelRepository.findAll();
+                for (FuelRecord f : fuels) {
+                    if (f.getVehicle() != null && id.equals(f.getVehicle().getId())) {
+                        f.setVehicle(null);
+                        fuelRepository.save(f);
+                    }
+                }
+                // 5. Remove or unlink maintenance records
+                List<VehicleMaintenance> maints = maintenanceRepository.findByVehicleIdOrderByServiceDateDesc(id);
+                if (maints != null && !maints.isEmpty()) {
+                    maintenanceRepository.deleteAll(maints);
+                }
+
                 String reg = v.getRegistrationNumber();
                 vehicleRepository.delete(v);
                 try {
