@@ -605,14 +605,15 @@ const Attendance = () => {
                 value={selectedDate}
                 onChange={e => setSelectedDate(e.target.value)}
                 style={{ 
-                  padding: '8px 14px', 
-                  borderRadius: '6px', 
-                  border: '1px solid var(--border-color)', 
-                  background: 'var(--bg-surface)', 
+                  padding: '9px 16px', 
+                  borderRadius: '8px', 
+                  border: '1.5px solid var(--border-color)', 
+                  background: 'var(--bg-secondary)', 
                   color: 'var(--text-primary)', 
                   fontSize: '14px', 
                   fontWeight: '600',
-                  outline: 'none'
+                  outline: 'none',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.06)'
                 }}
               />
             </div>

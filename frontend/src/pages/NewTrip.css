@@ -1017,16 +1017,24 @@
   }
 }
 
-/* Force crystal-clear bright white date picker calendar icon in New Trip & forms */
-input[type="date"] {
+/* Theme-aware Date picker calendar icon and text */
+[data-theme="dark"] input[type="date"] {
   color-scheme: dark !important;
   color: #f0f0f0 !important;
-  position: relative;
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%23ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>') !important;
   background-repeat: no-repeat !important;
   background-position: calc(100% - 12px) center !important;
   background-size: 18px 18px !important;
-  cursor: pointer;
+}
+
+[data-theme="light"] input[type="date"],
+:root:not([data-theme="dark"]) input[type="date"] {
+  color-scheme: light !important;
+  color: #0f172a !important;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%230f172a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>') !important;
+  background-repeat: no-repeat !important;
+  background-position: calc(100% - 12px) center !important;
+  background-size: 18px 18px !important;
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator {
