@@ -10,8 +10,8 @@ const DriverTrackingView = () => {
   const [watchId, setWatchId] = useState(null);
   const [lastSent, setLastSent] = useState(null);
   
-  // Language State
-  const [lang, setLang] = useState('hi'); // Default to Hindi for drivers
+  // Language State (Defaults to English)
+  const [lang, setLang] = useState('en');
 
   // Translations Dictionary
   const texts = {

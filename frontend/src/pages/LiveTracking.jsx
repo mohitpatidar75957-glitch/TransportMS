@@ -442,11 +442,14 @@ const LiveTracking = () => {
           backdropFilter: 'blur(4px)',
           zIndex: 9999,
           display: 'flex',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           justifyContent: 'center',
-          padding: '16px'
+          padding: '16px',
+          overflowY: 'auto'
         }}>
           <div style={{
+            marginTop: '60px',
+            marginBottom: '60px',
             backgroundColor: 'var(--bg-secondary)',
             border: '1px solid var(--border-color)',
             boxShadow: '0 20px 45px rgba(0, 0, 0, 0.35)',
