@@ -72,7 +72,7 @@ const AttendanceForm = () => {
 
   return (
     <div className="add-vehicle-container">
-      <div className="form-panel" style={{ maxWidth: '800px', margin: '0 auto', padding: '24px' }}>
+      <div className="form-panel">
         <div className="form-header" style={{ borderBottom: '1px solid #ddd', paddingBottom: '12px', marginBottom: '20px' }}>
           <h3 style={{ color: '#e67e22', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
             <MdEventAvailable size={24} /> Add Attendance

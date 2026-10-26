@@ -217,10 +217,13 @@ const VendorForm = () => {
 
   return (
     <div className="add-vehicle-container">
-      <div className="form-panel" style={{ maxWidth: '800px', margin: '0 auto', padding: '24px' }}>
-        <div className="form-header" style={{ borderBottom: '1px solid #ddd', paddingBottom: '12px', marginBottom: '20px' }}>
-          <h3 style={{ color: '#8e44ad', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-            <MdStore size={24} /> {isEditMode ? 'Edit Vendor' : 'Add New Vendor'}
+      <div className="form-panel">
+        <div className="form-header" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '14px', marginBottom: '24px' }}>
+          <h3 style={{ color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '10px', margin: 0, fontSize: '1.25rem', fontWeight: 600 }}>
+            <span style={{ display: 'inline-flex', padding: '8px', borderRadius: '8px', background: 'rgba(142, 68, 173, 0.12)', color: '#8e44ad' }}>
+              <MdStore size={22} />
+            </span>
+            {isEditMode ? 'Edit Vendor' : 'Add New Vendor'}
           </h3>
         </div>
 

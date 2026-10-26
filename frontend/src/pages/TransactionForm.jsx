@@ -66,7 +66,7 @@ const TransactionForm = () => {
 
   return (
     <div className="add-vehicle-container">
-      <div className="form-panel" style={{ maxWidth: '800px', margin: '0 auto', padding: '24px' }}>
+      <div className="form-panel">
         <div className="form-header" style={{ borderBottom: '1px solid #ddd', paddingBottom: '8px', marginBottom: '16px' }}>
           <h3 style={{ color: '#3498db', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
             <MdAdd size={24} /> Record New Transaction

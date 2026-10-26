@@ -91,7 +91,7 @@ const StaffForm = () => {
 
   return (
     <div className="add-vehicle-container">
-      <div className="form-panel" style={{ maxWidth: '800px', margin: '0 auto', padding: '24px' }}>
+      <div className="form-panel">
         <div className="form-header" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', marginBottom: '20px' }}>
           <h3 style={{ color: '#8e44ad', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
             <MdGroups size={24} /> {isEdit ? 'Edit Employee' : 'Add New Employee'}
