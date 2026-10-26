@@ -109,8 +109,15 @@
 .menu-item.active {
   background-color: var(--sidebar-active-bg, var(--accent-color)) !important;
   color: var(--sidebar-active-text, #ffffff) !important;
-  border-left: 4px solid var(--sidebar-active-border, #1e293b);
+  border-left: 4px solid var(--sidebar-active-border, #0f172a) !important;
   font-weight: 600;
+}
+
+.menu-item.active .title,
+.menu-item.active span,
+.menu-item.active svg {
+  color: var(--sidebar-active-text, #ffffff) !important;
+  fill: currentColor !important;
 }
 
 .menu-item.dashboard-item {
@@ -118,9 +125,16 @@
 }
 
 .menu-item.dashboard-item.active {
-  border-left: 4px solid var(--sidebar-active-border, #1e293b);
+  border-left: 4px solid var(--sidebar-active-border, #0f172a) !important;
   background-color: var(--sidebar-active-bg, var(--accent-color)) !important;
   color: var(--sidebar-active-text, #ffffff) !important;
+}
+
+.menu-item.dashboard-item.active .title,
+.menu-item.dashboard-item.active span,
+.menu-item.dashboard-item.active svg {
+  color: var(--sidebar-active-text, #ffffff) !important;
+  fill: currentColor !important;
 }
 
 .menu-item .icon {
@@ -136,8 +150,10 @@
   color: var(--text-primary);
 }
 
-.menu-item.active .icon {
+.menu-item.active .icon,
+.menu-item.active .icon svg {
   color: var(--sidebar-active-text, #ffffff) !important;
+  fill: currentColor !important;
 }
 
 .badge {

@@ -24,7 +24,8 @@ const getContrastTextColor = (hexColor) => {
   const b = parseInt(hex.substring(4, 6), 16) || 0;
   // Calculate relative luminance (YIQ equation)
   const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-  return (yiq >= 160) ? '#0f172a' : '#ffffff';
+  // If luminance is >= 140, it is a bright/light/pastel color, so dark text must be used
+  return (yiq >= 140) ? '#0f172a' : '#ffffff';
 };
 
 // Helper to apply theme to document root
@@ -40,7 +41,7 @@ export const applyTheme = (settings) => {
   const activeTextColor = getContrastTextColor(settings.accentColor);
   root.style.setProperty('--sidebar-active-bg', settings.accentColor);
   root.style.setProperty('--sidebar-active-text', activeTextColor);
-  root.style.setProperty('--sidebar-active-border', activeTextColor === '#0f172a' ? '#0f172a' : '#ffffff');
+  root.style.setProperty('--sidebar-active-border', activeTextColor === '#0f172a' ? '#0f172a' : '#2563eb');
   
   const isLight = settings.bgPrimary === '#f4f6f9' || settings.bgPrimary === '#ffffff' || settings.bgPrimary === '#f8fafc';
   root.setAttribute('data-theme', isLight ? 'light' : 'dark');
