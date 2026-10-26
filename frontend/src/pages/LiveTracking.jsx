@@ -232,14 +232,9 @@ const LiveTracking = () => {
           <div style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '8px',
-            background: 'var(--bg-secondary)',
-            padding: '4px 12px',
-            borderRadius: '10px',
-            border: '1px solid var(--border-color)',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.06)'
+            gap: '6px'
           }}>
-            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>🗺️ Map:</span>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>Map:</span>
             <select
               value={mapStyle}
               onChange={(e) => {
@@ -248,15 +243,16 @@ const LiveTracking = () => {
                 localStorage.setItem('tms_map_style', val);
               }}
               style={{
-                background: 'var(--bg-secondary)',
+                background: 'transparent',
                 border: 'none',
                 color: 'var(--text-primary)',
                 fontSize: '13px',
                 fontWeight: '600',
                 cursor: 'pointer',
                 outline: 'none',
-                padding: '6px 4px',
-                borderRadius: '6px'
+                boxShadow: 'none',
+                padding: '4px 6px',
+                borderRadius: '4px'
               }}
             >
               <option value="osm">OpenStreetMap (Default & Clean)</option>

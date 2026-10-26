@@ -45,34 +45,60 @@ const DriverTrackingView = () => {
 
   const t = texts[lang];
 
+  const backendBase = import.meta.env.VITE_API_URL 
+    ? import.meta.env.VITE_API_URL.replace(/\/$/, '') 
+    : 'https://transport-ms-backend.onrender.com';
+
   useEffect(() => {
-    // Fetch session info
-    fetch(`/api/tracking/sessions/${sessionId}`)
-      .then(res => {
-        if (!res.ok) throw new Error('Tracking session not found or expired.');
-        return res.json();
-      })
-      .then(data => setSessionData(data))
-      .catch(err => setError(err.message));
+    // Fetch session info with direct fallback
+    const fetchSession = async () => {
+      try {
+        let res = await fetch(`/api/tracking/sessions/${sessionId}`);
+        if (!res.ok) {
+          // Fallback to direct backend
+          res = await fetch(`${backendBase}/api/tracking/sessions/${sessionId}`);
+        }
+        if (!res.ok) {
+          throw new Error('Tracking session not found or expired.');
+        }
+        const data = await res.json();
+        setSessionData(data);
+      } catch (err) {
+        console.error('Session fetch error:', err);
+        setError(err.message || 'Tracking session not found or expired.');
+      }
+    };
+
+    fetchSession();
       
     return () => {
       if (watchId) navigator.geolocation.clearWatch(watchId);
     };
   }, [sessionId]);
 
-  const sendLocation = (position) => {
+  const sendLocation = async (position) => {
     const { latitude, longitude, speed } = position.coords;
     const speedKmh = speed ? (speed * 3.6).toFixed(1) : 0;
     
-    fetch(`/api/tracking/update/${sessionId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ latitude, longitude, speed: speedKmh })
-    })
-    .then(res => {
-      if(res.ok) setLastSent(new Date().toLocaleTimeString());
-    })
-    .catch(err => console.error('Failed to send location:', err));
+    try {
+      let res = await fetch(`/api/tracking/update/${sessionId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ latitude, longitude, speed: speedKmh })
+      });
+      if (!res.ok) {
+        res = await fetch(`${backendBase}/api/tracking/update/${sessionId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ latitude, longitude, speed: speedKmh })
+        });
+      }
+      if (res.ok) {
+        setLastSent(new Date().toLocaleTimeString());
+      }
+    } catch (err) {
+      console.error('Failed to send location:', err);
+    }
   };
 
   const startTracking = () => {
