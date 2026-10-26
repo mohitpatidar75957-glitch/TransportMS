@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MdMyLocation, MdDirectionsCar, MdRefresh, MdFullscreen, MdShare } from 'react-icons/md';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle, Polyline } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './Vehicles.css';
@@ -13,6 +13,118 @@ L.Icon.Default.mergeOptions({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
+
+// Custom Truck Pin Icon
+const createTruckIcon = (vehicleId, isSelected) => {
+  return L.divIcon({
+    className: 'custom-map-truck-pin',
+    html: `
+      <div style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transform: translate(-50%, -100%);
+        cursor: pointer;
+      ">
+        <div style="
+          background: #0f172a;
+          color: #ffffff;
+          font-size: 11px;
+          font-weight: 700;
+          padding: 3px 8px;
+          border-radius: 6px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+          border: 1px solid ${isSelected ? '#3b82f6' : 'rgba(255,255,255,0.2)'};
+          white-space: nowrap;
+          margin-bottom: 4px;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        ">
+          <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #10b981;"></span>
+          ${vehicleId}
+        </div>
+        <div style="
+          width: 38px;
+          height: 38px;
+          border-radius: 50%;
+          background: ${isSelected ? 'linear-gradient(135deg, #2563eb, #1d4ed8)' : 'linear-gradient(135deg, #0f172a, #1e293b)'};
+          border: 2.5px solid #ffffff;
+          box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #ffffff;
+          font-size: 18px;
+        ">
+          🚛
+        </div>
+        <div style="
+          width: 0;
+          height: 0;
+          border-left: 6px solid transparent;
+          border-right: 6px solid transparent;
+          border-top: 7px solid ${isSelected ? '#1d4ed8' : '#1e293b'};
+          margin-top: -1px;
+        "></div>
+      </div>
+    `,
+    iconSize: [40, 65],
+    iconAnchor: [20, 65],
+    popupAnchor: [0, -60]
+  });
+};
+
+// Custom Hub / End Point Pin Icon
+const createHubIcon = (hubName, type = 'destination') => {
+  const isDest = type === 'destination';
+  return L.divIcon({
+    className: 'custom-map-hub-pin',
+    html: `
+      <div style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transform: translate(-50%, -100%);
+        cursor: pointer;
+      ">
+        <div style="
+          background: ${isDest ? '#dc2626' : '#0284c7'};
+          color: #ffffff;
+          font-size: 10px;
+          font-weight: 700;
+          padding: 2px 7px;
+          border-radius: 4px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+          white-space: nowrap;
+          margin-bottom: 3px;
+          letter-spacing: 0.3px;
+          text-transform: uppercase;
+        ">
+          ${hubName}
+        </div>
+        <div style="
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: ${isDest ? 'linear-gradient(135deg, #ef4444, #dc2626)' : 'linear-gradient(135deg, #0284c7, #0369a1)'};
+          border: 2px solid #ffffff;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #ffffff;
+          font-size: 15px;
+        ">
+          ${isDest ? '📍' : '🏢'}
+        </div>
+      </div>
+    `,
+    iconSize: [36, 55],
+    iconAnchor: [18, 55],
+    popupAnchor: [0, -50]
+  });
+};
 
 const LiveTracking = () => {
   const [sessions, setSessions] = useState([]);
@@ -181,22 +293,57 @@ const LiveTracking = () => {
             zoom={5} 
             style={{ width: '100%', height: '100%' }}
           >
+            {/* CARTO Voyager TileLayer - Clean modern aesthetic from screenshot, 100% Free & No API key needed */}
             <TileLayer
-              attribution='&copy; OpenStreetMap contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://carto.com/attributions">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+              url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+              subdomains="abcd"
+              maxZoom={20}
             />
             
             {sessions.map(s => {
               if (s.latitude && s.longitude) {
+                const isSelected = activeSession === s.sessionId;
                 return (
-                  <Marker key={s.sessionId} position={[s.latitude, s.longitude]}>
-                    <Popup>
-                      <strong>{s.vehicleId}</strong><br/>
-                      Driver: {s.driverName}<br/>
-                      Phone: {s.driverPhone}<br/>
-                      Speed: {s.speed || 0} km/h
-                    </Popup>
-                  </Marker>
+                  <React.Fragment key={s.sessionId}>
+                    {/* Radial geofence circle around active truck matching screenshot */}
+                    <Circle
+                      center={[s.latitude, s.longitude]}
+                      radius={12000}
+                      pathOptions={{
+                        color: '#0284c7',
+                        fillColor: '#38bdf8',
+                        fillOpacity: 0.08,
+                        weight: 1.5,
+                        dashArray: '4, 6'
+                      }}
+                    />
+
+                    {/* Custom Truck Pin with Vehicle Number Badge */}
+                    <Marker 
+                      position={[s.latitude, s.longitude]}
+                      icon={createTruckIcon(s.vehicleId || 'Truck', isSelected)}
+                      eventHandlers={{
+                        click: () => setActiveSession(s.sessionId)
+                      }}
+                    >
+                      <Popup>
+                        <div style={{ padding: '6px', minWidth: '180px' }}>
+                          <strong style={{ fontSize: '14px', color: '#0f172a', display: 'block', marginBottom: '4px' }}>
+                            🚛 {s.vehicleId}
+                          </strong>
+                          <div style={{ fontSize: '12px', color: '#475569', lineHeight: 1.5 }}>
+                            <div><strong>Driver:</strong> {s.driverName || 'N/A'}</div>
+                            <div><strong>Phone:</strong> {s.driverPhone || 'N/A'}</div>
+                            <div><strong>Speed:</strong> <span style={{ color: '#10b981', fontWeight: 600 }}>{s.speed || 0} km/h</span></div>
+                            <div style={{ marginTop: '4px', fontSize: '11px', color: '#94a3b8' }}>
+                              Updated: {new Date(s.lastUpdated).toLocaleTimeString()}
+                            </div>
+                          </div>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  </React.Fragment>
                 );
               }
               return null;
