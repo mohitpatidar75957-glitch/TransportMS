@@ -108,9 +108,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           </div>
           <div className="logo-text">
             <h2>{appBranding?.title || 'TMS by Codervu'}</h2>
-            <p style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span>{appBranding?.subtitle || 'Management'}</span>
-            </p>
+            {appBranding?.subtitle ? (
+              <p style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>{appBranding.subtitle}</span>
+              </p>
+            ) : null}
           </div>
           <button className="mobile-close-btn" onClick={toggleSidebar}>
             <MdClose size={24} />

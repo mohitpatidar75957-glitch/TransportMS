@@ -115,7 +115,7 @@ export const AuthProvider = ({ children }) => {
       const stored = localStorage.getItem('tms_app_branding');
       if (stored) return JSON.parse(stored);
     } catch (e) {}
-    return { title: 'TMS by Codervu', subtitle: 'Management' };
+    return { title: 'TMS by Codervu', subtitle: '' };
   });
 
   const updateAppBranding = (newBranding) => {

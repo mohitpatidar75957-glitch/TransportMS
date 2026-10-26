@@ -8,7 +8,7 @@ const Profile = () => {
   const { showAlert } = useModal();
   const [brandingData, setBrandingData] = useState({
     title: appBranding?.title || 'TMS by Codervu',
-    subtitle: appBranding?.subtitle || 'Management'
+    subtitle: appBranding?.subtitle || ''
   });
   const [formData, setFormData] = useState({
     name: '',
@@ -104,7 +104,7 @@ const Profile = () => {
       if (isSuperAdmin && brandingData.title) {
         updateAppBranding({
           title: brandingData.title.trim(),
-          subtitle: (brandingData.subtitle || 'Management').trim()
+          subtitle: (brandingData.subtitle || '').trim()
         });
       }
 
@@ -337,13 +337,10 @@ const Profile = () => {
                       type="text" 
                       value={brandingData.title} 
                       onChange={(e) => setBrandingData({ ...brandingData, title: e.target.value })} 
-                      placeholder="e.g. TMS by Codervu"
+                      placeholder="Enter main title"
                       required
                       style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600', outline: 'none' }}
                     />
-                    <small style={{ color: '#64748b', fontSize: '12px', marginTop: '4px', display: 'block' }}>
-                      Appears in bold at the top of the sidebar next to the logo.
-                    </small>
                   </div>
 
                   <div className="form-group">
@@ -354,12 +351,9 @@ const Profile = () => {
                       type="text" 
                       value={brandingData.subtitle} 
                       onChange={(e) => setBrandingData({ ...brandingData, subtitle: e.target.value })} 
-                      placeholder="e.g. Management"
+                      placeholder="Optional subtitle (leave blank if not needed)"
                       style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none' }}
                     />
-                    <small style={{ color: '#64748b', fontSize: '12px', marginTop: '4px', display: 'block' }}>
-                      Small tagline beneath the main title (e.g. Management, Logistics Hub).
-                    </small>
                   </div>
                 </div>
               </div>
