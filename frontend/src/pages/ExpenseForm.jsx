@@ -134,7 +134,7 @@ const ExpenseForm = () => {
 
   return (
     <div className="add-vehicle-container">
-      <div className="form-panel" style={{ maxWidth: '850px', margin: '0 auto' }}>
+      <div className="form-panel">
         <div className="form-header" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <MdAccountBalanceWallet size={26} className="form-icon" style={{ color: '#38bdf8' }} />
           <div>

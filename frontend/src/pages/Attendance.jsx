@@ -556,16 +556,16 @@ const Attendance = () => {
             style={{
               padding: '10px 18px',
               borderRadius: '8px',
-              border: '1px solid ' + (viewMode === 'daily' ? '#0984e3' : 'var(--border-color)'),
-              background: viewMode === 'daily' ? 'linear-gradient(135deg, #0984e3, #6c5ce7)' : 'rgba(255,255,255,0.05)',
-              color: '#fff',
+              border: viewMode === 'daily' ? '1px solid #2563eb' : '1px solid var(--border-color)',
+              background: viewMode === 'daily' ? 'var(--accent-color)' : 'var(--bg-secondary)',
+              color: viewMode === 'daily' ? '#ffffff' : 'var(--text-secondary)',
               fontWeight: '600',
               fontSize: '13px',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              boxShadow: viewMode === 'daily' ? '0 4px 12px rgba(9, 132, 227, 0.3)' : 'none',
+              boxShadow: viewMode === 'daily' ? '0 2px 8px rgba(37, 99, 235, 0.3)' : 'none',
               transition: 'all 0.2s ease'
             }}
           >
@@ -576,16 +576,16 @@ const Attendance = () => {
             style={{
               padding: '10px 18px',
               borderRadius: '8px',
-              border: '1px solid ' + (viewMode === 'monthly' ? '#0984e3' : 'var(--border-color)'),
-              background: viewMode === 'monthly' ? 'linear-gradient(135deg, #0984e3, #6c5ce7)' : 'rgba(255,255,255,0.05)',
-              color: '#fff',
+              border: viewMode === 'monthly' ? '1px solid #2563eb' : '1px solid var(--border-color)',
+              background: viewMode === 'monthly' ? 'var(--accent-color)' : 'var(--bg-secondary)',
+              color: viewMode === 'monthly' ? '#ffffff' : 'var(--text-secondary)',
               fontWeight: '600',
               fontSize: '13px',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              boxShadow: viewMode === 'monthly' ? '0 4px 12px rgba(9, 132, 227, 0.3)' : 'none',
+              boxShadow: viewMode === 'monthly' ? '0 2px 8px rgba(37, 99, 235, 0.3)' : 'none',
               transition: 'all 0.2s ease'
             }}
           >
@@ -608,11 +608,11 @@ const Attendance = () => {
                   padding: '8px 14px', 
                   borderRadius: '6px', 
                   border: '1px solid var(--border-color)', 
-                  background: 'transparent', 
+                  background: 'var(--bg-surface)', 
                   color: 'var(--text-primary)', 
                   fontSize: '14px', 
-                  outline: 'none',
-                  colorScheme: 'dark'
+                  fontWeight: '600',
+                  outline: 'none'
                 }}
               />
             </div>

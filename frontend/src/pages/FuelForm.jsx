@@ -291,7 +291,7 @@ const FuelForm = () => {
 
   return (
     <div className="add-vehicle-container">
-      <div className="form-panel" style={{ maxWidth: '850px', margin: '0 auto', padding: '24px' }}>
+      <div className="form-panel">
         <div className="form-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ddd', paddingBottom: '12px', marginBottom: '20px' }}>
           <div>
             <h3 style={{ color: '#fbc531', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>

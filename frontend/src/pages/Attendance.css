@@ -233,56 +233,59 @@
 
 /* Present - Green */
 .status-toggle-btn.present {
-  color: #2ed573;
-  border-color: rgba(46, 213, 115, 0.3);
-  background-color: rgba(46, 213, 115, 0.08);
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.45);
+  background-color: rgba(16, 185, 129, 0.12);
+  font-weight: 700;
 }
 
 .status-toggle-btn.present:hover {
-  background-color: rgba(46, 213, 115, 0.15);
+  background-color: rgba(16, 185, 129, 0.25);
 }
 
 .status-toggle-btn.present.active {
-  background-color: #2ed573;
+  background-color: #10b981;
   color: white;
-  border-color: #2ed573;
-  box-shadow: 0 2px 8px rgba(46, 213, 115, 0.4);
+  border-color: #10b981;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
 }
 
 /* Absent - Orange/Amber */
 .status-toggle-btn.absent {
-  color: #ffa502;
-  border-color: rgba(255, 165, 2, 0.3);
-  background-color: rgba(255, 165, 2, 0.08);
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.45);
+  background-color: rgba(245, 158, 11, 0.12);
+  font-weight: 700;
 }
 
 .status-toggle-btn.absent:hover {
-  background-color: rgba(255, 165, 2, 0.15);
+  background-color: rgba(245, 158, 11, 0.25);
 }
 
 .status-toggle-btn.absent.active {
-  background-color: #ffa502;
+  background-color: #f59e0b;
   color: white;
-  border-color: #ffa502;
-  box-shadow: 0 2px 8px rgba(255, 165, 2, 0.4);
+  border-color: #f59e0b;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
 }
 
 /* Leave - Yellow/Gold */
 .status-toggle-btn.leave-btn {
-  color: #eccc68;
-  border-color: rgba(236, 204, 104, 0.3);
-  background-color: rgba(236, 204, 104, 0.08);
+  color: #d97706;
+  border-color: rgba(217, 119, 6, 0.45);
+  background-color: rgba(217, 119, 6, 0.12);
+  font-weight: 700;
 }
 
 .status-toggle-btn.leave-btn:hover {
-  background-color: rgba(236, 204, 104, 0.15);
+  background-color: rgba(217, 119, 6, 0.25);
 }
 
 .status-toggle-btn.leave-btn.active {
-  background-color: #eccc68;
-  color: #333;
-  border-color: #eccc68;
-  box-shadow: 0 2px 8px rgba(236, 204, 104, 0.4);
+  background-color: #d97706;
+  color: white;
+  border-color: #d97706;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.4);
 }
 
 /* Remarks Input */
