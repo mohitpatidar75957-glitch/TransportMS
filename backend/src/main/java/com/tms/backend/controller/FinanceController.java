@@ -12,7 +12,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/v1/finance")
-@PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'MANAGER', 'CUSTOMER')")
 public class FinanceController {
 
     @Autowired private InvoiceRepository invoiceRepository;
