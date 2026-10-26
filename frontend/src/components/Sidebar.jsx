@@ -6,7 +6,7 @@ import {
   MdTrendingUp, MdAccountBalance, MdLocalGasStation, MdStore, 
   MdInventory, MdEventAvailable, MdPayments, MdGroups, 
   MdFolder, MdAssessment, MdContactMail, MdSettings, MdColorLens, MdClose, MdMap, MdSecurity, MdHistory, MdListAlt,
-  MdSmartphone
+  MdSmartphone, MdAddRoad, MdRoute
 } from 'react-icons/md';
 import { FaWhatsapp } from 'react-icons/fa';
 import './Sidebar.css';
@@ -29,7 +29,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     },
     {
       title: 'New Trip',
-      icon: <MdMap />,
+      icon: <MdAddRoad />,
       path: '/new-trip'
     },
     {
@@ -129,7 +129,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
         {isPathAllowed('/new-trip') && (
           <NavLink to="/new-trip" className={({ isActive }) => isActive ? "menu-item active" : "menu-item"} onClick={handleLinkClick}>
-            <span className="icon"><MdMap /></span>
+            <span className="icon"><MdAddRoad /></span>
             <span className="title">New Trip</span>
           </NavLink>
         )}
