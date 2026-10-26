@@ -13,7 +13,7 @@ import './Sidebar.css';
 import { useAuth } from '../context/AuthContext';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
-  const { userRole, isPathAllowed } = useAuth();
+  const { userRole, isPathAllowed, appBranding } = useAuth();
 
   const handleLinkClick = () => {
     if (isOpen) {
@@ -107,9 +107,9 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             <img src="/logo.png" alt="Transport MS Logo" className="brand-logo-img" />
           </div>
           <div className="logo-text">
-            <h2>Transport MS</h2>
+            <h2>{appBranding?.title || 'TMS by Codervu'}</h2>
             <p style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span>Management</span>
+              <span>{appBranding?.subtitle || 'Management'}</span>
             </p>
           </div>
           <button className="mobile-close-btn" onClick={toggleSidebar}>

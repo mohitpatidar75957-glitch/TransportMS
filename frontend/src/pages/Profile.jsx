@@ -4,8 +4,12 @@ import { useModal } from '../context/ModalContext';
 import './Vehicles.css';
 
 const Profile = () => {
-  const { currentUser, switchRole, userRole } = useAuth();
+  const { currentUser, switchRole, userRole, appBranding, updateAppBranding } = useAuth();
   const { showAlert } = useModal();
+  const [brandingData, setBrandingData] = useState({
+    title: appBranding?.title || 'TMS by Codervu',
+    subtitle: appBranding?.subtitle || 'Management'
+  });
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -20,6 +24,7 @@ const Profile = () => {
   });
   const [loading, setLoading] = useState(false);
 
+  const isSuperAdmin = userRole?.key === 'SUPER_ADMIN' || currentUser?.role === 'SUPER_ADMIN';
   const isCustomer = userRole?.key === 'CUSTOMER' || currentUser?.role === 'CUSTOMER';
 
   useEffect(() => {
@@ -95,6 +100,14 @@ const Profile = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      // If Super Admin, save Application Header Branding
+      if (isSuperAdmin && brandingData.title) {
+        updateAppBranding({
+          title: brandingData.title.trim(),
+          subtitle: (brandingData.subtitle || 'Management').trim()
+        });
+      }
+
       const payload = {
         ...currentUser,
         ...formData
@@ -109,7 +122,7 @@ const Profile = () => {
         body: JSON.stringify(payload)
       });
       if (response.ok) {
-        showAlert('Profile updated successfully!');
+        showAlert('Profile & Application settings updated successfully!');
         // Update local storage context safely
         const updatedUser = await response.json();
         const stored = JSON.parse(localStorage.getItem('userData') || '{}');
@@ -304,6 +317,53 @@ const Profile = () => {
                 />
               </div>
             </div>
+
+            {/* Application Branding (Super Admin Exclusive) */}
+            {isSuperAdmin && (
+              <div style={{ marginBottom: '32px', backgroundColor: 'var(--bg-surface)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <h4 style={{ fontSize: '15px', color: 'var(--text-primary)', fontWeight: 600, margin: '0 0 8px 0' }}>
+                  🚀 Application Header Branding (Sidebar)
+                </h4>
+                <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '0 0 16px 0' }}>
+                  Super Admin control to customize the main title and subtitle displayed at the top of the sidebar.
+                </p>
+
+                <div className="flex-row-responsive" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                  <div className="form-group">
+                    <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500, marginBottom: '6px' }}>
+                      Sidebar Main Title
+                    </label>
+                    <input 
+                      type="text" 
+                      value={brandingData.title} 
+                      onChange={(e) => setBrandingData({ ...brandingData, title: e.target.value })} 
+                      placeholder="e.g. TMS by Codervu"
+                      required
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600', outline: 'none' }}
+                    />
+                    <small style={{ color: '#64748b', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                      Appears in bold at the top of the sidebar next to the logo.
+                    </small>
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500, marginBottom: '6px' }}>
+                      Sidebar Subtitle / Tagline
+                    </label>
+                    <input 
+                      type="text" 
+                      value={brandingData.subtitle} 
+                      onChange={(e) => setBrandingData({ ...brandingData, subtitle: e.target.value })} 
+                      placeholder="e.g. Management"
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none' }}
+                    />
+                    <small style={{ color: '#64748b', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                      Small tagline beneath the main title (e.g. Management, Logistics Hub).
+                    </small>
+                  </div>
+                </div>
+              </div>
+            )}
             
             <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
               <button 

@@ -110,7 +110,21 @@ export const AuthProvider = ({ children }) => {
     }
   });
 
-  const [activeRole, setActiveRole] = useState(ROLES[currentRoleKey] || ROLES.SUPER_ADMIN);
+  const [appBranding, setAppBranding] = useState(() => {
+    try {
+      const stored = localStorage.getItem('tms_app_branding');
+      if (stored) return JSON.parse(stored);
+    } catch (e) {}
+    return { title: 'TMS by Codervu', subtitle: 'Management' };
+  });
+
+  const updateAppBranding = (newBranding) => {
+    const updated = { ...appBranding, ...newBranding };
+    setAppBranding(updated);
+    try {
+      localStorage.setItem('tms_app_branding', JSON.stringify(updated));
+    } catch (e) {}
+  };
 
   useEffect(() => {
     let newActiveRole = { ...(ROLES[currentRoleKey] || ROLES.SUPER_ADMIN) };
@@ -195,6 +209,8 @@ export const AuthProvider = ({ children }) => {
       roleKey: currentRoleKey,
       userRole: activeRole,
       currentUser,
+      appBranding,
+      updateAppBranding,
       switchRole,
       isPathAllowed,
       ROLES
