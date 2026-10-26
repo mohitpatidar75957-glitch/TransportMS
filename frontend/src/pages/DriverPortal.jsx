@@ -634,24 +634,41 @@ const DriverPortal = () => {
 
   // Helper to extract clean city and address
   const getCleanRouteDisplay = () => {
-    if (!selectedTrip) return { origin: '-', destination: '-' };
+    if (!selectedTrip) return { originCity: '-', originAddr: '', destCity: '-', destAddr: '' };
     const routeStr = selectedTrip.route || '';
     const parts = routeStr.split(/→|->|to|-/i);
     const originCity = (parts[0] || '').trim();
     const destCity = (parts.length > 1 ? parts[1] : '').trim();
 
-    const origin = originCity
-      ? `${originCity}${selectedTrip.pickupAddress && !selectedTrip.pickupAddress.toLowerCase().includes(originCity.toLowerCase()) ? ` • ${selectedTrip.pickupAddress}` : ''}`
-      : (selectedTrip.pickupAddress || 'Origin');
+    let originAddr = '';
+    if (selectedTrip.pickupAddress) {
+      const cleanPick = selectedTrip.pickupAddress.trim();
+      if (!originCity || !cleanPick.toLowerCase().includes(originCity.toLowerCase())) {
+        originAddr = cleanPick;
+      } else if (cleanPick.length > originCity.length + 3) {
+        originAddr = cleanPick.replace(new RegExp(originCity, 'ig'), '').replace(/^[\s,•-]+|[\s,•-]+$/g, '').trim();
+      }
+    }
 
-    const destination = destCity
-      ? `${destCity}${selectedTrip.deliveryAddress && !selectedTrip.deliveryAddress.toLowerCase().includes(destCity.toLowerCase()) ? ` • ${selectedTrip.deliveryAddress}` : ''}`
-      : (selectedTrip.deliveryAddress || 'Destination');
+    let destAddr = '';
+    if (selectedTrip.deliveryAddress) {
+      const cleanDeliv = selectedTrip.deliveryAddress.trim();
+      if (!destCity || !cleanDeliv.toLowerCase().includes(destCity.toLowerCase())) {
+        destAddr = cleanDeliv;
+      } else if (cleanDeliv.length > destCity.length + 3) {
+        destAddr = cleanDeliv.replace(new RegExp(destCity, 'ig'), '').replace(/^[\s,•-]+|[\s,•-]+$/g, '').trim();
+      }
+    }
 
-    return { origin, destination };
+    return { 
+      originCity: originCity || selectedTrip.pickupAddress || 'Origin', 
+      originAddr, 
+      destCity: destCity || selectedTrip.deliveryAddress || 'Destination', 
+      destAddr 
+    };
   };
 
-  const { origin: displayOrigin, destination: displayDest } = getCleanRouteDisplay();
+  const { originCity: dispOriginCity, originAddr: dispOriginAddr, destCity: dispDestCity, destAddr: dispDestAddr } = getCleanRouteDisplay();
 
   const getTripStatusLabel = (status) => {
     const s = String(status || '').toLowerCase().trim();
@@ -792,7 +809,10 @@ const DriverPortal = () => {
                 </div>
                 <div className="route-info">
                   <div className="route-label">{t.fromLabel}</div>
-                  <div className="route-value">{displayOrigin}</div>
+                  <div className="route-value">
+                    <span className="route-city">{dispOriginCity}</span>
+                    {dispOriginAddr && <span className="route-sub-addr">{dispOriginAddr}</span>}
+                  </div>
                 </div>
               </div>
 
@@ -806,7 +826,10 @@ const DriverPortal = () => {
                 </div>
                 <div className="route-info">
                   <div className="route-label">{t.toLabel}</div>
-                  <div className="route-value">{displayDest}</div>
+                  <div className="route-value">
+                    <span className="route-city">{dispDestCity}</span>
+                    {dispDestAddr && <span className="route-sub-addr">{dispDestAddr}</span>}
+                  </div>
                 </div>
               </div>
             </div>
