@@ -877,9 +877,7 @@ public class FleetController {
             return ResponseEntity.ok(updated);
         }).orElse(ResponseEntity.notFound().build());
     }
-
     @Autowired private com.tms.backend.repository.TransactionRepository transactionRepository;
-    @Autowired private com.tms.backend.repository.ExpenseRepository expenseRepository;
 
     @PostMapping("/maintenance/{id}/pay")
     public ResponseEntity<VehicleMaintenance> recordMaintenancePayment(
