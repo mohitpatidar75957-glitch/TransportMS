@@ -89,18 +89,6 @@ const Drivers = () => {
 
   return (
     <div className="vehicles-container">
-      {deleteModal.show && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h3>Confirm Delete</h3>
-            <p>Are you sure you want to delete this driver? This action cannot be undone.</p>
-            <div className="modal-actions">
-              <button className="cancel-btn" onClick={() => setDeleteModal({ show: false, id: null, isReal: false, dbId: null })}>Cancel</button>
-              <button className="delete-btn" onClick={confirmDelete}>Delete</button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <div className="page-header">
         <div className="header-text">
