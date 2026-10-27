@@ -16,7 +16,12 @@ import {
   MdNavigation,
   MdLocationPin,
   MdPerson,
-  MdLocalShipping
+  MdLocalShipping,
+  MdLanguage,
+  MdSensors,
+  MdSave,
+  MdWarning,
+  MdRocketLaunch
 } from 'react-icons/md';
 import { 
   getOfflineQueue, 
@@ -714,7 +719,7 @@ const DriverPortal = () => {
               className="lang-switch-btn"
               title="Change Language / भाषा बदलें"
             >
-              <span className="lang-icon">🌐</span>
+              <span className="lang-icon"><MdLanguage size={16} /></span>
               <span className="lang-text">{lang === 'hi' ? 'English' : 'हिंदी'}</span>
             </button>
             
@@ -731,7 +736,7 @@ const DriverPortal = () => {
         {(!isOnline || queueCount > 0) && (
           <div className="offline-alert-banner">
             <div className="offline-alert-content">
-              <span className="offline-icon">📡</span>
+              <span className="offline-icon"><MdSensors size={20} /></span>
               <div>
                 <div className="offline-title">
                   {!isOnline ? t.offlineBannerTitle : `${t.pendingSyncTitle} (${queueCount})`}
@@ -943,7 +948,9 @@ const DriverPortal = () => {
           <div className="driver-modal-overlay" onClick={() => setIsExpenseModalOpen(false)}>
             <div className="driver-modal-sheet" onClick={e => e.stopPropagation()}>
               <div className="modal-sheet-header">
-                <span className="modal-sheet-title">⛽ {t.modalExpenseTitle}</span>
+                <span className="modal-sheet-title" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <MdLocalGasStation size={20} color="#f97316" /> {t.modalExpenseTitle}
+                </span>
                 <button 
                   type="button"
                   className="close-modal-btn" 
@@ -964,7 +971,7 @@ const DriverPortal = () => {
                   alignItems: 'flex-start',
                   gap: '10px'
                 }}>
-                  <span style={{ fontSize: '20px' }}>🚨</span>
+                  <span style={{ display: 'flex', alignItems: 'center' }}><MdWarning size={22} color="#ef4444" /></span>
                   <div>
                     <div style={{ color: '#ef4444', fontWeight: 'bold', fontSize: '13px' }}>
                       चेतावनी: असामान्य खर्च (High Expense Spike)
@@ -1037,8 +1044,8 @@ const DriverPortal = () => {
                   >
                     {t.modalCancel}
                   </button>
-                  <button type="submit" className="modal-action-btn submit-orange">
-                    💾 {t.saveExpenseBtn}
+                  <button type="submit" className="modal-action-btn submit-orange" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                    <MdSave size={18} /> {t.saveExpenseBtn}
                   </button>
                 </div>
               </form>
@@ -1051,7 +1058,9 @@ const DriverPortal = () => {
           <div className="driver-modal-overlay" onClick={() => setIsPodModalOpen(false)}>
             <div className="driver-modal-sheet" onClick={e => e.stopPropagation()}>
               <div className="modal-sheet-header">
-                <span className="modal-sheet-title">📸 {t.modalPodTitle}</span>
+                <span className="modal-sheet-title" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <MdCameraAlt size={20} color="#a855f7" /> {t.modalPodTitle}
+                </span>
                 <button 
                   type="button"
                   className="close-modal-btn" 
@@ -1082,8 +1091,9 @@ const DriverPortal = () => {
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
                       className="retake-photo-btn"
+                      style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                     >
-                      🔄 {t.retakePhoto}
+                      <MdRefresh size={18} /> {t.retakePhoto}
                     </button>
                   </div>
                 ) : (
@@ -1113,8 +1123,9 @@ const DriverPortal = () => {
                   className="modal-action-btn submit-purple"
                   disabled={!podPreview}
                   onClick={submitPodPhoto}
+                  style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                 >
-                  🚀 {t.uploadPodBtn}
+                  <MdRocketLaunch size={18} /> {t.uploadPodBtn}
                 </button>
               </div>
             </div>
@@ -1126,7 +1137,9 @@ const DriverPortal = () => {
           <div className="driver-modal-overlay" onClick={() => setIsReachModalOpen(false)}>
             <div className="driver-modal-sheet reach-confirm-sheet" onClick={e => e.stopPropagation()}>
               <div className="modal-sheet-header">
-                <span className="modal-sheet-title">🏁 {t.modalReachTitle}</span>
+                <span className="modal-sheet-title" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <MdCheckCircle size={20} color="#10b981" /> {t.modalReachTitle}
+                </span>
                 <button 
                   type="button"
                   className="close-modal-btn" 
@@ -1158,7 +1171,7 @@ const DriverPortal = () => {
                   onClick={handleReached}
                   className="modal-action-btn submit-green"
                 >
-                  ✅ {t.modalConfirmDelivery}
+                  <MdCheck size={18} /> {t.modalConfirmDelivery}
                 </button>
               </div>
             </div>

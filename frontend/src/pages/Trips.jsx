@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MdAdd, MdSearch, MdVisibility, MdEdit, MdDelete, MdFileDownload } from 'react-icons/md';
+import { MdAdd, MdSearch, MdVisibility, MdEdit, MdDelete, MdFileDownload, MdLanguage, MdMic, MdStop, MdSend, MdLocalShipping } from 'react-icons/md';
 import './Vehicles.css'; // Reusing common table styles
 import { useModal } from '../context/ModalContext';
 import { useAuth } from '../context/AuthContext';
@@ -127,7 +127,7 @@ const Trips = () => {
               fontWeight: 'bold'
             }}
           >
-            <span style={{ fontSize: '18px' }}>🌐</span> {lang === 'en' ? 'English' : 'हिंदी'}
+            <MdLanguage size={18} /> {lang === 'en' ? 'English' : 'हिंदी'}
           </button>
         </div>
       )}
@@ -209,7 +209,7 @@ const Trips = () => {
                 {/* Voice Notes Feature for Driver directly on the card */}
                 <div style={{ background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                    <span style={{ color: 'white', fontSize: '14px', fontWeight: 'bold' }}>🎙️ {lang === 'hi' ? 'बोल कर नोट्स लिखें' : 'Voice Notes'}</span>
+                    <span style={{ color: 'white', fontSize: '14px', fontWeight: 'bold' }}><span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><MdMic size={16} /> {lang === 'hi' ? 'बोल कर नोट्स लिखें' : 'Voice Notes'}</span></span>
                   </div>
                   {t.notes && (
                     <div style={{ padding: '10px', background: 'rgba(255,255,255,0.1)', borderRadius: '8px', marginBottom: '10px', fontSize: '13px', whiteSpace: 'pre-wrap', color: '#e0e0e0' }}>
@@ -273,7 +273,7 @@ const Trips = () => {
                         }
                       }}
                     >
-                      {recordingId === t.id ? (lang === 'hi' ? '⏹ रोकें' : '⏹ Stop') : (lang === 'hi' ? '🎤 रिकॉर्ड करें' : '🎤 Record')}
+                      {recordingId === t.id ? <><MdStop size={16} /> {lang === 'hi' ? 'रोकें' : 'Stop'}</> : <><MdMic size={16} /> {lang === 'hi' ? 'रिकॉर्ड करें' : 'Record'}</>}
                     </button>
                     <button 
                       style={{ flex: 1, backgroundColor: '#27ae60', padding: '12px', color: 'white', border: 'none', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontWeight: 'bold' }}
@@ -303,7 +303,7 @@ const Trips = () => {
                         }
                       }}
                     >
-                      📤 {lang === 'hi' ? 'भेजें' : 'Send'}
+                      <><MdSend size={16} /> {lang === 'hi' ? 'भेजें' : 'Send'}</>
                     </button>
                   </div>
                 </div>

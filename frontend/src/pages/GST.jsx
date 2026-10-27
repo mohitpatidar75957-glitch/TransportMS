@@ -411,7 +411,7 @@ const GST = () => {
 
               {computedResult.isRcm ? (
                 <div style={{ backgroundColor: 'rgba(255, 171, 0, 0.1)', color: '#ffab00', padding: '10px', borderRadius: '6px', fontSize: '0.85rem' }}>
-                  ⚠️ <strong>RCM Active:</strong> Invoice tax is ₹0. Receiver pays tax directly to Govt under Sec 9(3).
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdWarning color="#f59e0b" size={16} /> <strong>RCM Active:</strong></span> Invoice tax is ₹0. Receiver pays tax directly to Govt under Sec 9(3).
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.9rem' }}>
@@ -481,7 +481,7 @@ const GST = () => {
             color: 'var(--text-secondary)',
             fontSize: '0.9rem'
           }}>
-            💡 <strong>State-wise GST & TDS Calculator ready:</strong> Select Consignor & Consignee States and enter Freight Amount above to see live IGST / CGST+SGST breakdown, RCM applicability, and Sec 194C TDS deductions.
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdLightbulb color="#f59e0b" size={16} /> <strong>State-wise GST & TDS Calculator ready:</strong></span> Select Consignor & Consignee States and enter Freight Amount above to see live IGST / CGST+SGST breakdown, RCM applicability, and Sec 194C TDS deductions.
           </div>
         )}
       </div>

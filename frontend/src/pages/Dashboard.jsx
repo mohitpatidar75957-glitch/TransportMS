@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { MdAddCircle, MdLocalShipping, MdPerson, MdWarning, MdCheckCircle } from 'react-icons/md';
 import CustomerDashboard from './CustomerDashboard';
 import './Dashboard.css';
 
@@ -325,16 +326,16 @@ const Dashboard = () => {
           <div className="panel quick-tools">
             <h3>{isManager ? 'Manager Quick Tools' : 'Admin Quick Tools'}</h3>
             <ul className="tools-list" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <li><button className="tool-btn" onClick={() => navigate('/new-trip')} style={{ width: '100%', textAlign: 'left', padding: '12px 16px', display: 'flex', gap: '8px', alignItems: 'center' }}><span>➕</span> Add New Trip</button></li>
-              <li><button className="tool-btn" onClick={() => navigate('/vehicles/create')} style={{ width: '100%', textAlign: 'left', padding: '12px 16px', display: 'flex', gap: '8px', alignItems: 'center' }}><span>🚛</span> Add Vehicle</button></li>
-              <li><button className="tool-btn" onClick={() => navigate('/drivers/create')} style={{ width: '100%', textAlign: 'left', padding: '12px 16px', display: 'flex', gap: '8px', alignItems: 'center' }}><span>👨‍✈️</span> Add Driver</button></li>
+              <li><button className="tool-btn" onClick={() => navigate('/new-trip')} style={{ width: '100%', textAlign: 'left', padding: '12px 16px', display: 'flex', gap: '8px', alignItems: 'center' }}><MdAddCircle size={18} color="#3b82f6" /> Add New Trip</button></li>
+              <li><button className="tool-btn" onClick={() => navigate('/vehicles/create')} style={{ width: '100%', textAlign: 'left', padding: '12px 16px', display: 'flex', gap: '8px', alignItems: 'center' }}><MdLocalShipping size={18} color="#10b981" /> Add Vehicle</button></li>
+              <li><button className="tool-btn" onClick={() => navigate('/drivers/create')} style={{ width: '100%', textAlign: 'left', padding: '12px 16px', display: 'flex', gap: '8px', alignItems: 'center' }}><MdPerson size={18} color="#8b5cf6" /> Add Driver</button></li>
             </ul>
           </div>
 
           <div className="panel alerts">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
               <h3 style={{ margin: 0 }}>
-                {alerts.length > 0 ? '⚠️ Document Alerts' : '📋 Document Status'}
+                {alerts.length > 0 ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><MdWarning color="#ef4444" /> Document Alerts</span> : <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><MdCheckCircle color="#10b981" /> Document Status</span>}
               </h3>
               {alerts.length > 0 && (
                 <span style={{ 
@@ -350,7 +351,7 @@ const Dashboard = () => {
               )}
             </div>
             {alerts.length === 0 ? (
-              <p style={{ color: '#64748b', fontSize: '13px' }}>✅ All vehicle & driver documents are up to date.</p>
+              <p style={{ color: '#64748b', fontSize: '13px' }}><span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><MdCheckCircle color="#10b981" /> All vehicle & driver documents are up to date.</span></p>
             ) : (
               <ul className="alerts-list" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '320px', overflowY: 'auto' }}>
                 {alerts.map((alert, idx) => (

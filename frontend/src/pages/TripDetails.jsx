@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MdEdit, MdDelete, MdAdd, MdVisibility, MdClose, MdFileDownload } from 'react-icons/md';
+import { MdEdit, MdDelete, MdAdd, MdVisibility, MdClose, MdFileDownload, MdDescription, MdLocalShipping, MdFlashOn, MdMic } from 'react-icons/md';
 import { useModal } from '../context/ModalContext';
 import { useAuth } from '../context/AuthContext';
 import './VehicleDetails.css';
@@ -328,7 +328,7 @@ const TripDetails = () => {
         <div className="modal-overlay" onClick={() => setShowPodUploadModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '480px', width: '92%' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ margin: 0, fontSize: '18px' }}>📄 Upload POD & Delivery Settlement</h3>
+              <h3 style={{ margin: 0, fontSize: '18px' }}><span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><MdDescription size={20} color="#3b82f6" /> Upload POD & Delivery Settlement</span></h3>
               <button className="icon-btn" onClick={() => setShowPodUploadModal(false)}><MdClose size={22} /></button>
             </div>
             
@@ -472,7 +472,7 @@ const TripDetails = () => {
           flexWrap: 'wrap'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: '200px' }}>
-            <span style={{ fontSize: '1.4rem' }}>📜</span>
+            <MdDescription size={24} color="#2ecc71" />
             <div>
               <strong style={{ color: '#2ecc71', fontSize: '0.95rem' }}>LR / Bilty:</strong>{' '}
               <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '1.05rem', marginLeft: '4px' }}>
@@ -502,7 +502,7 @@ const TripDetails = () => {
           flexWrap: 'wrap'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: '220px' }}>
-            <span style={{ fontSize: '1.4rem' }}>🚚</span>
+            <MdLocalShipping size={24} color="#e67e22" />
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                 <strong style={{ color: '#e67e22', fontSize: '0.92rem' }}>E-Way Bill:</strong>
@@ -567,7 +567,7 @@ const TripDetails = () => {
                 whiteSpace: 'nowrap' 
               }}
             >
-              ⚡ 1-Click Generate
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdFlashOn size={16} /> 1-Click Generate</span>
             </button>
             <button 
               onClick={handleDownloadEwayJson}
@@ -706,7 +706,7 @@ const TripDetails = () => {
           {roleKey !== 'CUSTOMER' && (
           <div className="panel" style={{ padding: '20px', background: 'rgba(230, 126, 34, 0.05)', border: '1px solid rgba(230, 126, 34, 0.2)' }}>
             <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: '#e67e22' }}>
-              <span>🎙️ Driver & Admin Notes</span>
+              <span><span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><MdMic size={18} color="#e67e22" /> Driver & Admin Notes</span></span>
               {(roleKey === 'ADMIN' || roleKey === 'SUPER_ADMIN') && (
                 <button 
                   style={{ background: 'transparent', border: 'none', color: '#e74c3c', cursor: 'pointer', fontSize: '12px', textDecoration: 'underline' }}

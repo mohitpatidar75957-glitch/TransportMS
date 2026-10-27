@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { MdRocketLaunch } from 'react-icons/md';
 import { useAuth } from '../context/AuthContext';
 import { useModal } from '../context/ModalContext';
 import './Vehicles.css';
@@ -322,7 +323,7 @@ const Profile = () => {
             {isSuperAdmin && (
               <div style={{ marginBottom: '32px', backgroundColor: 'var(--bg-surface)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
                 <h4 style={{ fontSize: '15px', color: 'var(--text-primary)', fontWeight: 600, margin: '0 0 8px 0' }}>
-                  🚀 Application Header Branding (Sidebar)
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><MdRocketLaunch size={18} color="#3b82f6" /> Application Header Branding (Sidebar)</span>
                 </h4>
                 <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '0 0 16px 0' }}>
                   Super Admin control to customize the main title and subtitle displayed at the top of the sidebar.

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MdMyLocation, MdDirectionsCar, MdRefresh, MdFullscreen, MdShare } from 'react-icons/md';
+import { MdMyLocation, MdDirectionsCar, MdRefresh, MdFullscreen, MdShare, MdVpnKey, MdSensors, MdLocalShipping, MdChat } from 'react-icons/md';
 import { MapContainer, TileLayer, Marker, Popup, Circle, Polyline } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -306,7 +306,7 @@ const LiveTracking = () => {
                 cursor: 'pointer'
               }}
             >
-              🔑 {cartoKey ? 'CARTO Key Set' : 'Add CARTO Key'}
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdVpnKey /> {cartoKey ? 'CARTO Key Set' : 'Add CARTO Key'}</span>
             </button>
           )}
 
@@ -435,7 +435,7 @@ const LiveTracking = () => {
                       <Popup>
                         <div style={{ padding: '6px', minWidth: '180px' }}>
                           <strong style={{ fontSize: '14px', color: '#0f172a', display: 'block', marginBottom: '4px' }}>
-                            🚛 {s.vehicleId}
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdLocalShipping size={16} /> {s.vehicleId}</span>
                           </strong>
                           <div style={{ fontSize: '12px', color: '#475569', lineHeight: 1.5 }}>
                             <div><strong>Driver:</strong> {s.driverName || 'N/A'}</div>
@@ -488,7 +488,7 @@ const LiveTracking = () => {
             color: 'var(--text-primary)'
           }}>
             <h3 style={{ marginTop: 0, fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              📡 Share Live Tracking Link
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><MdSensors /> Share Live Tracking Link</span>
             </h3>
             <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '20px' }}>
               Select the vehicle and driver to generate a real-time GPS tracking session link. You can send this link to the driver on WhatsApp.
@@ -613,7 +613,7 @@ const LiveTracking = () => {
                       fontSize: '14px'
                     }}
                   >
-                    💬 Share via WhatsApp
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><MdChat size={18} /> Share via WhatsApp</span>
                   </a>
                   <button 
                     onClick={() => setShowStartModal(false)} 
@@ -645,7 +645,7 @@ const LiveTracking = () => {
         }}>
           <div className="panel" style={{ width: '460px', maxWidth: '92%', borderRadius: '14px', padding: '24px', boxShadow: '0 20px 40px rgba(0,0,0,0.3)' }}>
             <h3 style={{ marginTop: 0, display: 'flex', alignItems: 'center', gap: '8px', fontSize: '18px' }}>
-              🔑 Enter CARTO API Key
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><MdVpnKey size={20} color="#f59e0b" /> Enter CARTO API Key</span>
             </h3>
             <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '16px' }}>
               CARTO maps ke tiles se watermark hatane ke liye apni API Key paste karein. Agar key nahi hai toh aap upar se <b>OpenStreetMap</b> select kar sakte hain jo bilkul free aur bina key ke chalta hai.
