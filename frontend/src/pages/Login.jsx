@@ -184,14 +184,13 @@ const Login = () => {
             </div>
 
             <h1 className="brand-title">
-              {appBranding?.title ? (
-                appBranding.title
-              ) : (
-                <>Transport<span className="brand-highlight">MS</span></>
-              )}
+              {appBranding?.title || 'TMS'}
             </h1>
+            {appBranding?.subtitle && (
+              <span className="brand-byline">{appBranding.subtitle}</span>
+            )}
             <p className="brand-tagline">
-              {appBranding?.subtitle || 'Fleet & Transport Management System'}
+              Fleet & Transport Management System
             </p>
 
             <div className="brand-divider"></div>

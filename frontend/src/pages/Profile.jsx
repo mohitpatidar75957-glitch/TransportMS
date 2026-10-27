@@ -7,8 +7,8 @@ const Profile = () => {
   const { currentUser, switchRole, userRole, appBranding, updateAppBranding } = useAuth();
   const { showAlert } = useModal();
   const [brandingData, setBrandingData] = useState({
-    title: appBranding?.title || 'TMS by Codervu',
-    subtitle: appBranding?.subtitle || ''
+    title: appBranding?.title || 'TMS',
+    subtitle: appBranding?.subtitle || 'by Codervu'
   });
   const [formData, setFormData] = useState({
     name: '',
