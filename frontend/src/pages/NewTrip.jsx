@@ -1456,16 +1456,40 @@ const NewTrip = () => {
             )}
 
             <div className="vehicle-info-grid">
-              <div className="form-group" data-field="manualFreightRate" style={{ gridColumn: '1 / -1', background: 'rgba(9, 132, 227, 0.1)', padding: '14px', borderRadius: '10px', border: errors.manualFreightRate ? '1.5px solid #ff4757' : '1px solid rgba(9, 132, 227, 0.35)' }}>
-                <label style={{ color: '#74b9ff', fontWeight: '700', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <MdAccountBalanceWallet size={18} color="#38bdf8" /> Freight Rate / Expected Earnings (₹)
+              <div className="form-group" data-field="manualFreightRate" style={{ gridColumn: '1 / -1', background: 'var(--bg-surface, #f8fafc)', padding: '16px', borderRadius: '10px', border: errors.manualFreightRate ? '1.5px solid #ef4444' : '1px solid var(--border-color, #e2e8f0)' }}>
+                <label style={{ color: 'var(--text-primary, #0f172a)', fontWeight: '700', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <MdAccountBalanceWallet size={18} color="#2563eb" /> Freight Rate / Expected Earnings (₹)
                 </label>
                 <input 
                   type="number" 
+                  min="0"
+                  step="any"
                   placeholder="₹ 0.00" 
                   value={manualFreightRate} 
-                  onChange={e => { setManualFreightRate(e.target.value); validateField('manualFreightRate', e.target.value); }} 
-                  style={{ backgroundColor: 'rgba(0,0,0,0.3)', border: errors.manualFreightRate ? '1.5px solid #ff4757' : '1px solid #0984e3', color: '#fff', fontSize: '1.05rem', fontWeight: 'bold', marginTop: '6px' }}
+                  onKeyDown={e => {
+                    // Prevent exponent 'e', 'E', minus '-', and plus '+'
+                    if (['e', 'E', '-', '+'].includes(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
+                  onChange={e => {
+                    const rawVal = e.target.value;
+                    // If user tries to paste negative or invalid numbers, block it
+                    if (rawVal.includes('-')) return;
+                    setManualFreightRate(rawVal);
+                    validateField('manualFreightRate', rawVal);
+                  }} 
+                  style={{ 
+                    backgroundColor: 'var(--bg-secondary, #ffffff)', 
+                    border: errors.manualFreightRate ? '2px solid #ef4444' : '1.5px solid #3b82f6', 
+                    color: 'var(--text-primary, #0f172a)', 
+                    fontSize: '1.1rem', 
+                    fontWeight: '700', 
+                    marginTop: '6px',
+                    padding: '10px 14px',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.06)'
+                  }}
                 />
                 {errors.manualFreightRate ? (
                   <div className="error-text" style={{ color: '#ff4757', fontSize: '0.85rem', marginTop: '6px', fontWeight: '600' }}>
@@ -1635,8 +1659,16 @@ const NewTrip = () => {
                 <label>Avg Fuel Price (₹ / L)</label>
                 <input 
                   type="number" 
+                  min="0"
+                  step="any"
                   value={fuelPrice} 
-                  onChange={e => { setFuelPrice(e.target.value); validateField('fuelPrice', e.target.value); }} 
+                  onKeyDown={e => { if (['e', 'E', '-', '+'].includes(e.key)) e.preventDefault(); }}
+                  onChange={e => { 
+                    const v = e.target.value; 
+                    if (v.includes('-')) return; 
+                    setFuelPrice(v); 
+                    validateField('fuelPrice', v); 
+                  }} 
                   style={errors.fuelPrice ? { border: '1.5px solid #ff4757' } : {}}
                 />
                 {errors.fuelPrice && <div className="error-text" style={{ color: '#ff4757', fontSize: '0.85rem', marginTop: '4px', fontWeight: '600' }}>{errors.fuelPrice}</div>}
@@ -1646,9 +1678,16 @@ const NewTrip = () => {
                 <label>Vehicle Mileage (KM / L)</label>
                 <input 
                   type="number" 
+                  min="0"
                   step="0.1" 
                   value={mileage} 
-                  onChange={e => { setMileage(e.target.value); validateField('mileage', e.target.value); }} 
+                  onKeyDown={e => { if (['e', 'E', '-', '+'].includes(e.key)) e.preventDefault(); }}
+                  onChange={e => { 
+                    const v = e.target.value; 
+                    if (v.includes('-')) return; 
+                    setMileage(v); 
+                    validateField('mileage', v); 
+                  }} 
                   style={errors.mileage ? { border: '1.5px solid #ff4757' } : {}}
                 />
                 {errors.mileage && <div className="error-text" style={{ color: '#ff4757', fontSize: '0.85rem', marginTop: '4px', fontWeight: '600' }}>{errors.mileage}</div>}
@@ -1656,23 +1695,54 @@ const NewTrip = () => {
 
               <div className="form-group">
                 <label>Driver Expense (₹)</label>
-                <input type="number" value={driverExpense} onChange={e => setDriverExpense(e.target.value)} />
+                <input 
+                  type="number" 
+                  min="0" 
+                  value={driverExpense} 
+                  onKeyDown={e => { if (['e', 'E', '-', '+'].includes(e.key)) e.preventDefault(); }}
+                  onChange={e => { if (!e.target.value.includes('-')) setDriverExpense(e.target.value); }} 
+                />
               </div>
               <div className="form-group">
                 <label>Food Expense (₹)</label>
-                <input type="number" value={foodExpense} onChange={e => setFoodExpense(e.target.value)} />
+                <input 
+                  type="number" 
+                  min="0" 
+                  value={foodExpense} 
+                  onKeyDown={e => { if (['e', 'E', '-', '+'].includes(e.key)) e.preventDefault(); }}
+                  onChange={e => { if (!e.target.value.includes('-')) setFoodExpense(e.target.value); }} 
+                />
               </div>
               <div className="form-group">
                 <label>Parking Expense (₹)</label>
-                <input type="number" value={parkingExpense} onChange={e => setParkingExpense(e.target.value)} />
+                <input 
+                  type="number" 
+                  min="0" 
+                  value={parkingExpense} 
+                  onKeyDown={e => { if (['e', 'E', '-', '+'].includes(e.key)) e.preventDefault(); }}
+                  onChange={e => { if (!e.target.value.includes('-')) setParkingExpense(e.target.value); }} 
+                />
               </div>
               <div className="form-group">
                 <label>Other Expense (₹)</label>
-                <input type="number" value={otherExpense} onChange={e => setOtherExpense(e.target.value)} />
+                <input 
+                  type="number" 
+                  min="0" 
+                  value={otherExpense} 
+                  onKeyDown={e => { if (['e', 'E', '-', '+'].includes(e.key)) e.preventDefault(); }}
+                  onChange={e => { if (!e.target.value.includes('-')) setOtherExpense(e.target.value); }} 
+                />
               </div>
               <div className="form-group" style={{ gridColumn: '1 / -1' }}>
                 <label>Advance Received (₹)</label>
-                <input type="number" placeholder="Enter advance amount" value={advanceAmount} onChange={e => setAdvanceAmount(e.target.value)} />
+                <input 
+                  type="number" 
+                  min="0" 
+                  placeholder="Enter advance amount" 
+                  value={advanceAmount} 
+                  onKeyDown={e => { if (['e', 'E', '-', '+'].includes(e.key)) e.preventDefault(); }}
+                  onChange={e => { if (!e.target.value.includes('-')) setAdvanceAmount(e.target.value); }} 
+                />
               </div>
             </div>
           </div>
