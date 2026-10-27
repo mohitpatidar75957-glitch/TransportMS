@@ -3,7 +3,7 @@
 .driver-portal-wrapper {
   width: 100%;
   box-sizing: border-box;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: var(--text-primary);
 }
 
@@ -108,63 +108,76 @@
 .lang-switch-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  color: var(--text-primary);
-  padding: 6px 14px;
-  border-radius: var(--btn-radius);
-  font-size: 0.8125rem;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #1e293b;
+  padding: 7px 16px;
+  border-radius: 10px;
+  font-size: 0.84rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
 }
 
 .lang-switch-btn:hover {
-  background-color: var(--hover-color);
-  border-color: var(--border-subtle);
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+}
+
+.lang-switch-btn:active {
+  transform: translateY(0);
 }
 
 .lang-icon {
-  font-size: 14px;
+  font-size: 15px;
+  line-height: 1;
 }
 
 .driver-status-badge {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 6px 14px;
-  border-radius: var(--btn-radius);
-  font-size: 0.75rem;
+  gap: 8px;
+  padding: 7px 16px;
+  border-radius: 10px;
+  font-size: 0.78rem;
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
   text-transform: uppercase;
+  font-family: inherit;
+  transition: all 0.2s ease;
 }
 
 .driver-status-badge.online {
-  background: var(--success-bg);
-  color: var(--success-text);
-  border: 1px solid var(--success-border);
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+  box-shadow: 0 1px 3px rgba(5, 150, 105, 0.08);
 }
 
 .status-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #22c55e;
-  box-shadow: 0 0 10px #22c55e;
+  background: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
   animation: pulseGreen 2s infinite;
 }
 
 .driver-status-badge.offline {
-  background: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.4);
+  background: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+  box-shadow: 0 1px 3px rgba(217, 119, 6, 0.08);
 }
 
 .driver-status-badge.offline .status-dot {
   background: #f59e0b;
-  box-shadow: 0 0 10px #f59e0b;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
   animation: none;
 }
 
@@ -277,23 +290,32 @@
 }
 
 .refresh-trips-btn {
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  color: var(--text-primary);
-  font-size: 0.75rem;
-  font-weight: 600;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #2563eb;
+  font-size: 0.8rem;
+  font-weight: 700;
   padding: 6px 14px;
-  border-radius: var(--btn-radius);
+  border-radius: 9px;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
 }
 
 .refresh-trips-btn:hover {
-  background-color: var(--hover-color);
-  border-color: var(--border-subtle);
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(37, 99, 235, 0.12);
+}
+
+.refresh-trips-btn:active {
+  transform: translateY(0);
 }
 
 .trip-select-dropdown {
@@ -367,30 +389,34 @@
 }
 
 .trip-status-pill {
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  padding: 4px 12px;
+  padding: 5px 14px;
   border-radius: 20px;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .trip-status-pill.intransit {
-  background: var(--success-bg);
-  color: var(--success-text);
-  border: 1px solid var(--success-border);
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
 }
 
 .trip-status-pill.completed {
-  background: var(--info-bg);
-  color: var(--info-text);
-  border: 1px solid var(--info-border);
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
 }
 
 .trip-status-pill.scheduled {
-  background: var(--bg-surface);
-  color: var(--text-secondary);
-  border: 1px solid var(--border-color);
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #cbd5e1;
 }
 
 /* ROUTE TIMELINE */
