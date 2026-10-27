@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/fleet")
@@ -761,6 +762,7 @@ public class FleetController {
                     if (routeParts.length > 1) {
                         lr.setToLocation(routeParts[1].trim());
                     }
+                }
                 if (savedTrip.getEwayBillNumber() != null && !savedTrip.getEwayBillNumber().isBlank()) {
                     lr.setEwayBillNumber(savedTrip.getEwayBillNumber());
                 }
