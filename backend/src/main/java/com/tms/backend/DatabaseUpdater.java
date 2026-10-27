@@ -97,8 +97,29 @@ public class DatabaseUpdater {
             jdbcTemplate.execute("UPDATE lr_bilty l JOIN trips t ON (l.lr_number LIKE CONCAT('%', t.trip_number, '%') OR l.lr_number LIKE CONCAT('%', t.id, '%')) SET l.trip_id = t.id WHERE l.trip_id IS NULL");
             jdbcTemplate.execute("UPDATE lr_bilty SET trip_id = 1 WHERE trip_id IS NULL");
             System.out.println("Successfully auto-linked LR records to Trips!");
+        } catch (Exception e) {}
+
+        try {
+            // Clean demo typos (matrial box -> Material Box, abit sahu -> Amit Sahu, punjab -> Pune)
+            jdbcTemplate.execute("UPDATE trips SET client_name = 'Amit Sahu' WHERE LOWER(client_name) LIKE '%abit sahu%'");
+            jdbcTemplate.execute("UPDATE trips SET goods_type = 'Material Box' WHERE LOWER(goods_type) LIKE '%matrial box%'");
+            jdbcTemplate.execute("UPDATE trips SET route = 'Indore ➔ Pune' WHERE LOWER(route) LIKE '%punjab%'");
+            jdbcTemplate.execute("UPDATE trips SET delivery_address = 'Pune' WHERE LOWER(delivery_address) LIKE '%punjab%'");
+
+            jdbcTemplate.execute("UPDATE orders SET customer_name = 'Amit Sahu' WHERE LOWER(customer_name) LIKE '%abit sahu%'");
+            jdbcTemplate.execute("UPDATE orders SET cargo_details = 'Material Box' WHERE LOWER(cargo_details) LIKE '%matrial box%'");
+
+            jdbcTemplate.execute("UPDATE lr_bilty SET consignor = 'Amit Sahu' WHERE LOWER(consignor) LIKE '%abit sahu%'");
+            jdbcTemplate.execute("UPDATE lr_bilty SET material_description = 'Material Box' WHERE LOWER(material_description) LIKE '%matrial box%'");
+            jdbcTemplate.execute("UPDATE lr_bilty SET to_location = 'Pune' WHERE LOWER(to_location) LIKE '%punjab%'");
+
+            jdbcTemplate.execute("UPDATE gst_invoices SET client = 'Amit Sahu' WHERE LOWER(client) LIKE '%abit sahu%'");
+
+            // Standardize vehicle ownership RK -> R.K. TRADERS & LOGISTICS
+            jdbcTemplate.execute("UPDATE vehicles SET ownership = 'R.K. TRADERS & LOGISTICS' WHERE ownership = 'RK' OR ownership IS NULL OR ownership = ''");
+            System.out.println("Successfully cleaned demo typos (Amit Sahu, Material Box, Pune) and updated vehicle ownership to R.K. TRADERS & LOGISTICS!");
         } catch (Exception e) {
-            System.out.println("Notice linking LR to Trips: " + e.getMessage());
+            System.out.println("Notice cleaning demo typos: " + e.getMessage());
         }
 
 

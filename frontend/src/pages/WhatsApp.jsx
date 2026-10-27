@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { FaWhatsapp, FaCheckCircle, FaRobot, FaHistory, FaCheckDouble, FaPaperPlane } from 'react-icons/fa';
-import { MdEdit, MdToggleOn, MdToggleOff } from 'react-icons/md';
+import { FaWhatsapp } from 'react-icons/fa';
+import { 
+  MdEdit, 
+  MdToggleOn, 
+  MdToggleOff, 
+  MdAutoMode, 
+  MdManageHistory, 
+  MdScheduleSend, 
+  MdSend, 
+  MdCheckCircle, 
+  MdDoneAll 
+} from 'react-icons/md';
 import './WhatsApp.css';
 import { useModal } from '../context/ModalContext';
 
@@ -126,7 +136,7 @@ const WhatsApp = () => {
             </div>
             <div>
               <h3>WhatsApp Business API</h3>
-              <p className="status-active"><FaCheckCircle /> Connected successfully</p>
+              <p className="status-active"><MdCheckCircle size={16} /> Connected successfully</p>
             </div>
           </div>
           <div className="status-details">
@@ -149,14 +159,14 @@ const WhatsApp = () => {
         <div className="wa-quick-actions">
           <div className="action-card">
             <div className="action-icon" style={{ backgroundColor: 'rgba(9, 132, 227, 0.1)', color: '#0984e3' }}>
-              <FaRobot size={24} />
+              <MdAutoMode size={26} />
             </div>
             <h4>Automated Rules</h4>
             <p>Configure trigger-based messages</p>
           </div>
           <div className="action-card">
             <div className="action-icon" style={{ backgroundColor: 'rgba(253, 160, 133, 0.1)', color: '#fda085' }}>
-              <FaHistory size={24} />
+              <MdManageHistory size={26} />
             </div>
             <h4>Message Logs</h4>
             <p>View history and delivery status</p>
@@ -186,9 +196,11 @@ const WhatsApp = () => {
                 }
               }}
             >
-              <FaRobot size={15} /> Run Auto Reminders (3-Day / Due / Overdue)
+              <MdScheduleSend size={18} /> Run Auto Reminders (3-Day / Due / Overdue)
             </button>
-            <button className="btn-primary" onClick={() => setIsTemplateModalOpen(true)}>Send Invoice Reminder</button>
+            <button className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }} onClick={() => setIsTemplateModalOpen(true)}>
+              <MdSend size={16} /> Send Invoice Reminder
+            </button>
           </div>
         </div>
         
@@ -198,7 +210,7 @@ const WhatsApp = () => {
               <div className="template-header">
                 <h3>{template.name}</h3>
                 <div className="template-actions">
-                  <button className="icon-btn" onClick={() => handleOpenSimulateModal(template.name)} title="Simulate Send"><FaPaperPlane size={14} /></button>
+                  <button className="icon-btn" onClick={() => handleOpenSimulateModal(template.name)} title="Simulate Send"><MdSend size={16} /></button>
                   <button className="icon-btn"><MdEdit size={18} /></button>
                   <button className="icon-btn toggle-btn" onClick={() => toggleTemplate(template.id)}>
                     {template.active ? <MdToggleOn size={28} color="#20c997" /> : <MdToggleOff size={28} color="#636e72" />}
@@ -241,8 +253,8 @@ const WhatsApp = () => {
                   <td>{new Date(log.sentAt).toLocaleString()}</td>
                   <td>
                     <span className={`wa-status ${log.status ? log.status.toLowerCase() : ''}`}>
-                      {log.status === 'Read' && <FaCheckDouble color="#34B7F1" style={{marginRight:'6px'}}/>}
-                      {log.status === 'Delivered' && <FaCheckDouble color="#b2bec3" style={{marginRight:'6px'}}/>}
+                      {log.status === 'Read' && <MdDoneAll size={16} color="#34B7F1" style={{marginRight:'6px'}}/>}
+                      {log.status === 'Delivered' && <MdDoneAll size={16} color="#b2bec3" style={{marginRight:'6px'}}/>}
                       {log.status}
                     </span>
                   </td>
@@ -331,8 +343,8 @@ const WhatsApp = () => {
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn-secondary" onClick={() => setIsTemplateModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn-primary" style={{ backgroundColor: '#25D366', color: 'white' }}>
-                  <FaPaperPlane style={{ marginRight: '8px' }} /> Send Message
+                <button type="submit" className="btn-primary" style={{ backgroundColor: '#25D366', color: 'white', display: 'inline-flex', alignItems: 'center' }}>
+                  <MdSend size={16} style={{ marginRight: '8px' }} /> Send Message
                 </button>
               </div>
             </form>
@@ -374,8 +386,8 @@ const WhatsApp = () => {
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn-secondary" onClick={() => setIsSimulateModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn-primary" style={{ backgroundColor: '#25D366', color: 'white' }}>
-                  <FaPaperPlane style={{ marginRight: '8px' }} /> Send Message
+                <button type="submit" className="btn-primary" style={{ backgroundColor: '#25D366', color: 'white', display: 'inline-flex', alignItems: 'center' }}>
+                  <MdSend size={16} style={{ marginRight: '8px' }} /> Send Message
                 </button>
               </div>
             </form>

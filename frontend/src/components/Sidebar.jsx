@@ -6,7 +6,7 @@ import {
   MdTrendingUp, MdAccountBalance, MdLocalGasStation, MdStore, 
   MdInventory, MdEventAvailable, MdPayments, MdGroups, 
   MdFolder, MdAssessment, MdContactMail, MdSettings, MdColorLens, MdClose, MdMap, MdSecurity, MdHistory, MdListAlt,
-  MdSmartphone, MdAddRoad, MdRoute
+  MdSmartphone, MdAddRoad, MdRoute, MdAddCircleOutline, MdAltRoute, MdToll, MdPercent
 } from 'react-icons/md';
 import { FaWhatsapp } from 'react-icons/fa';
 import './Sidebar.css';
@@ -29,7 +29,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     },
     {
       title: 'New Trip',
-      icon: <MdAddRoad />,
+      icon: <MdAddCircleOutline />,
       path: '/new-trip'
     },
     {
@@ -39,10 +39,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         { title: 'Orders', icon: <MdListAlt />, path: '/orders' },
         { title: 'Vehicles', icon: <MdLocalShipping />, path: '/vehicles' },
         { title: 'Drivers', icon: <MdPeople />, path: '/drivers' },
-        { title: 'Trips', icon: <MdDirectionsCar />, path: '/trips' },
+        { title: 'Trips', icon: <MdAltRoute />, path: '/trips' },
         { title: 'LR / Bilty', icon: <MdReceipt />, path: '/lr' },
         { title: 'Live Tracking', icon: <MdLocationOn />, path: '/tracking', badge: 'LIVE' },
-        { title: 'FASTag & Tolls', icon: <MdPayments />, path: '/fastag', badge: 'FAST' },
+        { title: 'FASTag & Tolls', icon: <MdToll />, path: '/fastag', badge: 'FAST' },
         { title: 'WhatsApp Int.', icon: <FaWhatsapp />, path: '/whatsapp' },
       ]
     },
@@ -52,7 +52,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         { title: 'Billing / Invoices', icon: <MdAttachMoney />, path: '/billing' },
         { title: 'Expenses', icon: <MdAccountBalanceWallet />, path: '/expenses' },
         { title: 'Profit & Loss', icon: <MdTrendingUp />, path: '/profit-loss' },
-        { title: 'GST', icon: <MdReceipt />, path: '/gst' },
+        { title: 'GST', icon: <MdPercent />, path: '/gst' },
         { title: 'Loans / EMI', icon: <MdAccountBalance />, path: '/loans' },
         { title: 'Cash / Bank', icon: <MdAccountBalance />, path: '/cash-bank' },
       ]

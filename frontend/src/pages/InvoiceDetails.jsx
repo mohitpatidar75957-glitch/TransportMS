@@ -182,21 +182,28 @@ const InvoiceDetails = () => {
     );
   }
 
-  // RCM and GST Calculation
+  // Trip Breakdown and Sync Calculations
+  const trip = dbInvoice.trip || {};
+  const baseFreight = Number(trip.freightAmount) || (Number(dbInvoice.amount) ? (Boolean(dbInvoice.rcmApplicable) ? Number(dbInvoice.amount) : Number(dbInvoice.amount) / 1.05) : 0);
+  const gstAmount = Number(trip.gstAmount) || 0;
+  const biltyCharge = Number(trip.biltyCharge) || 0;
+  const loadingCharge = Number(trip.loadingCharge) || 0;
+  const advanceAmount = Number(trip.advanceAmount) || 0;
   const isRcm = Boolean(dbInvoice.rcmApplicable);
-  const grossAmount = Number(dbInvoice.amount) || 0;
-  const freightAmount = isRcm ? grossAmount : (grossAmount / 1.05);
-  const cgst = isRcm ? 0 : (freightAmount * 0.025);
-  const sgst = isRcm ? 0 : (freightAmount * 0.025);
+
+  // Synchronized gross total amount: freight + GST + bilty + loading
+  const calculatedGross = trip.id ? (baseFreight + gstAmount + biltyCharge + loadingCharge) : (Number(dbInvoice.amount) || 0);
+  const grossAmount = calculatedGross > 0 ? calculatedGross : (Number(dbInvoice.amount) || 0);
 
   // TDS Calculation
   const isTds = Boolean(dbInvoice.tdsApplicable);
   const tdsRate = Number(dbInvoice.tdsRate) || (isTds ? 2.0 : 0);
-  const tdsDeduction = Number(dbInvoice.tdsAmount) || (isTds ? (freightAmount * (tdsRate / 100)) : 0);
+  const tdsDeduction = Number(dbInvoice.tdsAmount) || (isTds ? (baseFreight * (tdsRate / 100)) : 0);
   const netReceivable = Math.max(0, grossAmount - tdsDeduction);
 
-  // Payments summary
-  const totalPaid = invoicePayments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
+  // Payments summary (recorded payments + initial advance)
+  const paymentRecordsSum = invoicePayments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
+  const totalPaid = paymentRecordsSum + (paymentRecordsSum === 0 ? advanceAmount : 0);
   const balanceDue = Math.max(0, netReceivable - totalPaid);
 
   const isPaid = dbInvoice.status === 'Paid' || (balanceDue <= 0 && netReceivable > 0);
@@ -479,7 +486,7 @@ const InvoiceDetails = () => {
               <tr>
                 <td style={{ padding: '10px', border: '1px solid #bdc3c7', textAlign: 'center' }}>1</td>
                 <td style={{ padding: '10px', border: '1px solid #bdc3c7' }}>
-                  <p style={{ margin: '0 0 4px 0', fontWeight: 'bold' }}>Goods Transportation Charges (GTA)</p>
+                  <p style={{ margin: '0 0 4px 0', fontWeight: 'bold' }}>Base Freight Transportation Charges</p>
                   {dbInvoice.trip && (
                     <p style={{ margin: 0, fontSize: '12px', color: '#7f8c8d' }}>
                       Trip: {dbInvoice.trip.tripNumber || `TRP-${dbInvoice.trip.id}`} <br/>
@@ -489,8 +496,28 @@ const InvoiceDetails = () => {
                   )}
                 </td>
                 <td style={{ padding: '10px', border: '1px solid #bdc3c7', textAlign: 'center' }}>{dbInvoice.hsnCode || '996511'}</td>
-                <td style={{ padding: '10px', border: '1px solid #bdc3c7', textAlign: 'right' }}>{freightAmount.toFixed(2)}</td>
+                <td style={{ padding: '10px', border: '1px solid #bdc3c7', textAlign: 'right', fontWeight: 'bold' }}>₹{baseFreight.toFixed(2)}</td>
               </tr>
+              {biltyCharge > 0 && (
+                <tr>
+                  <td style={{ padding: '10px', border: '1px solid #bdc3c7', textAlign: 'center' }}>2</td>
+                  <td style={{ padding: '10px', border: '1px solid #bdc3c7' }}>
+                    <p style={{ margin: 0, fontWeight: 'bold' }}>Bilty & Documentation Charges</p>
+                  </td>
+                  <td style={{ padding: '10px', border: '1px solid #bdc3c7', textAlign: 'center' }}>996511</td>
+                  <td style={{ padding: '10px', border: '1px solid #bdc3c7', textAlign: 'right', fontWeight: 'bold' }}>₹{biltyCharge.toFixed(2)}</td>
+                </tr>
+              )}
+              {loadingCharge > 0 && (
+                <tr>
+                  <td style={{ padding: '10px', border: '1px solid #bdc3c7', textAlign: 'center' }}>{biltyCharge > 0 ? 3 : 2}</td>
+                  <td style={{ padding: '10px', border: '1px solid #bdc3c7' }}>
+                    <p style={{ margin: 0, fontWeight: 'bold' }}>Loading & Handling Charges</p>
+                  </td>
+                  <td style={{ padding: '10px', border: '1px solid #bdc3c7', textAlign: 'center' }}>996511</td>
+                  <td style={{ padding: '10px', border: '1px solid #bdc3c7', textAlign: 'right', fontWeight: 'bold' }}>₹{loadingCharge.toFixed(2)}</td>
+                </tr>
+              )}
             </tbody>
           </table>
 
@@ -503,7 +530,9 @@ const InvoiceDetails = () => {
               </h4>
               {invoicePayments.length === 0 ? (
                 <p style={{ margin: 0, fontSize: '12px', color: '#64748b', fontStyle: 'italic' }}>
-                  No advance or part-payments recorded yet. Total balance is pending.
+                  {advanceAmount > 0 
+                    ? `Initial advance payment of ₹${advanceAmount.toFixed(2)} adjusted against trip freight.`
+                    : 'No advance or part-payments recorded yet. Total balance is pending.'}
                 </p>
               ) : (
                 <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}>
@@ -530,32 +559,40 @@ const InvoiceDetails = () => {
             </div>
 
             {/* Right: Calculations table */}
-            <table style={{ width: '340px', fontSize: '14px' }}>
+            <table style={{ width: '360px', fontSize: '14px' }}>
               <tbody>
                 <tr>
-                  <td style={{ padding: '6px 0', fontWeight: 'bold' }}>Subtotal (Freight):</td>
-                  <td style={{ padding: '6px 0', textAlign: 'right' }}>₹{freightAmount.toFixed(2)}</td>
+                  <td style={{ padding: '6px 0', fontWeight: 'bold' }}>Base Freight:</td>
+                  <td style={{ padding: '6px 0', textAlign: 'right' }}>₹{baseFreight.toFixed(2)}</td>
                 </tr>
-                {isRcm ? (
+                {biltyCharge > 0 && (
                   <tr>
-                    <td style={{ padding: '6px 0', color: '#0984e3' }}>GST (5% under RCM):</td>
-                    <td style={{ padding: '6px 0', textAlign: 'right', color: '#0984e3', fontStyle: 'italic' }}>Paid by Recipient</td>
+                    <td style={{ padding: '6px 0', color: '#64748b' }}>Bilty Charges:</td>
+                    <td style={{ padding: '6px 0', textAlign: 'right' }}>₹{biltyCharge.toFixed(2)}</td>
+                  </tr>
+                )}
+                {loadingCharge > 0 && (
+                  <tr>
+                    <td style={{ padding: '6px 0', color: '#64748b' }}>Loading Charges:</td>
+                    <td style={{ padding: '6px 0', textAlign: 'right' }}>₹{loadingCharge.toFixed(2)}</td>
+                  </tr>
+                )}
+                {gstAmount > 0 ? (
+                  <tr>
+                    <td style={{ padding: '6px 0', color: '#0984e3' }}>GST ({trip.gstPercent ? `${trip.gstPercent}%` : 'Tax'}):</td>
+                    <td style={{ padding: '6px 0', textAlign: 'right', color: '#0984e3', fontWeight: 'bold' }}>+ ₹{gstAmount.toFixed(2)}</td>
                   </tr>
                 ) : (
-                  <>
+                  isRcm && (
                     <tr>
-                      <td style={{ padding: '6px 0', color: '#7f8c8d' }}>CGST @ 2.5%:</td>
-                      <td style={{ padding: '6px 0', textAlign: 'right', color: '#7f8c8d' }}>₹{cgst.toFixed(2)}</td>
+                      <td style={{ padding: '6px 0', color: '#0984e3' }}>GST (5% under RCM):</td>
+                      <td style={{ padding: '6px 0', textAlign: 'right', color: '#0984e3', fontStyle: 'italic' }}>Paid by Recipient</td>
                     </tr>
-                    <tr>
-                      <td style={{ padding: '6px 0', color: '#7f8c8d' }}>SGST @ 2.5%:</td>
-                      <td style={{ padding: '6px 0', textAlign: 'right', color: '#7f8c8d' }}>₹{sgst.toFixed(2)}</td>
-                    </tr>
-                  </>
+                  )
                 )}
                 <tr style={{ borderTop: '1px solid #cbd5e1' }}>
                   <td style={{ padding: '6px 0', fontWeight: 'bold' }}>Gross Invoice Total:</td>
-                  <td style={{ padding: '6px 0', textAlign: 'right', fontWeight: 'bold' }}>₹{grossAmount.toFixed(2)}</td>
+                  <td style={{ padding: '6px 0', textAlign: 'right', fontWeight: 'bold', color: '#0f172a' }}>₹{grossAmount.toFixed(2)}</td>
                 </tr>
                 {isTds && (
                   <tr>
@@ -565,12 +602,14 @@ const InvoiceDetails = () => {
                 )}
                 <tr style={{ borderTop: '1px solid #cbd5e1' }}>
                   <td style={{ padding: '6px 0', fontWeight: 'bold' }}>Net Receivable:</td>
-                  <td style={{ padding: '6px 0', textAlign: 'right', fontWeight: 'bold' }}>₹{netReceivable.toFixed(2)}</td>
+                  <td style={{ padding: '6px 0', textAlign: 'right', fontWeight: 'bold', color: '#0984e3' }}>₹{netReceivable.toFixed(2)}</td>
                 </tr>
-                <tr>
-                  <td style={{ padding: '6px 0', color: '#16a34a' }}>Paid to Date:</td>
-                  <td style={{ padding: '6px 0', textAlign: 'right', color: '#16a34a', fontWeight: 'bold' }}>- ₹{totalPaid.toFixed(2)}</td>
-                </tr>
+                {totalPaid > 0 && (
+                  <tr>
+                    <td style={{ padding: '6px 0', color: '#16a34a' }}>Less: Advance / Paid:</td>
+                    <td style={{ padding: '6px 0', textAlign: 'right', color: '#16a34a', fontWeight: 'bold' }}>- ₹{totalPaid.toFixed(2)}</td>
+                  </tr>
+                )}
                 <tr style={{ borderTop: '2px solid #333' }}>
                   <td style={{ padding: '10px 0', fontWeight: 'bold', fontSize: '15px', color: balanceDue > 0 ? '#e74c3c' : '#16a34a' }}>
                     {balanceDue > 0 ? 'Remaining Balance Due:' : 'Status: Fully Cleared'}

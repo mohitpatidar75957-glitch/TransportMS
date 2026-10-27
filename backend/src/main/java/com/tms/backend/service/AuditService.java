@@ -46,8 +46,17 @@ public class AuditService {
             if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
                 finalActionBy = auth.getName(); // Usually email or username
             } else if (finalActionBy == null || finalActionBy.isEmpty()) {
-                finalActionBy = "SYSTEM";
+                finalActionBy = "Admin";
             }
+        }
+
+        if ("superadmin@tms.com".equalsIgnoreCase(finalActionBy) || "SUPER_ADMIN".equalsIgnoreCase(finalActionBy)) {
+            finalActionBy = "Admin";
+        }
+
+        String finalDesc = description;
+        if (finalDesc != null && !finalDesc.toLowerCase().contains(" by ")) {
+            finalDesc = finalDesc + " by " + finalActionBy;
         }
 
         AuditLog log = new AuditLog();
@@ -57,7 +66,11 @@ public class AuditService {
         log.setAction(action);
         log.setOldValue(oldValue);
         log.setNewValue(newValue);
-        log.setDescription(description);
+        log.setDescription(finalDesc);
+
+        Long currentTenant = com.tms.backend.config.TenantContext.getCurrentTenant();
+        log.setTenantId(currentTenant != null ? currentTenant : 1L);
+
         auditLogRepository.save(log);
     }
 }

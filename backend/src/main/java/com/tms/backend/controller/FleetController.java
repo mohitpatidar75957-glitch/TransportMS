@@ -36,7 +36,7 @@ public class FleetController {
 
     // --- Vehicles ---
     @GetMapping("/vehicles")
-    public List<Vehicle> getAllVehicles() { return vehicleRepository.findAll(); }
+    public List<Vehicle> getAllVehicles() { return vehicleRepository.findAllByOrderByIdAsc(); }
     
     @GetMapping("/vehicles/{id}")
     public ResponseEntity<Vehicle> getVehicleById(@PathVariable Long id) {
@@ -46,19 +46,29 @@ public class FleetController {
     }
     
     @PostMapping("/vehicles")
-    public Vehicle createVehicle(@RequestBody Vehicle vehicle) {
-        if (vehicle.getRegistrationNumber() != null) {
-            vehicle.setRegistrationNumber(com.tms.backend.util.RegistrationNumberFormatter.format(vehicle.getRegistrationNumber()));
+    public ResponseEntity<?> createVehicle(@RequestBody Vehicle vehicle) {
+        if (vehicle.getRegistrationNumber() == null || vehicle.getRegistrationNumber().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Vehicle registration number is required"));
         }
-        if (vehicle.getTenantId() == null) {
-            Long currentTenant = com.tms.backend.config.TenantContext.getCurrentTenant();
-            vehicle.setTenantId(currentTenant != null ? currentTenant : 1L);
+        String formattedReg = com.tms.backend.util.RegistrationNumberFormatter.format(vehicle.getRegistrationNumber());
+        vehicle.setRegistrationNumber(formattedReg);
+
+        Long currentTenant = vehicle.getTenantId() != null 
+            ? vehicle.getTenantId() 
+            : com.tms.backend.config.TenantContext.getCurrentTenant();
+        long effectiveTenant = currentTenant != null ? currentTenant : 1L;
+        vehicle.setTenantId(effectiveTenant);
+
+        Vehicle existing = vehicleRepository.findByTenantIdAndRegistrationNumber(effectiveTenant, formattedReg);
+        if (existing != null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Vehicle with registration number " + formattedReg + " already exists in your fleet!"));
         }
+
         Vehicle saved = vehicleRepository.save(vehicle);
         try {
             auditService.logAction((HttpServletRequest) null, "CREATED", "Vehicle", saved.getId(), null, saved.getRegistrationNumber(), "Created vehicle " + saved.getRegistrationNumber());
         } catch (Exception e) {}
-        return saved;
+        return ResponseEntity.ok(saved);
     }
     
     @PostMapping("/vehicles/bulk")
@@ -150,13 +160,22 @@ public class FleetController {
     }
 
     @PutMapping("/vehicles/{id}")
-    public ResponseEntity<Vehicle> updateVehicle(@PathVariable Long id, @RequestBody Vehicle vehicleDetails) {
+    public ResponseEntity<?> updateVehicle(@PathVariable Long id, @RequestBody Vehicle vehicleDetails) {
         return vehicleRepository.findById(id).map(v -> {
             String oldReg = v.getRegistrationNumber() + " (" + v.getStatus() + ")";
             vehicleDetails.setId(id);
             vehicleDetails.setCreatedAt(v.getCreatedAt()); // Preserve creation timestamp
+            if (vehicleDetails.getTenantId() == null) {
+                vehicleDetails.setTenantId(v.getTenantId() != null ? v.getTenantId() : 1L);
+            }
             if (vehicleDetails.getRegistrationNumber() != null) {
-                vehicleDetails.setRegistrationNumber(com.tms.backend.util.RegistrationNumberFormatter.format(vehicleDetails.getRegistrationNumber()));
+                String formattedReg = com.tms.backend.util.RegistrationNumberFormatter.format(vehicleDetails.getRegistrationNumber());
+                vehicleDetails.setRegistrationNumber(formattedReg);
+                
+                Vehicle existing = vehicleRepository.findByTenantIdAndRegistrationNumber(vehicleDetails.getTenantId(), formattedReg);
+                if (existing != null && !existing.getId().equals(id)) {
+                    return ResponseEntity.badRequest().body(Map.of("error", "Vehicle with registration number " + formattedReg + " already exists in your fleet!"));
+                }
             }
             Vehicle updated = vehicleRepository.save(vehicleDetails);
             String newReg = updated.getRegistrationNumber() + " (" + updated.getStatus() + ")";
@@ -343,7 +362,31 @@ public class FleetController {
     @GetMapping("/trips")
     public ResponseEntity<?> getAllTrips() { 
         try {
-            return ResponseEntity.ok(tripRepository.findAll()); 
+            List<Trip> trips = tripRepository.findAll();
+            boolean changed = false;
+            for (Trip t : trips) {
+                if (t.getTripNumber() == null || t.getTripNumber().matches("TRP-\\d{5,}") || t.getTripNumber().startsWith("TRP-DB-")) {
+                    String cleanNum = String.format("TRP-%04d", t.getId() != null ? t.getId() : 1);
+                    String oldNum = t.getTripNumber();
+                    t.setTripNumber(cleanNum);
+                    try {
+                        tripRepository.save(t);
+                        changed = true;
+                        if (oldNum != null && lrRepository != null) {
+                            lrRepository.findByTripId(t.getId()).ifPresent(lr -> {
+                                if (lr.getLrNumber() != null && lr.getLrNumber().contains(oldNum)) {
+                                    lr.setLrNumber(lr.getLrNumber().replace(oldNum, cleanNum));
+                                    lrRepository.save(lr);
+                                }
+                            });
+                        }
+                    } catch (Exception ignored) {}
+                }
+            }
+            if (changed) {
+                trips = tripRepository.findAll();
+            }
+            return ResponseEntity.ok(trips); 
         } catch(Exception e) {
             String msg = e.getMessage() + (e.getCause() != null ? " | " + e.getCause().getMessage() : "");
             if (e.getCause() != null && e.getCause().getCause() != null) {
@@ -352,6 +395,25 @@ public class FleetController {
             return ResponseEntity.internalServerError().body(java.util.Map.of("error", msg));
         }
     }
+
+    public synchronized String generateNextTripNumber() {
+        long nextSeq = 1;
+        List<Trip> allTrips = tripRepository.findAll();
+        for (Trip t : allTrips) {
+            if (t.getTripNumber() != null && t.getTripNumber().startsWith("TRP-")) {
+                try {
+                    String numericPart = t.getTripNumber().replace("TRP-", "").trim();
+                    if (numericPart.matches("\\d{1,6}")) {
+                        long val = Long.parseLong(numericPart);
+                        if (val >= nextSeq) {
+                            nextSeq = val + 1;
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+        }
+        return String.format("TRP-%04d", nextSeq);
+    }
     
     @GetMapping("/trips/{id}")
     public ResponseEntity<Trip> getTripById(@PathVariable Long id) {
@@ -359,7 +421,33 @@ public class FleetController {
     }
     
     @PostMapping("/trips")
-    public Trip createTrip(@RequestBody Trip trip) {
+    public ResponseEntity<?> createTrip(@RequestBody Trip trip) {
+        if (trip.getVehicle() == null || (trip.getVehicle().getId() == null && (trip.getVehicle().getRegistrationNumber() == null || trip.getVehicle().getRegistrationNumber().trim().isEmpty()))) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Vehicle is compulsory/required to create a trip!"));
+        }
+        
+        // Resolve Vehicle entity if only ID or registrationNumber is passed
+        if (trip.getVehicle().getId() != null) {
+            Optional<Vehicle> vOpt = vehicleRepository.findById(trip.getVehicle().getId());
+            if (vOpt.isPresent()) {
+                trip.setVehicle(vOpt.get());
+            } else {
+                return ResponseEntity.badRequest().body(Map.of("error", "Selected vehicle not found in database!"));
+            }
+        } else if (trip.getVehicle().getRegistrationNumber() != null) {
+            String norm = com.tms.backend.util.RegistrationNumberFormatter.format(trip.getVehicle().getRegistrationNumber());
+            Vehicle v = vehicleRepository.findByRegistrationNumber(norm);
+            if (v != null) {
+                trip.setVehicle(v);
+            } else {
+                return ResponseEntity.badRequest().body(Map.of("error", "Vehicle with number " + norm + " not found!"));
+            }
+        }
+
+        if (trip.getTripNumber() == null || trip.getTripNumber().trim().isEmpty() || trip.getTripNumber().matches("TRP-\\d{5,}") || trip.getTripNumber().startsWith("TRP-DB-")) {
+            trip.setTripNumber(generateNextTripNumber());
+        }
+
         if (trip.getTrackingLink() == null || trip.getTrackingLink().isEmpty()) {
             trip.setTrackingLink(java.util.UUID.randomUUID().toString());
         }
@@ -391,7 +479,13 @@ public class FleetController {
         standardInvoice.setInvoiceNumber("INV-" + java.time.Year.now().getValue() + "-" + (1000 + new Random().nextInt(9000)));
         standardInvoice.setClientName(savedTrip.getClientName());
         standardInvoice.setDate(savedTrip.getStartDate() != null ? savedTrip.getStartDate() : java.time.LocalDate.now());
-        standardInvoice.setAmount(savedTrip.getFreightAmount());
+        
+        java.math.BigDecimal totalGrossFreight = savedTrip.getFreightAmount() != null ? savedTrip.getFreightAmount() : java.math.BigDecimal.ZERO;
+        if (savedTrip.getGstAmount() != null) totalGrossFreight = totalGrossFreight.add(savedTrip.getGstAmount());
+        if (savedTrip.getBiltyCharge() != null) totalGrossFreight = totalGrossFreight.add(savedTrip.getBiltyCharge());
+        if (savedTrip.getLoadingCharge() != null) totalGrossFreight = totalGrossFreight.add(savedTrip.getLoadingCharge());
+        
+        standardInvoice.setAmount(totalGrossFreight);
         standardInvoice.setStatus("Unpaid");
         standardInvoice.setTrip(savedTrip);
         standardInvoice.setTenantId(savedTrip.getTenantId());
@@ -475,6 +569,7 @@ public class FleetController {
             
             lr.setMaterialDescription(savedTrip.getGoodsType());
             lr.setAdvanceAmount(savedTrip.getAdvanceAmount());
+            lr.setEwayBillNumber(savedTrip.getEwayBillNumber());
             lr.setTenantId(savedTrip.getTenantId());
             
             if (savedTrip.getFreightAmount() != null) {
@@ -529,7 +624,7 @@ public class FleetController {
             }
         }
         
-        return savedTrip;
+        return ResponseEntity.ok(savedTrip);
     }
     
     @DeleteMapping("/trips/{id}")
@@ -666,6 +761,8 @@ public class FleetController {
                     if (routeParts.length > 1) {
                         lr.setToLocation(routeParts[1].trim());
                     }
+                if (savedTrip.getEwayBillNumber() != null && !savedTrip.getEwayBillNumber().isBlank()) {
+                    lr.setEwayBillNumber(savedTrip.getEwayBillNumber());
                 }
                 
                 lrRepository.save(lr);
@@ -677,11 +774,31 @@ public class FleetController {
 
     // --- LR/Bilty ---
     @GetMapping("/lr")
-    public List<LR> getAllLRs() { return lrRepository.findAll(); }
+    public List<LR> getAllLRs() { 
+        List<LR> lrs = lrRepository.findAll();
+        for (LR lr : lrs) {
+            syncEwayBillToLR(lr);
+        }
+        return lrs; 
+    }
     
     @GetMapping("/lr/{id}")
     public ResponseEntity<LR> getLRById(@PathVariable Long id) {
-        return lrRepository.findById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        return lrRepository.findById(id).map(lr -> {
+            syncEwayBillToLR(lr);
+            return ResponseEntity.ok(lr);
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    private void syncEwayBillToLR(LR lr) {
+        if (lr != null && (lr.getEwayBillNumber() == null || lr.getEwayBillNumber().trim().isEmpty())) {
+            if (lr.getTrip() != null && lr.getTrip().getEwayBillNumber() != null && !lr.getTrip().getEwayBillNumber().trim().isEmpty()) {
+                lr.setEwayBillNumber(lr.getTrip().getEwayBillNumber());
+                try {
+                    lrRepository.save(lr);
+                } catch (Exception ignored) {}
+            }
+        }
     }
     
     @PostMapping("/lr")

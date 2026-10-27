@@ -40,6 +40,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/resources/**", "/api/v1/ocr/**").permitAll() // Allow fuel records, anomaly checks & OCR without third-party fees
                 .requestMatchers("/api/v1/hr/**").permitAll() // Allow HR staff, managers & attendance
                 .requestMatchers("/api/v1/system/**", "/api/v1/audit/**").permitAll() // Allow System Health, Watchdog Monitors & Audit Logs
+                .requestMatchers("/api/notifications/**", "/api/v1/notifications/**").permitAll() // Allow notifications & alerts
                 .requestMatchers("/api/trips/estimate-delivery-time", "/api/trips/auto-freight", "/api/trips/route-ranking").permitAll()
                 .requestMatchers("/api/v1/trips/**", "/api/v1/orders/**", "/api/v1/dispatch/**").permitAll() // Checked and rate-limited by ApiKeyFilter
                 .requestMatchers("/api/docs/**", "/api-docs/**").permitAll() // Allow docs

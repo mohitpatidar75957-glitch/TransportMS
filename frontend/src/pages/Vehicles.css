@@ -146,20 +146,20 @@
 }
 
 .data-table th {
-  padding: 10px 14px;
-  font-size: 0.7rem;
+  padding: 8px 6px;
+  font-size: 0.68rem;
   text-transform: uppercase;
   color: var(--text-secondary);
   font-weight: 600;
   background-color: var(--bg-surface);
   border-bottom: 1px solid var(--border-color);
-  letter-spacing: 0.6px;
+  letter-spacing: 0.3px;
   white-space: nowrap;
 }
 
 .data-table td {
-  padding: 12px 14px;
-  font-size: 0.825rem;
+  padding: 8px 6px;
+  font-size: 0.78rem;
   color: var(--text-primary);
   border-bottom: 1px solid var(--border-color);
   vertical-align: middle;
@@ -182,13 +182,13 @@
 
 .vehicle-num {
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--text-primary);
   font-family: inherit;
 }
 
 .vehicle-name, .vehicle-model {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
 }
 
@@ -200,9 +200,9 @@
 .date-badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
+  padding: 2px 5px;
   border-radius: 4px;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -235,49 +235,73 @@
   letter-spacing: 0.2px;
 }
 
+/* Delivered / Active / Paid - Green (Hara) */
+.status-badge.delivered,
+.status-badge.completed,
 .status-badge.active,
 .status-badge.present,
 .status-badge.paid {
-  background-color: var(--success-bg);
-  color: var(--success-text);
-  border: 1px solid var(--success-border);
+  background-color: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
 }
 
-.status-badge.absent,
-.status-badge.inactive,
-.status-badge.cancelled {
-  background-color: var(--danger-bg);
-  color: var(--danger-text);
-  border: 1px solid var(--danger-border);
-}
-
-.status-badge.leave,
-.status-badge.pending {
-  background-color: var(--warning-bg);
-  color: var(--warning-text);
-  border: 1px solid var(--warning-border);
-}
-
-.status-badge.under-maintenance,
+/* In Transit - Orange (Narangi) */
 .status-badge.in-transit,
+.status-badge.transit,
+.status-badge.running {
+  background-color: #ffedd5;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+}
+
+/* Closed - Grey (Gray) */
+.status-badge.closed {
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+/* Pending / Planned / Scheduled - Yellow (Peela) */
+.status-badge.pending,
+.status-badge.planned,
+.status-badge.scheduled,
+.status-badge.leave {
+  background-color: #fef9c3;
+  color: #a16207;
+  border: 1px solid #fde047;
+}
+
+/* Cancelled - Red (Laal) */
+.status-badge.cancelled,
+.status-badge.canceled,
+.status-badge.absent,
+.status-badge.inactive {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+/* Under Maintenance / Loaded - Blue */
+.status-badge.under-maintenance,
 .status-badge.loaded {
-  background-color: var(--info-bg);
-  color: var(--info-text);
-  border: 1px solid var(--info-border);
+  background-color: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
 }
 
 .action-buttons {
   display: flex;
-  gap: 12px;
+  gap: 6px;
 }
 
 .action-icon {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.125rem;
-  padding: 6px;
-  border-radius: 6px;
+  font-size: 1.05rem;
+  padding: 4px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -294,6 +318,7 @@
 }
 
 .action-icon.view { color: var(--accent-color); }
+.action-icon.eway { color: #0284c7; }
 .action-icon.edit { color: #ffa502; }
 .action-icon.delete { color: #ff4757; }
 

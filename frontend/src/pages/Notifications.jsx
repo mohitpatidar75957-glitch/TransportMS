@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MdNotifications, MdNotificationsOff } from 'react-icons/md';
+import { MdNotifications, MdNotificationsOff, MdDoneAll } from 'react-icons/md';
 import './Notifications.css';
 
 const Notifications = () => {
@@ -15,20 +15,13 @@ const Notifications = () => {
 
   const fetchNotifications = async () => {
     try {
-      const [notifRes, alertsRes] = await Promise.all([
-        fetch('/api/notifications').catch(() => null),
-        fetch('/api/v1/fleet/alerts/expiring-documents').catch(() => null)
-      ]);
-
-      if (notifRes && notifRes.ok) {
-        const data = await notifRes.json();
-        data.sort((a, b) => new Date(b.date) - new Date(a.date));
-        setNotifications(data);
-      }
-
-      if (alertsRes && alertsRes.ok) {
-        const alertsData = await alertsRes.json();
-        setDocAlerts(alertsData);
+      const res = await fetch('/api/notifications/centralized').catch(() => null);
+      if (res && res.ok) {
+        const data = await res.json();
+        setDocAlerts(data.documentAlerts || []);
+        const sysNotifs = data.systemAlerts || [];
+        sysNotifs.sort((a, b) => new Date(b.date) - new Date(a.date));
+        setNotifications(sysNotifs);
       }
     } catch (e) {
       console.error("Failed to fetch notifications", e);
@@ -48,16 +41,39 @@ const Notifications = () => {
     }
   };
 
-  const totalAlerts = notifications.filter(n => !n.read).length + docAlerts.length;
+  const markAllAsRead = async () => {
+    try {
+      const res = await fetch('/api/notifications/read-all', { method: 'PUT' });
+      if (res.ok) {
+        setNotifications(notifications.map(n => ({ ...n, read: true })));
+      }
+    } catch (e) {
+      console.error("Failed to mark all as read", e);
+    }
+  };
+
+  const unreadSysCount = notifications.filter(n => !n.read).length;
+  const totalAlerts = unreadSysCount + docAlerts.length;
 
   return (
     <div className="notifications-page">
       <div className="notification-page-card">
-        <div className="notification-page-header">
-          <div className="notification-page-title">
-            <MdNotifications style={{ color: '#f59e0b' }} /> Notification Center
+        <div className="notification-page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <div className="notification-page-title">
+              <MdNotifications style={{ color: '#f59e0b' }} /> Notification Center
+            </div>
+            <div className="notification-page-subtitle">You have {totalAlerts} active alert(s)</div>
           </div>
-          <div className="notification-page-subtitle">You have {totalAlerts} active alert(s)</div>
+          {unreadSysCount > 0 && (
+            <button 
+              onClick={markAllAsRead} 
+              className="mark-read-btn" 
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#3b82f6', color: '#fff', borderColor: '#3b82f6' }}
+            >
+              <MdDoneAll size={16} /> Mark All as Read
+            </button>
+          )}
         </div>
         
         {loading ? (
@@ -80,7 +96,7 @@ const Notifications = () => {
             {docAlerts.length > 0 && (
               <div style={{ marginBottom: '20px' }}>
                 <h4 style={{ color: '#d97706', margin: '0 0 12px 0', fontSize: '13px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                  ⚠️ Pending Document Expiries
+                  ⚠️ Pending Document Expiries ({docAlerts.length})
                 </h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {docAlerts.map((alert, idx) => (
@@ -124,7 +140,7 @@ const Notifications = () => {
             {notifications.length > 0 && (
               <div>
                 <h4 style={{ color: '#64748b', margin: '0 0 12px 0', fontSize: '13px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                  🔔 System Activity
+                  🔔 System Activity & Alerts ({unreadSysCount} Unread)
                 </h4>
                 {notifications.map(notification => (
                   <div 
@@ -156,5 +172,3 @@ const Notifications = () => {
 };
 
 export default Notifications;
-
-

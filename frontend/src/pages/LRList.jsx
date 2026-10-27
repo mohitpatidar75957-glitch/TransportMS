@@ -44,6 +44,7 @@ const LRList = () => {
       freight: `₹${(lr.amount || 0) + (lr.gstAmount || (lr.trip ? lr.trip.gstAmount : 0) || 0) + (lr.biltyCharge || 0) + (lr.loadingCharge || 0)}`,
       status: lr.status || 'In Transit',
       podStatus: lr.podStatus || 'Pending',
+      ewayBillNumber: lr.ewayBillNumber || lr.trip?.ewayBillNumber || '',
       isReal: true
     }))
   ];
@@ -82,7 +83,8 @@ const LRList = () => {
     const matchesSearch = 
       String(lr.id || '').toLowerCase().includes(searchLower) || 
       String(lr.consignor || '').toLowerCase().includes(searchLower) ||
-      String(lr.consignee || '').toLowerCase().includes(searchLower);
+      String(lr.consignee || '').toLowerCase().includes(searchLower) ||
+      String(lr.ewayBillNumber || '').toLowerCase().includes(searchLower);
     
     const matchesStatus = statusFilter === 'All Status' || lr.status === statusFilter;
     
@@ -158,9 +160,26 @@ const LRList = () => {
               filteredLrs.map((lr) => (
               <tr key={lr.id}>
                 <td>
-                  <div className="vehicle-info">
+                  <div className="vehicle-info" style={{ alignItems: 'flex-start' }}>
                     <span className="link-text vehicle-num" onClick={() => navigate(`/lr/${lr.dbId || lr.id}`)}>{lr.id}</span>
-                    <span className="vehicle-name">{lr.date}</span>
+                    <span className="vehicle-name" style={{ margin: 0 }}>{lr.date}</span>
+                    {lr.ewayBillNumber ? (
+                      <span style={{ 
+                        fontSize: '11px', 
+                        color: '#0284c7', 
+                        fontWeight: 700, 
+                        background: '#e0f2fe', 
+                        border: '1px solid #bae6fd', 
+                        padding: '1px 5px', 
+                        borderRadius: '3px', 
+                        display: 'inline-block', 
+                        marginTop: '2px', 
+                        marginLeft: 0,
+                        lineHeight: '15px'
+                      }}>
+                        EWB: {lr.ewayBillNumber}
+                      </span>
+                    ) : null}
                   </div>
                 </td>
                 <td>

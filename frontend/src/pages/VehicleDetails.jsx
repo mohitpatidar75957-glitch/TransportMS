@@ -110,7 +110,7 @@ const VehicleDetails = () => {
               </div>
               <div className="info-group">
                 <label>Owner Name</label>
-                <p>{vehicle.ownership || 'Unknown'}</p>
+                <p>{(!vehicle.ownership || vehicle.ownership === 'RK' || vehicle.ownership === 'Unknown') ? 'R.K. TRADERS & LOGISTICS' : (vehicle.ownership === 'Owned' ? 'R.K. TRADERS & LOGISTICS (Owned)' : vehicle.ownership)}</p>
               </div>
               <div className="info-row">
                 <div className="info-group half">

@@ -25,37 +25,38 @@ public class DispatchSuggestionController {
     public ResponseEntity<?> suggest(@RequestParam Long orderId) {
         Map<String, Object> response = new HashMap<>();
 
-        Long tenantId = com.tms.backend.config.TenantContext.getCurrentTenant();
-        if (tenantId == null) {
-            tenantId = 1L;
-        }
+        try {
+            Long tenantId = com.tms.backend.config.TenantContext.getCurrentTenant();
+            if (tenantId == null) {
+                tenantId = 1L; // Fallback to default company
+            }
 
-        // 1. Fetch the order strictly for the current company
-        List<Map<String, Object>> orders = jdbcTemplate.queryForList(
-            "SELECT * FROM orders WHERE id = ? AND (tenant_id = ? OR tenant_id IS NULL)", orderId, tenantId
-        );
-        if (orders.isEmpty()) {
-            response.put("error", "Order not found");
-            return ResponseEntity.badRequest().body(response);
-        }
-        Map<String, Object> order = orders.get(0);
+            // 1. Fetch the order strictly for the current company
+            List<Map<String, Object>> orders = jdbcTemplate.queryForList(
+                "SELECT * FROM orders WHERE id = ? AND tenant_id = ?", orderId, tenantId
+            );
+            if (orders.isEmpty()) {
+                response.put("error", "Order not found");
+                return ResponseEntity.badRequest().body(response);
+            }
+            Map<String, Object> order = orders.get(0);
 
-        String pickup   = str(order.get("pickup_location"));
-        String drop     = str(order.get("drop_location"));
-        String weightStr = str(order.get("weight")); // e.g. "18 Tons"
-        double orderWeight = parseWeight(weightStr);  // extract numeric tons
-        String freight  = str(order.get("amount"));   // e.g. "₹45000"
+            String pickup   = str(order.get("pickup_location"));
+            String drop     = str(order.get("drop_location"));
+            String weightStr = str(order.get("weight")); // e.g. "18 Tons"
+            double orderWeight = parseWeight(weightStr);  // extract numeric tons
+            String freight  = str(order.get("amount"));   // e.g. "₹45000"
 
-        // 2. Filter VALID vehicles belonging ONLY to this company (Active + all docs valid > 30 days)
-        String today30 = LocalDate.now().plusDays(30).toString();
-        List<Map<String, Object>> vehicles = jdbcTemplate.queryForList(
-            "SELECT * FROM vehicles WHERE (tenant_id = ? OR tenant_id IS NULL) AND status = 'Active' " +
-            "AND insurance_expiry > ? " +
-            "AND permit_expiry > ? " +
-            "AND puc_expiry > ? " +
-            "AND fitness_expiry > ?",
-            tenantId, today30, today30, today30, today30
-        );
+            // 2. Filter VALID vehicles belonging ONLY to this company (Active + all docs valid > 30 days)
+            String today30 = LocalDate.now().plusDays(30).toString();
+            List<Map<String, Object>> vehicles = jdbcTemplate.queryForList(
+                "SELECT * FROM vehicles WHERE tenant_id = ? AND status = 'Active' " +
+                "AND insurance_expiry > ? " +
+                "AND permit_expiry > ? " +
+                "AND puc_expiry > ? " +
+                "AND fitness_expiry > ?",
+                tenantId, today30, today30, today30, today30
+            );
 
         // 3. Filter AVAILABLE vehicles (no active/scheduled trip)
         List<Map<String, Object>> freeVehicles = new ArrayList<>();
@@ -69,7 +70,7 @@ public class DispatchSuggestionController {
 
             // Not on an active trip within this company
             List<Map<String, Object>> activeTrips = jdbcTemplate.queryForList(
-                "SELECT id FROM trips WHERE vehicle_id = ? AND status IN ('In Transit','Scheduled') AND (tenant_id = ? OR tenant_id IS NULL)", vehicleId, tenantId
+                "SELECT id FROM trips WHERE vehicle_id = ? AND status IN ('In Transit','Scheduled') AND tenant_id = ?", vehicleId, tenantId
             );
             if (activeTrips.isEmpty()) {
                 freeVehicles.add(v);
@@ -78,7 +79,7 @@ public class DispatchSuggestionController {
 
         // 4. Filter AVAILABLE drivers belonging ONLY to this company (status=Available + license valid > 30 days)
         List<Map<String, Object>> drivers = jdbcTemplate.queryForList(
-            "SELECT * FROM drivers WHERE (tenant_id = ? OR tenant_id IS NULL) AND status = 'Available' AND license_expiry > ?", tenantId, today30
+            "SELECT * FROM drivers WHERE tenant_id = ? AND status = 'Available' AND license_expiry > ?", tenantId, today30
         );
 
         // 5. Estimate realistic Route Distance
@@ -251,7 +252,13 @@ public class DispatchSuggestionController {
             response.put("message", "Found " + top3.size() + " suggestion(s). Review and confirm to create a trip.");
         }
 
-        return ResponseEntity.ok(response);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.err.println("Error in DispatchSuggestionController: " + e.getMessage());
+            e.printStackTrace();
+            response.put("error", "Could not load suggestions. Please try again.");
+            return ResponseEntity.status(500).body(response);
+        }
     }
 
     // ─── Helpers ────────────────────────────────────────────────────────────

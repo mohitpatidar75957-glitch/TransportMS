@@ -74,7 +74,16 @@ export const isValidAadhar = (aadhar, required = false) => {
  * - for numbers: keeps only digits
  * - for pan/gst: uppercase and alphanumeric only
  */
-export const sanitizeNameInput = (val) => val.replace(/[^A-Za-z\s.'-]/g, '');
+export const capitalizeWords = (str) => {
+  if (!str) return '';
+  return str.replace(/(^|\s|[.\-\/])([a-z])/g, (_, boundary, char) => boundary + char.toUpperCase());
+};
+
+export const sanitizeNameInput = (val) => {
+  const lettersOnly = val.replace(/[^A-Za-z\s.'-]/g, '');
+  return capitalizeWords(lettersOnly);
+};
+
 export const sanitizeDigitsOnly = (val, maxLen) => {
   const digits = val.replace(/\D/g, '');
   return maxLen ? digits.slice(0, maxLen) : digits;

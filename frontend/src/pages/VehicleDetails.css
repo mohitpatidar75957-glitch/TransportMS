@@ -12,21 +12,97 @@
 }
 
 .header-titles h2 {
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: 1.35rem;
+  font-weight: 700;
   color: var(--text-primary);
-  margin: 0 0 4px 0;
-}
-
-.header-titles p {
-  color: var(--text-secondary);
   margin: 0;
-  font-size: 0.875rem;
+  white-space: nowrap;
 }
 
 .header-actions {
   display: flex;
-  gap: 12px;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: nowrap !important;
+  overflow-x: auto;
+}
+
+/* Trip Details Action Buttons */
+.trip-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 35px;
+  padding: 0 11px;
+  border-radius: 7px;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+}
+
+.trip-btn svg {
+  flex-shrink: 0;
+  font-size: 16px;
+}
+
+.trip-btn:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
+}
+
+.trip-btn:active {
+  transform: translateY(0);
+}
+
+.trip-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
+}
+
+.trip-btn-eway {
+  background-color: #0284c7;
+  color: #ffffff;
+  border-color: #0369a1;
+}
+
+.trip-btn-pod {
+  background-color: #2563eb;
+  color: #ffffff;
+  border-color: #1d4ed8;
+}
+
+.trip-btn-viewpod {
+  background-color: #7c3aed;
+  color: #ffffff;
+  border-color: #6d28d9;
+}
+
+.trip-btn-close {
+  background-color: #059669;
+  color: #ffffff;
+  border-color: #047857;
+}
+
+.trip-btn-edit {
+  background-color: #f59e0b;
+  color: #1e293b;
+  border-color: #d97706;
+}
+
+.trip-btn-delete {
+  background-color: #dc2626;
+  color: #ffffff;
+  border-color: #b91c1c;
 }
 
 .action-btn {

@@ -29,6 +29,9 @@ public class EwayInvoiceController {
     private InvoiceRepository invoiceRepository;
 
     @Autowired
+    private com.tms.backend.repository.LRRepository lrRepository;
+
+    @Autowired
     private com.tms.backend.service.GstGovtPortalService gstGovtPortalService;
 
     /**
@@ -94,6 +97,17 @@ public class EwayInvoiceController {
         trip.setConsignorGST(cgst);
         trip.setConsigneeGST(bgst);
         tripRepository.save(trip);
+
+        // Also update associated LR/Bilty so E-Way Bill Number displays on Bilty
+        try {
+            List<com.tms.backend.model.LR> allLrs = lrRepository.findAll();
+            for (com.tms.backend.model.LR lr : allLrs) {
+                if (lr.getTrip() != null && lr.getTrip().getId().equals(trip.getId())) {
+                    lr.setEwayBillNumber(ewayBillNo);
+                    lrRepository.save(lr);
+                }
+            }
+        } catch (Exception ignored) {}
 
         gatewayResponse.put("tripNumber", trip.getTripNumber());
         return ResponseEntity.ok(gatewayResponse);
@@ -209,7 +223,7 @@ public class EwayInvoiceController {
 
         String consignorName = trip.getConsignorName();
         if (consignorName == null || consignorName.isBlank()) {
-            consignorName = "RK Transport Logistics";
+            consignorName = "R.K. TRADERS & LOGISTICS";
         }
 
         String consigneeName = trip.getConsigneeName();
@@ -270,7 +284,7 @@ public class EwayInvoiceController {
         vehDetails.put("updMode", "1");
         vehDetails.put("transMode", "1"); // Road
         vehDetails.put("transDistance", (int) distance);
-        vehDetails.put("transporterName", "RK Transport & Logistics");
+        vehDetails.put("transporterName", "R.K. TRADERS & LOGISTICS");
         vehDetails.put("transDocNo", trip.getTripNumber() != null ? trip.getTripNumber() : ("TRP-" + trip.getId()));
         vehDetails.put("transDocDate", docDate);
         vehDetails.put("vehicleNo", vehicleNo);

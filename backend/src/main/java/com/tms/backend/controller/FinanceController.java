@@ -24,13 +24,41 @@ public class FinanceController {
 
     // --- Invoices ---
     @GetMapping("/invoices")
-    public List<Invoice> getAllInvoices() { return invoiceRepository.findAll(); }
+    public List<Invoice> getAllInvoices() { 
+        List<Invoice> list = invoiceRepository.findAll();
+        for (Invoice inv : list) {
+            syncInvoiceAmountWithTrip(inv);
+        }
+        return list;
+    }
 
     @GetMapping("/invoices/{id}")
     public ResponseEntity<?> getInvoiceById(@PathVariable Long id) {
         return invoiceRepository.findById(id)
-                .map(ResponseEntity::ok)
+                .map(inv -> {
+                    syncInvoiceAmountWithTrip(inv);
+                    return ResponseEntity.ok(inv);
+                })
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    private void syncInvoiceAmountWithTrip(Invoice inv) {
+        if (inv != null && inv.getTrip() != null) {
+            Trip t = inv.getTrip();
+            java.math.BigDecimal tripFreight = t.getFreightAmount() != null ? t.getFreightAmount() : java.math.BigDecimal.ZERO;
+            if (t.getGstAmount() != null) tripFreight = tripFreight.add(t.getGstAmount());
+            if (t.getBiltyCharge() != null) tripFreight = tripFreight.add(t.getBiltyCharge());
+            if (t.getLoadingCharge() != null) tripFreight = tripFreight.add(t.getLoadingCharge());
+
+            // If calculated trip gross freight is positive and different from invoice amount, sync and persist
+            if (tripFreight.compareTo(java.math.BigDecimal.ZERO) > 0 && 
+                (inv.getAmount() == null || inv.getAmount().compareTo(tripFreight) != 0)) {
+                inv.setAmount(tripFreight);
+                try {
+                    invoiceRepository.save(inv);
+                } catch (Exception ignored) {}
+            }
+        }
     }
 
     // --- Payments / Part-Payments ---

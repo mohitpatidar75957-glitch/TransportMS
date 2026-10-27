@@ -9,7 +9,8 @@ import {
   MdCalculate, 
   MdSwapHoriz, 
   MdShield,
-  MdAccountBalanceWallet
+  MdAccountBalanceWallet,
+  MdLightbulb
 } from 'react-icons/md';
 import './GST.css';
 import './Vehicles.css';

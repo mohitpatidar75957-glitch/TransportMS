@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MdAdd, MdSearch, MdVisibility, MdEdit, MdDelete } from 'react-icons/md';
 import * as XLSX from 'xlsx';
@@ -125,9 +125,22 @@ const Vehicles = () => {
     e.target.value = null;
   };
 
-  // Merge dummy vehicles with real database vehicles
+  const uniqueDbVehicles = useMemo(() => {
+    const seen = new Set();
+    const result = [];
+    const sorted = [...dbVehicles].sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));
+    for (const v of sorted) {
+      const reg = normalizeRegistrationNumber(v.registrationNumber || '');
+      if (reg && !seen.has(reg)) {
+        seen.add(reg);
+        result.push(v);
+      }
+    }
+    return result;
+  }, [dbVehicles]);
+
   const allVehicles = [
-    ...dbVehicles.map(v => {
+    ...uniqueDbVehicles.map(v => {
       // Helper to evaluate document status (valid > 30d, expiring-soon <= 30d, invalid <= 0d)
       const getDateStatus = (dateStr) => {
         if (!dateStr || dateStr === 'N/A') return 'none';
@@ -154,7 +167,7 @@ const Vehicles = () => {
         type: v.type,
         capacity: v.capacity ? (v.capacity.toString().toLowerCase().includes('ton') ? v.capacity : `${v.capacity} Tons`) : 'N/A',
         model: v.model || 'N/A',
-        owner: v.ownership || 'Unknown',
+        owner: (!v.ownership || v.ownership === 'RK' || v.ownership === 'Unknown' || v.ownership.includes('R.K.') || v.ownership.includes('TRADERS') || v.ownership === 'Owned') ? 'R.K. Logistics' : v.ownership,
         insurance: v.insuranceExpiry || 'N/A',
         puc: v.pucExpiry || 'N/A',
         permit: v.permitExpiry || 'N/A',
@@ -321,9 +334,9 @@ const Vehicles = () => {
                 <td colSpan="11" style={{textAlign: 'center', padding: '20px'}}>No vehicles found matching your criteria.</td>
               </tr>
             ) : (
-              filteredVehicles.map((v) => (
+              filteredVehicles.map((v, index) => (
               <tr key={v.id} style={{ opacity: (v.status === 'Active' || v.status === 'Available') ? 1 : 0.4, transition: 'opacity 0.2s' }}>
-                <td>{v.displayId || v.id}</td>
+                <td>{index + 1}</td>
                 <td>
                   <div className="vehicle-info">
                     <span className="vehicle-num">{v.number}</span>
@@ -349,7 +362,7 @@ const Vehicles = () => {
                     {v.capacity}
                   </span>
                 </td>
-                <td>{v.owner}</td>
+                <td title="R.K. TRADERS & LOGISTICS">{v.owner}</td>
                 <td>
                   <span className={`date-badge ${v.insuranceStatus}`}>
                     {v.insurance}

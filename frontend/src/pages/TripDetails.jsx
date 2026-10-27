@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MdEdit, MdDelete, MdAdd, MdVisibility, MdClose, MdFileDownload, MdDescription, MdLocalShipping, MdFlashOn, MdMic } from 'react-icons/md';
+import { MdEdit, MdDelete, MdAdd, MdVisibility, MdClose, MdFileDownload, MdDescription, MdLocalShipping, MdFlashOn, MdMic, MdUploadFile, MdCheckCircle, MdPrint } from 'react-icons/md';
+import QRCode from 'qrcode';
 import { useModal } from '../context/ModalContext';
 import { useAuth } from '../context/AuthContext';
 import './VehicleDetails.css';
@@ -24,6 +25,7 @@ const TripDetails = () => {
   const [revInput, setRevInput] = useState('');
   const [costInput, setCostInput] = useState('');
   const [downloadingEway, setDownloadingEway] = useState(false);
+  const [generatingEway, setGeneratingEway] = useState(false);
 
   // Smart POD Upload with Payment Modal
   const [showPodUploadModal, setShowPodUploadModal] = useState(false);
@@ -33,6 +35,49 @@ const TripDetails = () => {
   const [deliveryPaymentAmount, setDeliveryPaymentAmount] = useState('');
   const [deliveryPaymentMode, setDeliveryPaymentMode] = useState('UPI');
   const [deliveryPaymentRemarks, setDeliveryPaymentRemarks] = useState('Delivery collection on POD receiving');
+
+  const handleOpenEwaySlip = async () => {
+    if (!dbTrip?.id) return;
+    let currentEwb = dbTrip.ewayBillNumber;
+    let currentExp = dbTrip.ewayBillExpiry;
+
+    if (!currentEwb || currentEwb.trim() === '' || currentEwb.toLowerCase() === 'part-a ready') {
+      try {
+        setGeneratingEway(true);
+        const res = await fetch('/api/v1/compliance/eway-bill/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tripId: Number(dbTrip.id),
+            distanceKm: dbTrip.distance || 250
+          })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          currentEwb = data.ewayBillNumber;
+          currentExp = data.ewayBillExpiry;
+          setDbTrip(prev => ({
+            ...prev,
+            ewayBillNumber: currentEwb,
+            ewayBillExpiry: currentExp
+          }));
+        } else {
+          const err = await res.json();
+          showAlert(err.error || 'Failed to generate E-Way bill');
+          setGeneratingEway(false);
+          return;
+        }
+      } catch (err) {
+        showAlert('Error generating E-Way Bill: ' + err.message);
+        setGeneratingEway(false);
+        return;
+      } finally {
+        setGeneratingEway(false);
+      }
+    }
+
+    navigate(`/trips/${dbTrip.tripNumber || dbTrip.id}/eway-bill`);
+  };
 
   useEffect(() => {
     const fetchTripData = async () => {
@@ -77,6 +122,13 @@ const TripDetails = () => {
     };
     fetchTripData();
   }, [id]);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('showEway') === 'true' && dbTrip) {
+      handleOpenEwaySlip();
+    }
+  }, [dbTrip?.id]);
 
   if (loading) return <div style={{padding: '24px'}}>Loading trip details...</div>;
 
@@ -232,30 +284,20 @@ const TripDetails = () => {
     }
   };
 
-  const handleDownloadEwayJson = async () => {
-    if (!dbTrip?.id) return;
+  const handleDeleteTrip = async () => {
+    if (!trip.dbId) return;
+    const confirmed = await showConfirm(`Are you sure you want to delete Trip ${trip.id}?`);
+    if (!confirmed) return;
     try {
-      setDownloadingEway(true);
-      const res = await fetch(`/api/v1/compliance/eway-bill/${dbTrip.id}/export/json`);
+      const res = await fetch(`/api/trips/${trip.dbId}`, { method: 'DELETE' });
       if (res.ok) {
-        const blob = await res.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `eway_bill_${dbTrip.tripNumber || dbTrip.id}.json`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        showAlert('E-Way Bill NIC JSON exported successfully! You can directly upload this file to the Government E-Way Bill Portal (ewaybillgst.gov.in).');
+        showAlert('Trip deleted successfully');
+        navigate('/trips');
       } else {
-        const err = await res.json();
-        showAlert(err.error || 'Failed to generate E-Way bill JSON.');
+        showAlert('Failed to delete trip');
       }
-    } catch (e) {
-      showAlert('Error downloading E-Way bill JSON: ' + e.message);
-    } finally {
-      setDownloadingEway(false);
+    } catch (err) {
+      showAlert('Error deleting trip: ' + err.message);
     }
   };
 
@@ -412,45 +454,69 @@ const TripDetails = () => {
         </div>
       )}
 
-      <div className="details-header" style={{ marginBottom: '24px' }}>
-        <div className="header-titles">
-          <h2>Trip Details — {trip.id}</h2>
+      <div className="details-header" style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'nowrap', gap: '12px' }}>
+        <div className="header-titles" style={{ flexShrink: 0 }}>
+          <h2 style={{ whiteSpace: 'nowrap', margin: 0 }}>Trip Details — {trip.id}</h2>
         </div>
-          <div className="header-actions">
+        <div className="header-actions" style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'nowrap' }}>
           {roleKey !== 'CUSTOMER' && (
             <button 
-              className="primary-btn" 
-              onClick={handleDownloadEwayJson} 
-              disabled={downloadingEway}
-              style={{ marginRight: '8px', backgroundColor: '#e67e22', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              className="trip-btn trip-btn-eway" 
+              onClick={handleOpenEwaySlip} 
+              disabled={generatingEway || downloadingEway}
+              title="View & Print Official Government E-Way Bill Slip"
             >
-              <MdFileDownload size={18} />
-              {downloadingEway ? 'Formatting...' : 'Govt E-Way JSON'}
+              <MdLocalShipping size={17} />
+              <span>{generatingEway ? 'Generating...' : 'Govt E-Way Bill'}</span>
             </button>
           )}
           {roleKey !== 'CUSTOMER' && trip.status !== 'CLOSED' && (
-             <button className="primary-btn" onClick={openPodUploadDialog} style={{ marginRight: '8px', backgroundColor: '#3498db' }}>
-               {trip.podStatus === 'RECEIVED' ? 'Update POD & Payment' : 'Upload POD'}
+             <button 
+               className="trip-btn trip-btn-pod" 
+               onClick={openPodUploadDialog}
+               title="Upload or update Proof of Delivery slip and payment"
+             >
+               <MdUploadFile size={17} />
+               <span>{trip.podStatus === 'RECEIVED' ? 'Update POD & Payment' : 'Upload POD'}</span>
              </button>
           )}
           {trip.podStatus === 'RECEIVED' && dbTrip?.podUrl && (
-             <button className="primary-btn" style={{ marginRight: '8px', backgroundColor: '#9b59b6' }} onClick={() => setShowPodImage(true)}>
-               <MdVisibility size={18} style={{ marginRight: '6px', verticalAlign: 'text-bottom' }} />
-               View POD Copy
+             <button 
+               className="trip-btn trip-btn-viewpod" 
+               onClick={() => setShowPodImage(true)}
+               title="View uploaded Proof of Delivery document"
+             >
+               <MdVisibility size={17} />
+               <span>View POD Copy</span>
              </button>
           )}
           {roleKey !== 'CUSTOMER' && trip.status !== 'CLOSED' && (
-            <button className="primary-btn" onClick={handleCloseTrip} style={{ marginRight: '8px', backgroundColor: '#e74c3c' }}>
-              Close Trip
+            <button 
+              className="trip-btn trip-btn-close" 
+              onClick={handleCloseTrip}
+              title="Final reconcile and close this trip"
+            >
+              <MdCheckCircle size={17} />
+              <span>Close Trip</span>
             </button>
           )}
           {roleKey !== 'CUSTOMER' && (
             <>
-              <button className="action-btn edit-btn" onClick={() => navigate(`/trips/${id}/edit`)}>
-                <MdEdit /> Edit Trip
+              <button 
+                className="trip-btn trip-btn-edit" 
+                onClick={() => navigate(`/trips/${id}/edit`)}
+                title="Edit trip details"
+              >
+                <MdEdit size={17} />
+                <span>Edit Trip</span>
               </button>
-              <button className="action-btn delete-btn">
-                <MdDelete /> Delete
+              <button 
+                className="trip-btn trip-btn-delete" 
+                onClick={handleDeleteTrip}
+                title="Delete this trip"
+              >
+                <MdDelete size={17} />
+                <span>Delete</span>
               </button>
             </>
           )}
@@ -461,121 +527,154 @@ const TripDetails = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '16px', marginBottom: '24px' }}>
         {/* Linked LR / Bilty Banner */}
         <div style={{
-          backgroundColor: 'rgba(46, 204, 113, 0.08)',
-          border: '1.5px solid #2ecc71',
+          backgroundColor: '#f0fdf4',
+          border: '1.5px solid #86efac',
           borderRadius: '10px',
-          padding: '12px 18px',
+          padding: '14px 20px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           gap: '12px',
-          flexWrap: 'wrap'
+          flexWrap: 'wrap',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: '200px' }}>
-            <MdDescription size={24} color="#2ecc71" />
-            <div>
-              <strong style={{ color: '#2ecc71', fontSize: '0.95rem' }}>LR / Bilty:</strong>{' '}
-              <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '1.05rem', marginLeft: '4px' }}>
-                {lrs[0]?.lrNumber || `LR-${dbTrip?.tripNumber || id}`}
-              </span>
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <MdDescription size={24} color="#16a34a" />
+            <strong style={{ color: '#16a34a', fontSize: '15px', fontWeight: 700 }}>LR / Bilty:</strong>
+            <span style={{ color: '#0f172a', fontWeight: 700, fontSize: '15px', marginLeft: '4px' }}>
+              {lrs[0]?.lrNumber || dbTrip?.lrNumber || `LR-${dbTrip?.tripNumber || id}`}
+            </span>
           </div>
           <button 
-            className="btn-primary"
             onClick={() => navigate(`/lr/${lrs[0]?.id || id}`)}
-            style={{ backgroundColor: '#2ecc71', border: 'none', padding: '8px 16px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', borderRadius: '6px', whiteSpace: 'nowrap' }}
+            style={{ 
+              backgroundColor: '#16a34a', 
+              color: '#ffffff', 
+              border: '1px solid #15803d', 
+              padding: '8px 16px', 
+              fontSize: '13px', 
+              fontWeight: 600, 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: '6px', 
+              cursor: 'pointer', 
+              borderRadius: '6px', 
+              whiteSpace: 'nowrap',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.06)'
+            }}
           >
-            View LR →
+            <span>View LR</span>
+            <span>→</span>
           </button>
         </div>
 
-        {/* 1-Click E-Way Bill & IRN Government Compliance Banner */}
+        {/* E-Way Bill & Government Compliance Banner - Styled Symmetrically to LR Box */}
         <div style={{
-          backgroundColor: 'rgba(230, 126, 34, 0.08)',
-          border: '1.5px solid #e67e22',
+          backgroundColor: '#fff7ed',
+          border: '1.5px solid #fdba74',
           borderRadius: '10px',
-          padding: '12px 18px',
+          padding: '14px 20px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           gap: '12px',
-          flexWrap: 'wrap'
+          flexWrap: 'wrap',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: '220px' }}>
-            <MdLocalShipping size={24} color="#e67e22" />
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                <strong style={{ color: '#e67e22', fontSize: '0.92rem' }}>E-Way Bill:</strong>
-                <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '1rem', letterSpacing: '0.5px' }}>
-                  {dbTrip?.ewayBillNumber || 'Part-A Ready'}
-                </span>
-                {dbTrip?.ewayBillExpiry && (
-                  <span style={{ fontSize: '10.5px', background: 'rgba(230, 126, 34, 0.2)', color: '#f39c12', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>
-                    Exp: {dbTrip.ewayBillExpiry}
-                  </span>
-                )}
-              </div>
-              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                Direct NIC / GSP Live Portal API Integration
-              </div>
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <MdLocalShipping size={24} color="#ea580c" />
+            <strong style={{ color: '#ea580c', fontSize: '15px', fontWeight: 700 }}>E-Way Bill:</strong>
+            <span style={{ color: '#0f172a', fontWeight: 700, fontSize: '15px', marginLeft: '4px' }}>
+              {dbTrip?.ewayBillNumber && dbTrip.ewayBillNumber.toLowerCase() !== 'part-a ready' ? dbTrip.ewayBillNumber : 'Not Generated'}
+            </span>
+            {dbTrip?.ewayBillExpiry && dbTrip.ewayBillNumber && dbTrip.ewayBillNumber.toLowerCase() !== 'part-a ready' && (
+              <span style={{ fontSize: '11px', background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a', padding: '2px 8px', borderRadius: '4px', fontWeight: 700, marginLeft: '4px' }}>
+                Exp: {dbTrip.ewayBillExpiry}
+              </span>
+            )}
           </div>
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
-            <button 
-              onClick={async () => {
-                if (!dbTrip?.id) return;
-                const status = (dbTrip.status || '').trim().toLowerCase();
-                if (status === 'completed' || status === 'delivered') {
-                  showAlert('Cannot generate E-Way Bill: This trip is already marked Completed/Delivered. E-Way Bills are only valid for dispatch and transit.');
-                  return;
-                }
-                try {
-                  const res = await fetch('/api/v1/compliance/eway-bill/generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      tripId: Number(dbTrip.id),
-                      distanceKm: dbTrip.distance || 250
-                    })
-                  });
-                  if (res.ok) {
-                    const data = await res.json();
-                    showAlert(`Govt E-Way Bill Generated Live!\n\nNo: ${data.ewayBillNumber}\nValid Until: ${data.ewayBillExpiry}\nMode: ${data.portalMode || 'NIC Gateway'}`);
-                    window.location.reload();
-                  } else {
-                    const err = await res.json();
-                    showAlert(err.error || 'Failed to generate E-Way bill');
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {dbTrip?.ewayBillNumber && dbTrip.ewayBillNumber.toLowerCase() !== 'part-a ready' ? (
+              <button 
+                onClick={() => navigate(`/trips/${dbTrip.tripNumber || dbTrip.id}/eway-bill`)}
+                style={{ 
+                  backgroundColor: '#ea580c', 
+                  color: '#ffffff', 
+                  border: '1px solid #c2410c', 
+                  padding: '8px 16px', 
+                  fontSize: '13px', 
+                  fontWeight: 600, 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  gap: '6px', 
+                  cursor: 'pointer', 
+                  borderRadius: '6px', 
+                  whiteSpace: 'nowrap', 
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.06)' 
+                }}
+              >
+                <span>View E-Way Slip</span>
+                <span>→</span>
+              </button>
+            ) : (
+              <button 
+                onClick={async () => {
+                  if (!dbTrip?.id) return;
+                  const status = (dbTrip.status || '').trim().toLowerCase();
+                  if (status === 'completed' || status === 'delivered') {
+                    showAlert('Cannot generate E-Way Bill: This trip is already marked Completed/Delivered. E-Way Bills are only valid for dispatch and transit.');
+                    return;
                   }
-                } catch (e) {
-                  showAlert('Error: ' + e.message);
-                }
-              }}
-              disabled={(dbTrip?.status || '').toLowerCase() === 'completed' || (dbTrip?.status || '').toLowerCase() === 'delivered'}
-              title={((dbTrip?.status || '').toLowerCase() === 'completed' || (dbTrip?.status || '').toLowerCase() === 'delivered') ? "E-Way Bill cannot be generated for completed trips" : "Generate E-Way Bill"}
-              style={{ 
-                backgroundColor: ((dbTrip?.status || '').toLowerCase() === 'completed' || (dbTrip?.status || '').toLowerCase() === 'delivered') ? 'rgba(255,255,255,0.1)' : '#27ae60', 
-                color: ((dbTrip?.status || '').toLowerCase() === 'completed' || (dbTrip?.status || '').toLowerCase() === 'delivered') ? '#888' : '#fff', 
-                border: 'none', 
-                padding: '7px 12px', 
-                borderRadius: '6px', 
-                fontSize: '0.82rem', 
-                fontWeight: 600, 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '5px', 
-                cursor: ((dbTrip?.status || '').toLowerCase() === 'completed' || (dbTrip?.status || '').toLowerCase() === 'delivered') ? 'not-allowed' : 'pointer', 
-                whiteSpace: 'nowrap' 
-              }}
-            >
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdFlashOn size={16} /> 1-Click Generate</span>
-            </button>
-            <button 
-              onClick={handleDownloadEwayJson}
-              disabled={downloadingEway}
-              style={{ backgroundColor: '#e67e22', color: '#fff', border: 'none', padding: '7px 12px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', whiteSpace: 'nowrap' }}
-            >
-              <MdFileDownload size={15} /> NIC JSON
-            </button>
+                  try {
+                    const res = await fetch('/api/v1/compliance/eway-bill/generate', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        tripId: Number(dbTrip.id),
+                        distanceKm: dbTrip.distance || 250
+                      })
+                    });
+                    if (res.ok) {
+                      const data = await res.json();
+                      setDbTrip(prev => ({
+                        ...prev,
+                        ewayBillNumber: data.ewayBillNumber,
+                        ewayBillExpiry: data.ewayBillExpiry
+                      }));
+                      showAlert(`Govt E-Way Bill Generated! No: ${data.ewayBillNumber}`);
+                      // Auto-navigate to LR where E-Way Bill number is displayed as requested by user
+                      navigate(`/lr/${lrs[0]?.id || id}`);
+                    } else {
+                      const err = await res.json();
+                      showAlert(err.error || 'Failed to generate E-Way bill');
+                    }
+                  } catch (e) {
+                    showAlert('Error: ' + e.message);
+                  }
+                }}
+                disabled={(dbTrip?.status || '').toLowerCase() === 'completed' || (dbTrip?.status || '').toLowerCase() === 'delivered'}
+                title={((dbTrip?.status || '').toLowerCase() === 'completed' || (dbTrip?.status || '').toLowerCase() === 'delivered') ? "E-Way Bill cannot be generated for completed trips" : "Generate E-Way Bill"}
+                style={{ 
+                  backgroundColor: ((dbTrip?.status || '').toLowerCase() === 'completed' || (dbTrip?.status || '').toLowerCase() === 'delivered') ? '#f1f5f9' : '#16a34a', 
+                  color: ((dbTrip?.status || '').toLowerCase() === 'completed' || (dbTrip?.status || '').toLowerCase() === 'delivered') ? '#64748b' : '#ffffff', 
+                  border: ((dbTrip?.status || '').toLowerCase() === 'completed' || (dbTrip?.status || '').toLowerCase() === 'delivered') ? '1px solid #cbd5e1' : '1px solid #15803d', 
+                  padding: '8px 16px', 
+                  fontSize: '13px', 
+                  fontWeight: 600, 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  gap: '6px', 
+                  cursor: ((dbTrip?.status || '').toLowerCase() === 'completed' || (dbTrip?.status || '').toLowerCase() === 'delivered') ? 'not-allowed' : 'pointer', 
+                  borderRadius: '6px', 
+                  whiteSpace: 'nowrap', 
+                  boxShadow: ((dbTrip?.status || '').toLowerCase() === 'completed' || (dbTrip?.status || '').toLowerCase() === 'delivered') ? 'none' : '0 1px 2px rgba(0,0,0,0.06)' 
+                }}
+              >
+                <MdFlashOn size={16} />
+                <span>Generate E-Way Bill</span>
+                <span>→</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

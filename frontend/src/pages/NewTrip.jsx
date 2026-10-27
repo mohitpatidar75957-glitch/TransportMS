@@ -5,7 +5,7 @@ import {
   MdAttachMoney, MdSearch, MdCheckCircle, MdArrowForward, MdInventory,
   MdTrendingUp, MdAddRoad, MdAccountBalanceWallet, MdStraighten, MdShowChart,
   MdWarning, MdFlashOn, MdDescription, MdAccountBalance,
-  MdLightbulb, MdGpsFixed, MdCalendarToday, MdScale
+  MdLightbulb, MdGpsFixed, MdCalendarToday, MdScale, MdTimer, MdEmojiEvents, MdAltRoute
 } from 'react-icons/md';
 import './NewTrip.css';
 import { 
@@ -14,7 +14,8 @@ import {
   isValidName, 
   sanitizeNameInput, 
   sanitizeDigitsOnly, 
-  sanitizeAlphaNumericUpper 
+  sanitizeAlphaNumericUpper,
+  capitalizeWords
 } from '../utils/validationUtils';
 
 // Standard Indian logistics hub cities including key MP & Interstate transport junctions
@@ -29,16 +30,20 @@ const INDIAN_LOGISTICS_CITIES = [
   'Kanpur', 'Khandwa', 'Khargone', 'Kochi', 'Kolhapur', 'Kolkata', 'Kota',
   'Lucknow', 'Ludhiana', 'Madurai', 'Mangalore', 'Mathura', 'Meerut', 'Moradabad', 'Mumbai', 'Muzaffarnagar', 'Muzaffarpur',
   'Nagpur', 'Nanded', 'Nashik', 'Neemuch', 'Noida',
+  'Omkareshwar', 'Omkara',
   'Panipat', 'Patna', 'Pithampur', 'Pune',
   'Raipur', 'Rajkot', 'Ranchi', 'Ratlam', 'Rewa', 'Rohtak', 'Rourkela',
   'Sagar', 'Saharanpur', 'Salem', 'Satna', 'Sehore', 'Solapur', 'Surat',
   'Thane', 'Tiruchirappalli', 'Udaipur', 'Ujjain', 'Vadodara', 'Varanasi', 'Vijayawada', 'Visakhapatnam'
 ];
 
-// Interactive City Autocomplete Component with custom dropdown suggestions
+// Interactive City Autocomplete Component with custom dropdown suggestions & All-India live lookup
 const CitySearchInput = ({ value, onChange, placeholder, onBlur, hasError, errorBorderColor }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [liveResults, setLiveResults] = useState([]);
+  const [isSearchingLive, setIsSearchingLive] = useState(false);
   const containerRef = useRef(null);
+  const searchTimeoutRef = useRef(null);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -51,11 +56,68 @@ const CitySearchInput = ({ value, onChange, placeholder, onBlur, hasError, error
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const query = (value || '').trim().toLowerCase();
-  const matchedCities = useMemo(() => {
+  const query = (value || '').trim();
+  const staticMatches = useMemo(() => {
     if (!query) return INDIAN_LOGISTICS_CITIES.slice(0, 15);
-    return INDIAN_LOGISTICS_CITIES.filter(c => c.toLowerCase().includes(query)).slice(0, 20);
+    const q = query.toLowerCase();
+    return INDIAN_LOGISTICS_CITIES.filter(c => c.toLowerCase().includes(q)).slice(0, 10);
   }, [query]);
+
+  // Dynamic live geocoding for all India locations (villages, towns, tehsils)
+  useEffect(() => {
+    if (!query || query.length < 2) {
+      setLiveResults([]);
+      setIsSearchingLive(false);
+      return;
+    }
+
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchTimeoutRef.current = setTimeout(async () => {
+      setIsSearchingLive(true);
+      try {
+        const res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=10`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.features) {
+            const indiaLocations = data.features
+              .filter(f => f.properties && f.properties.countrycode === 'IN')
+              .map(f => {
+                const p = f.properties;
+                const parts = [];
+                if (p.name) parts.push(p.name);
+                if (p.city && p.city !== p.name) parts.push(p.city);
+                else if (p.county && p.county !== p.name) parts.push(p.county);
+                if (p.state) parts.push(p.state);
+                return parts.join(', ');
+              })
+              .filter(Boolean);
+
+            const unique = Array.from(new Set(indiaLocations)).slice(0, 8);
+            setLiveResults(unique);
+          }
+        }
+      } catch (err) {
+        console.warn('Live location lookup error:', err);
+      } finally {
+        setIsSearchingLive(false);
+      }
+    }, 250);
+
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    };
+  }, [query]);
+
+  const allSuggestions = useMemo(() => {
+    const list = [...staticMatches];
+    liveResults.forEach(item => {
+      if (!list.includes(item)) list.push(item);
+    });
+    return list;
+  }, [staticMatches, liveResults]);
 
   return (
     <div ref={containerRef} style={{ position: 'relative', width: '100%' }}>
@@ -65,7 +127,8 @@ const CitySearchInput = ({ value, onChange, placeholder, onBlur, hasError, error
         value={value}
         onFocus={() => setIsOpen(true)}
         onChange={(e) => {
-          onChange(e.target.value);
+          const capVal = capitalizeWords(e.target.value);
+          onChange(capVal);
           setIsOpen(true);
         }}
         onBlur={onBlur}
@@ -80,45 +143,50 @@ const CitySearchInput = ({ value, onChange, placeholder, onBlur, hasError, error
           boxShadow: 'none'
         }}
       />
-      {isOpen && matchedCities.length > 0 && (
+      {isOpen && allSuggestions.length > 0 && (
         <div style={{
           position: 'absolute',
           top: 'calc(100% + 8px)',
           left: -12,
           right: -12,
           zIndex: 999999,
-          background: '#1a2332',
-          border: '1px solid rgba(255, 255, 255, 0.15)',
+          background: 'var(--bg-secondary)',
+          border: '1px solid var(--border-color)',
           borderRadius: '10px',
-          boxShadow: '0 16px 48px rgba(0,0,0,0.8)',
+          boxShadow: '0 12px 32px rgba(0, 0, 0, 0.12)',
           maxHeight: '260px',
           overflowY: 'auto'
         }}>
-          {matchedCities.map((city) => (
+          {allSuggestions.map((loc) => (
             <div
-              key={city}
+              key={loc}
               onMouseDown={(e) => {
                 e.preventDefault();
-                onChange(city);
+                onChange(loc);
                 setIsOpen(false);
               }}
               style={{
-                padding: '10px 16px',
+                padding: '11px 16px',
                 cursor: 'pointer',
-                color: '#dfe6e9',
+                color: 'var(--text-primary)',
                 fontSize: '0.9rem',
-                borderBottom: '1px solid rgba(255,255,255,0.05)',
+                borderBottom: '1px solid var(--border-color)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px'
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(9, 132, 227, 0.25)')}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--hover-color)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              <span style={{ color: '#0984e3' }}>📍</span>
-              <span>{city}</span>
+              <MdLocationOn style={{ color: '#0984e3' }} size={16} />
+              <span>{loc}</span>
             </div>
           ))}
+          {isSearchingLive && (
+            <div style={{ padding: '8px 16px', fontSize: '0.78rem', color: 'var(--text-secondary)', fontStyle: 'italic', borderTop: '1px solid var(--border-color)' }}>
+              Searching All India locations...
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -146,8 +214,8 @@ const CustomSelect = ({ options, value, onChange, placeholder = 'Select...' }) =
         style={{
           width: '100%',
           padding: '12px 16px',
-          backgroundColor: 'rgba(0, 0, 0, 0.2)',
-          border: `1.5px solid ${isOpen ? '#0984e3' : 'rgba(255, 255, 255, 0.1)'}`,
+          backgroundColor: 'var(--bg-secondary)',
+          border: `1.5px solid ${isOpen ? '#2563eb' : 'var(--border-color)'}`,
           borderRadius: '8px',
           color: 'var(--text-primary)',
           cursor: 'pointer',
@@ -157,17 +225,17 @@ const CustomSelect = ({ options, value, onChange, placeholder = 'Select...' }) =
           fontFamily: 'inherit',
           fontSize: '0.95rem',
           boxSizing: 'border-box',
-          boxShadow: isOpen ? '0 0 0 3px rgba(9,132,227,0.12)' : 'none',
+          boxShadow: isOpen ? '0 0 0 3px rgba(37, 99, 235, 0.12)' : 'none',
           transition: 'border-color 0.2s, box-shadow 0.2s',
           userSelect: 'none',
         }}
       >
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {selected ? selected.label : <span style={{ opacity: 0.5 }}>{placeholder}</span>}
+          {selected ? selected.label : <span style={{ color: 'var(--text-secondary)', opacity: 0.8 }}>{placeholder}</span>}
         </span>
         <span style={{
           fontSize: '0.75rem',
-          opacity: 0.7,
+          color: 'var(--text-secondary)',
           transition: 'transform 0.2s',
           transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
           display: 'inline-block',
@@ -183,10 +251,10 @@ const CustomSelect = ({ options, value, onChange, placeholder = 'Select...' }) =
           left: 0,
           right: 0,
           zIndex: 99999,
-          background: '#1a2332',
-          border: '1px solid rgba(255,255,255,0.15)',
+          background: 'var(--bg-secondary)',
+          border: '1px solid var(--border-color)',
           borderRadius: '10px',
-          boxShadow: '0 16px 48px rgba(0,0,0,0.7)',
+          boxShadow: '0 12px 32px rgba(0,0,0,0.12)',
           maxHeight: '260px',
           overflowY: 'auto',
         }}>
@@ -195,12 +263,12 @@ const CustomSelect = ({ options, value, onChange, placeholder = 'Select...' }) =
             style={{
               padding: '10px 16px',
               cursor: 'pointer',
-              color: 'rgba(255,255,255,0.45)',
+              color: 'var(--text-secondary)',
               fontSize: '0.9rem',
               fontStyle: 'italic',
-              borderBottom: '1px solid rgba(255,255,255,0.08)',
+              borderBottom: '1px solid var(--border-color)',
             }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(9,132,227,0.12)'}
+            onMouseEnter={e => e.currentTarget.style.background = 'var(--hover-color)'}
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
           >
             {placeholder}
@@ -214,19 +282,19 @@ const CustomSelect = ({ options, value, onChange, placeholder = 'Select...' }) =
                 style={{
                   padding: '10px 16px',
                   cursor: 'pointer',
-                  color: isSel ? '#74b9ff' : '#dfe6e9',
-                  background: isSel ? 'rgba(9,132,227,0.18)' : 'transparent',
+                  color: isSel ? '#2563eb' : 'var(--text-primary)',
+                  background: isSel ? 'rgba(37, 99, 235, 0.12)' : 'transparent',
                   fontWeight: isSel ? 600 : 400,
                   fontSize: '0.95rem',
-                  borderTop: '1px solid rgba(255,255,255,0.06)',
+                  borderTop: '1px solid var(--border-color)',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px'
                 }}
-                onMouseEnter={e => { if (!isSel) e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+                onMouseEnter={e => { if (!isSel) e.currentTarget.style.background = 'var(--hover-color)'; }}
                 onMouseLeave={e => { if (!isSel) e.currentTarget.style.background = 'transparent'; }}
               >
-                {isSel && <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#74b9ff', flexShrink: 0 }} />}
+                {isSel && <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#2563eb', flexShrink: 0 }} />}
                 {opt.label}
               </div>
             );
@@ -1138,7 +1206,7 @@ const NewTrip = () => {
     const generatedRoutes = [
       { type: 'BEST', title: 'BEST ROUTE', badge: '🥇', time: `${Math.floor(best.distance / 55)}h ${Math.floor((best.distance % 55) * (60/55))}m`, tolls: Math.floor(best.toll / 150), ...addMargin(best) },
       { type: 'NORMAL', title: 'NORMAL ROUTE', badge: '⚡', time: `${Math.floor(normal.distance / 50)}h ${Math.floor((normal.distance % 50) * (60/50))}m`, tolls: Math.floor(normal.toll / 80), ...addMargin(normal) },
-      { type: 'ECONOMY', title: 'ECONOMY ROUTE', badge: '💰', time: `${Math.floor(economy.distance / 45)}h ${Math.floor((economy.distance % 45) * (60/45))}m`, tolls: 0, ...addMargin(economy) }
+      { type: 'ECONOMY', title: 'ECONOMY ROUTE', badge: 'SAVER', time: `${Math.floor(economy.distance / 45)}h ${Math.floor((economy.distance % 45) * (60/45))}m`, tolls: 0, ...addMargin(economy) }
     ];
 
     // Rank routes by highest margin percentage (Point 5)
@@ -1154,7 +1222,6 @@ const NewTrip = () => {
   };
 
   const handleCreateTrip = async () => {
-    const tripNumber = `TRP-${Math.floor(10000 + Math.random() * 90000)}`;
     const selectedRoute = routes.find(r => r.type === selectedRouteType);
     const cost = selectedRoute ? selectedRoute.total : 0;
     const freightAmount = parseFloat(manualFreightRate) || (selectedRoute ? selectedRoute.freightAmount : 0);
@@ -1163,7 +1230,7 @@ const NewTrip = () => {
     const gstAmt = (freightAmount * gstPct) / 100;
 
     const payload = {
-      tripNumber: tripNumber,
+      tripNumber: null,
       vehicle: { id: parseInt(vehicleId) },
       driver: { id: parseInt(driverId) },
       route: `${startLocation} → ${destination}`,
@@ -1496,7 +1563,7 @@ const NewTrip = () => {
                     {errors.manualFreightRate}
                   </div>
                 ) : (
-                  <span style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '6px', display: 'block' }}>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--text-primary, #0f172a)', marginTop: '6px', display: 'block', fontWeight: 500 }}>
                     Total earning for this trip. Auto-filled if Rate Card exists, or enter manually.
                   </span>
                 )}
@@ -1510,9 +1577,9 @@ const NewTrip = () => {
                     <span>Live Profitability & Per-Kilometer (₹/KM) Calculator</span>
                   </div>
                   {effectiveDistance > 0 && (
-                    <span className="km-profit-distance-pill">
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdStraighten size={15} /> Distance: {effectiveDistance} KM</span>
-                    </span>
+                    <div className="km-profit-distance-pill" style={{ whiteSpace: 'nowrap', flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <MdStraighten size={16} /> <span>Distance: <strong>{effectiveDistance} KM</strong></span>
+                    </div>
                   )}
                 </div>
 
@@ -1852,7 +1919,7 @@ const NewTrip = () => {
                   <div className="smart-eta-main">
                     <div className="smart-eta-info-wrap">
                       <div className="smart-eta-icon-badge">
-                        ⏱️
+                        <MdTimer size={28} color="#38bdf8" />
                       </div>
                       <div>
                         <div className="smart-eta-title-row">
@@ -1900,11 +1967,11 @@ const NewTrip = () => {
               )}
               <div className="form-group" style={{ gridColumn: '1 / -1' }}>
                 <label>Pickup Address</label>
-                <input type="text" placeholder="Enter full pickup address" value={pickupAddress} onChange={e => setPickupAddress(e.target.value)} />
+                <input type="text" placeholder="Enter full pickup address" value={pickupAddress} onChange={e => setPickupAddress(capitalizeWords(e.target.value))} />
               </div>
               <div className="form-group" style={{ gridColumn: '1 / -1' }}>
                 <label>Delivery Address</label>
-                <input type="text" placeholder="Enter full delivery address" value={deliveryAddress} onChange={e => setDeliveryAddress(e.target.value)} />
+                <input type="text" placeholder="Enter full delivery address" value={deliveryAddress} onChange={e => setDeliveryAddress(capitalizeWords(e.target.value))} />
               </div>
 
               {/* Added LR Details for Trip Generation */}
@@ -2185,7 +2252,7 @@ const NewTrip = () => {
             onClick={handleFindRoutes}
             disabled={loading}
           >
-            {loading ? 'Calculating Best Routes...' : <><MdSearch size={20}/> Find Best Routes</>}
+            {loading ? 'Calculating Best Routes...' : <><MdAltRoute size={20}/> Find Best Routes</>}
           </button>
         </div>
       </div>
@@ -2225,8 +2292,11 @@ const NewTrip = () => {
           <div className="routes-grid">
             {routes.map((route, idx) => (
               <div className={`route-option-card ${route.type.toLowerCase()} ${selectedRouteType === route.type ? 'selected' : ''}`} key={idx}>
-                <div className="route-badge">
-                  {route.badge} {route.title}
+                <div className="route-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  {route.type === 'BEST' && <MdEmojiEvents size={16} color="#eab308" />}
+                  {route.type === 'NORMAL' && <MdFlashOn size={16} color="#38bdf8" />}
+                  {route.type === 'ECONOMY' && <MdAccountBalanceWallet size={16} color="#10b981" />}
+                  <span>{route.title}</span>
                 </div>
                 
                 <div className="route-card-content">

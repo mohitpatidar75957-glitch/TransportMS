@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MdAdd, MdSearch, MdVisibility, MdEdit, MdDelete, MdPictureAsPdf, MdCheckCircle, MdPayment } from 'react-icons/md';
+import { MdAdd, MdSearch, MdVisibility, MdEdit, MdDelete, MdPictureAsPdf, MdCheckCircle, MdPayment, MdCurrencyRupee } from 'react-icons/md';
 import './Vehicles.css'; // Reusing general styles
 import { useModal } from '../context/ModalContext';
 import { useAuth } from '../context/AuthContext';
@@ -98,25 +98,31 @@ const Invoices = () => {
 
   const handleDirectDownloadPdf = (inv) => {
     const raw = inv.rawInvoice || {};
-    const grossAmt = Number(raw.amount) || 0;
+    const trip = raw.trip || {};
+    const baseFreight = Number(trip.freightAmount) || (Number(raw.amount) ? (Boolean(raw.rcmApplicable) ? Number(raw.amount) : Number(raw.amount) / 1.05) : 0);
+    const gstAmt = Number(trip.gstAmount) || 0;
+    const biltyAmt = Number(trip.biltyCharge) || 0;
+    const loadingAmt = Number(trip.loadingCharge) || 0;
+    const advancePaid = Number(trip.advanceAmount) || 0;
+
     const isRcm = Boolean(raw.rcmApplicable);
-    const freightAmount = isRcm ? grossAmt : (grossAmt / 1.05);
-    const cgst = isRcm ? 0 : (freightAmount * 0.025);
-    const sgst = isRcm ? 0 : (freightAmount * 0.025);
+    const grossAmt = inv.grossVal || (baseFreight + gstAmt + biltyAmt + loadingAmt);
+
     const isTds = Boolean(raw.tdsApplicable);
     const tdsRate = Number(raw.tdsRate) || (isTds ? 2.0 : 0);
-    const tdsDeduction = Number(raw.tdsAmount) || (isTds ? (freightAmount * (tdsRate / 100)) : 0);
+    const tdsDeduction = Number(raw.tdsAmount) || (isTds ? (baseFreight * (tdsRate / 100)) : 0);
     const netReceivable = Math.max(0, grossAmt - tdsDeduction);
     
     const invoicePayments = paymentsMap[inv.dbId] || [];
-    const totalPaid = invoicePayments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
+    const paymentRecordsSum = invoicePayments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
+    const totalPaid = paymentRecordsSum + (paymentRecordsSum === 0 ? advancePaid : 0);
     const balanceDue = Math.max(0, netReceivable - totalPaid);
 
     const docNo = inv.id;
     const docDate = raw.date || new Date().toISOString().split('T')[0];
     const clientName = inv.customer || 'Customer Logistics';
-    const route = raw.trip?.route || 'Route Delivery';
-    const vehNo = raw.trip?.vehicle?.registrationNumber || 'MH04AB1234';
+    const route = trip.route || 'Route Delivery';
+    const vehNo = trip.vehicle?.registrationNumber || 'MH04AB1234';
 
     const iframe = document.createElement('iframe');
     iframe.style.position = 'fixed';
@@ -161,7 +167,7 @@ const Invoices = () => {
             table { width: 100%; border-collapse: collapse; margin-bottom: 20px; border: 1px solid #cbd5e1; }
             th { background: #f1f5f9; color: #334155; padding: 10px; font-size: 13px; border: 1px solid #cbd5e1; }
             td { padding: 10px; border: 1px solid #cbd5e1; font-size: 13px; }
-            .summary-table { width: 340px; margin-left: auto; border-collapse: collapse; margin-bottom: 25px; }
+            .summary-table { width: 360px; margin-left: auto; border-collapse: collapse; margin-bottom: 25px; }
             .summary-table td { border: none; padding: 5px 8px; font-size: 13px; }
             .footer { display: flex; justify-content: space-between; margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 20px; }
           </style>
@@ -192,7 +198,7 @@ const Invoices = () => {
             <div class="box">
               <span style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">Billed To:</span>
               <h4 style="margin: 4px 0 2px 0; font-size: 15px; color: #0f172a;">${clientName}</h4>
-              <p style="margin: 0; font-size: 13px; color: #475569;">${raw.trip?.deliveryAddress || raw.trip?.pickupAddress || 'Address on file'}</p>
+              <p style="margin: 0; font-size: 13px; color: #475569;">${trip.deliveryAddress || trip.pickupAddress || 'Address on file'}</p>
               <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">GSTIN: ${raw.consigneeGst || '24AAACG5678B1Z2'}</p>
             </div>
             <div class="box">
@@ -216,29 +222,50 @@ const Invoices = () => {
               <tr>
                 <td style="text-align: center;">1</td>
                 <td>
-                  <strong>Freight Transportation Logistics Services</strong><br/>
+                  <strong>Base Freight Transportation Charges</strong><br/>
                   <span style="font-size: 12px; color: #64748b;">Route: ${route} (${vehNo})</span>
                 </td>
                 <td style="text-align: center;">${raw.hsnCode || '996511'}</td>
-                <td style="text-align: right; font-weight: 600;">₹${freightAmount.toFixed(2)}</td>
+                <td style="text-align: right; font-weight: 600;">₹${baseFreight.toFixed(2)}</td>
               </tr>
+              ${biltyAmt > 0 ? `
+              <tr>
+                <td style="text-align: center;">2</td>
+                <td><strong>Bilty / Documentation Charges</strong></td>
+                <td style="text-align: center;">996511</td>
+                <td style="text-align: right; font-weight: 600;">₹${biltyAmt.toFixed(2)}</td>
+              </tr>
+              ` : ''}
+              ${loadingAmt > 0 ? `
+              <tr>
+                <td style="text-align: center;">${biltyAmt > 0 ? 3 : 2}</td>
+                <td><strong>Loading / Unloading Charges</strong></td>
+                <td style="text-align: center;">996511</td>
+                <td style="text-align: right; font-weight: 600;">₹${loadingAmt.toFixed(2)}</td>
+              </tr>
+              ` : ''}
             </tbody>
           </table>
 
           <table class="summary-table">
             <tr>
-              <td>Sub Total (Freight):</td>
-              <td style="text-align: right;">₹${freightAmount.toFixed(2)}</td>
+              <td>Base Freight:</td>
+              <td style="text-align: right; font-weight: 600;">₹${baseFreight.toFixed(2)}</td>
             </tr>
-            ${isRcm ? `
+            ${biltyAmt > 0 ? `
+              <tr><td>Bilty Charges:</td><td style="text-align: right;">₹${biltyAmt.toFixed(2)}</td></tr>
+            ` : ''}
+            ${loadingAmt > 0 ? `
+              <tr><td>Loading Charges:</td><td style="text-align: right;">₹${loadingAmt.toFixed(2)}</td></tr>
+            ` : ''}
+            ${gstAmt > 0 ? `
+              <tr><td>GST (${trip.gstPercent ? `${trip.gstPercent}%` : 'Tax'}):</td><td style="text-align: right; color: #0984e3;">+ ₹${gstAmt.toFixed(2)}</td></tr>
+            ` : (isRcm ? `
               <tr><td colspan="2" style="color: #27ae60; font-size: 11px; font-weight: bold;">(GST on Reverse Charge Mechanism - RCM)</td></tr>
-            ` : `
-              <tr><td>CGST @ 2.5%:</td><td style="text-align: right;">₹${cgst.toFixed(2)}</td></tr>
-              <tr><td>SGST @ 2.5%:</td><td style="text-align: right;">₹${sgst.toFixed(2)}</td></tr>
-            `}
+            ` : '')}
             <tr style="border-top: 1px solid #cbd5e1; font-weight: bold;">
-              <td>Gross Amount:</td>
-              <td style="text-align: right;">₹${grossAmt.toFixed(2)}</td>
+              <td>Gross Total Amount:</td>
+              <td style="text-align: right; color: #0f172a;">₹${grossAmt.toFixed(2)}</td>
             </tr>
             ${isTds ? `
               <tr style="color: #e74c3c;">
@@ -247,15 +274,17 @@ const Invoices = () => {
               </tr>
             ` : ''}
             <tr style="border-top: 1px solid #cbd5e1; font-weight: bold; font-size: 14px;">
-              <td>Net Receivable:</td>
+              <td>Net Payable / Receivable:</td>
               <td style="text-align: right; color: #0984e3;">₹${netReceivable.toFixed(2)}</td>
             </tr>
+            ${totalPaid > 0 ? `
             <tr>
-              <td style="color: #16a34a;">Paid to Date:</td>
+              <td style="color: #16a34a;">Less: Advance / Paid:</td>
               <td style="text-align: right; color: #16a34a; font-weight: bold;">- ₹${totalPaid.toFixed(2)}</td>
             </tr>
+            ` : ''}
             <tr style="border-top: 2px solid #0f172a; font-weight: 800; font-size: 15px;">
-              <td>${balanceDue > 0 ? 'Balance Due:' : 'Status: Fully Paid'}</td>
+              <td>${balanceDue > 0 ? 'Balance Due:' : 'Status: Fully Cleared'}</td>
               <td style="text-align: right; color: ${balanceDue > 0 ? '#e74c3c' : '#16a34a'};">₹${balanceDue.toFixed(2)}</td>
             </tr>
           </table>
@@ -291,13 +320,26 @@ const Invoices = () => {
 
   const allInvoices = [
     ...dbInvoices.map(i => {
-      const grossAmt = Number(i.amount) || 0;
+      const trip = i.trip;
+      const baseFreight = Number(trip?.freightAmount) || Number(i.amount) || 0;
+      const gstAmt = Number(trip?.gstAmount) || 0;
+      const biltyAmt = Number(trip?.biltyCharge) || 0;
+      const loadingAmt = Number(trip?.loadingCharge) || 0;
+      const advancePaid = Number(trip?.advanceAmount) || 0;
+      
+      // If invoice has a linked trip with charges, calculate true gross total
+      const calculatedGross = trip 
+        ? (baseFreight + gstAmt + biltyAmt + loadingAmt)
+        : (Number(i.amount) || 0);
+
+      const grossAmt = calculatedGross > 0 ? calculatedGross : (Number(i.amount) || 0);
       const tdsAmt = Number(i.tdsAmount) || 0;
-      const netBilled = grossAmt - tdsAmt;
+      const netBilled = Math.max(0, grossAmt - tdsAmt);
 
       // Sum all recorded part-payments
       const invoicePayments = paymentsMap[i.id] || [];
-      const totalPaidSum = invoicePayments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
+      const paymentRecordsSum = invoicePayments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
+      const totalPaidSum = paymentRecordsSum + (paymentRecordsSum === 0 ? advancePaid : 0);
       
       const isPaid = i.status === 'Paid' || (netBilled > 0 && totalPaidSum >= netBilled);
       const paidVal = totalPaidSum > 0 ? totalPaidSum : (isPaid ? netBilled : 0);
@@ -315,13 +357,19 @@ const Invoices = () => {
       return {
         id: i.invoiceNumber || `INV-DB-${i.id}`,
         dbId: i.id,
-        rawInvoice: i,
+        rawInvoice: { ...i, amount: grossAmt },
         date: i.date || 'Unknown',
         dueDate: i.dueDate || null,
         customer: i.clientName || i.trip?.clientName || 'N/A',
         tripId: i.trip ? (i.trip.tripNumber || `TRP-DB-${i.trip.id}`) : 'N/A',
         amountVal: netBilled,
         grossVal: grossAmt,
+        baseFreight,
+        gstAmt,
+        biltyAmt,
+        loadingAmt,
+        advancePaid,
+        hasBreakdown: Boolean(trip && (gstAmt > 0 || biltyAmt > 0 || loadingAmt > 0 || advancePaid > 0)),
         tdsVal: tdsAmt,
         amount: `₹${netBilled.toLocaleString()}`,
         paidVal: paidVal,
@@ -669,9 +717,19 @@ const Invoices = () => {
                       <span className="vehicle-name link-text">{inv.tripId}</span>
                     </div>
                   </td>
-                  <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{inv.amount}</td>
-                  <td style={{ textAlign: 'right', color: '#4cd137' }}>{inv.paid}</td>
-                  <td style={{ textAlign: 'right', color: '#e74c3c' }}>{inv.pending}</td>
+                  <td style={{ textAlign: 'right' }}>
+                    <div style={{ fontWeight: 'bold', fontSize: '14px', color: 'var(--text-primary)' }}>{inv.amount}</div>
+                    {inv.hasBreakdown ? (
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }} title={`Base Freight: ₹${inv.baseFreight.toLocaleString()} + GST: ₹${inv.gstAmt.toLocaleString()} + Extra Charges: ₹${(inv.biltyAmt + inv.loadingAmt).toLocaleString()}${inv.advancePaid > 0 ? ` - Advance: ₹${inv.advancePaid.toLocaleString()}` : ''}`}>
+                        ₹{inv.baseFreight.toLocaleString()} + GST {inv.gstAmt > 0 ? `₹${inv.gstAmt.toLocaleString()}` : '₹0'} + Charges ₹{(inv.biltyAmt + inv.loadingAmt).toLocaleString()}
+                        {inv.advancePaid > 0 && <span style={{ color: '#27ae60' }}> (Adv: -₹{inv.advancePaid.toLocaleString()})</span>}
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: '2px' }}>Standard Freight</div>
+                    )}
+                  </td>
+                  <td style={{ textAlign: 'right', color: '#4cd137', fontWeight: 600 }}>{inv.paid}</td>
+                  <td style={{ textAlign: 'right', color: '#e74c3c', fontWeight: 600 }}>{inv.pending}</td>
                   <td>
                     <span className={`status-badge ${(inv.status || 'Draft').toLowerCase()}`}>
                       {inv.status}
@@ -689,7 +747,7 @@ const Invoices = () => {
                         style={{ color: '#00b894' }} 
                         onClick={() => handleOpenPaymentModal(inv)}
                       >
-                        <MdPayment />
+                        <MdCurrencyRupee size={18} />
                       </button>
 
                       {(roleKey === 'SUPER_ADMIN' || roleKey === 'MANAGER') && (

@@ -159,12 +159,28 @@ const LRDetails = () => {
               loadingCharge: matchingTrip.loadingCharge ? parseFloat(matchingTrip.loadingCharge) : 0,
               materialDescription: goodsDesc,
               status: matchingTrip.status || 'Delivered',
+              ewayBillNumber: matchingTrip.ewayBillNumber || '',
               trip: matchingTrip
             };
           }
         }
 
         if (found) {
+          // If ewayBillNumber is empty on LR, attempt to fill it from matching trip
+          if (!found.ewayBillNumber || found.ewayBillNumber.trim() === '') {
+            const matchedTrip = (found.trip && found.trip.ewayBillNumber) 
+              ? found.trip 
+              : tripList.find(t => 
+                  (found.tripId && String(t.id) === String(found.tripId)) ||
+                  (found.trip?.id && String(t.id) === String(found.trip.id)) ||
+                  (found.lrNumber && t.tripNumber === found.lrNumber.replace(/^LR-TRP-/i, 'TRP-').replace(/^LR-/i, '')) ||
+                  (found.lrNumber && `LR-${t.tripNumber}` === found.lrNumber)
+                );
+            if (matchedTrip?.ewayBillNumber) {
+              found.ewayBillNumber = matchedTrip.ewayBillNumber;
+              if (!found.trip) found.trip = matchedTrip;
+            }
+          }
           setDbLr(found);
         }
       } catch (err) {
@@ -219,6 +235,7 @@ const LRDetails = () => {
     grossTotal: `₹${((dbLr?.amount || dbLr?.trip?.freightAmount || 5448) + (dbLr?.gstAmount || dbLr?.trip?.gstAmount || 0) + (dbLr?.biltyCharge || 0) + (dbLr?.loadingCharge || 0)).toLocaleString('en-IN')}`,
     advance: `₹${(dbLr?.advanceAmount || dbLr?.trip?.advanceAmount || 0).toLocaleString('en-IN')}`,
     toPay: `₹${(dbLr?.toPay || ((dbLr?.amount || dbLr?.trip?.freightAmount || 5448) + (dbLr?.gstAmount || dbLr?.trip?.gstAmount || 0) + (dbLr?.biltyCharge || 0) + (dbLr?.loadingCharge || 0) - (dbLr?.advanceAmount || dbLr?.trip?.advanceAmount || 0))).toLocaleString('en-IN')}`,
+    ewayBillNumber: dbLr?.ewayBillNumber || dbLr?.trip?.ewayBillNumber || '',
     status: dbLr?.status || dbLr?.trip?.status || 'Delivered'
   };
 
@@ -375,12 +392,15 @@ const LRDetails = () => {
 
       <div className="details-header no-print" style={{ marginBottom: '16px' }}>
         <div className="header-titles-responsive flex-between-responsive" style={{ justifyContent: 'flex-start' }}>
-          <button className="action-icon" onClick={() => navigate('/lr')} style={{ padding: '8px', border: 'none', background: 'transparent', color: 'var(--text-primary)', cursor: 'pointer' }}>
-            <MdArrowBack size={24} />
-          </button>
           <div>
-            <h2>Lorry Receipt : {lr.lrNumber}</h2>
-            <p className="status-badge delivered">{lr.status}</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <h2 style={{ margin: 0, fontSize: '22px', fontWeight: 800, color: '#0f172a' }}>
+                Lorry Receipt (LR) : <span style={{ color: '#0284c7' }}>{lr.lrNumber}</span>
+              </h2>
+              <span className="status-badge delivered" style={{ margin: 0, textTransform: 'uppercase', fontSize: '11px', fontWeight: 700 }}>
+                {lr.status || 'Generated'}
+              </span>
+            </div>
           </div>
         </div>
         <div className="header-actions">
@@ -398,28 +418,34 @@ const LRDetails = () => {
 
       {/* Linked Trip Banner */}
       <div className="no-print" style={{
-        backgroundColor: 'rgba(9, 132, 227, 0.12)',
-        border: '1.5px solid #0984e3',
+        backgroundColor: '#f0f9ff',
+        border: '1.5px solid #0284c7',
         borderRadius: '10px',
         padding: '12px 20px',
         marginBottom: '20px',
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        alignItems: 'center',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '1.2rem' }}>🚛</span>
-          <div>
-            <strong style={{ color: '#74b9ff', fontSize: '0.95rem' }}>Linked Trip:</strong>{' '}
-            <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '1.05rem', marginLeft: '4px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span style={{ fontSize: '1.4rem' }}>🚛</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <strong style={{ color: '#0369a1', fontSize: '0.95rem', fontWeight: 700 }}>Linked Trip:</strong>
+            <span style={{ color: '#0f172a', fontWeight: 800, fontSize: '1.05rem' }}>
               {dbLr?.trip?.tripNumber || (dbLr?.trip?.id ? `TRP-${dbLr.trip.id}` : `TRP-${id}`)}
             </span>
+            {lr.ewayBillNumber ? (
+              <span style={{ marginLeft: '10px', background: '#fef3c7', color: '#92400e', border: '1.5px solid #fde68a', padding: '3px 10px', borderRadius: '5px', fontSize: '12px', fontWeight: 800 }}>
+                E-Way Bill: {lr.ewayBillNumber}
+              </span>
+            ) : null}
           </div>
         </div>
         <button 
           className="btn-primary"
           onClick={() => navigate(`/trips/${dbLr?.trip?.id || dbLr?.trip?.tripNumber || id}`)}
-          style={{ padding: '8px 16px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+          style={{ padding: '8px 16px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', backgroundColor: '#0284c7', color: '#ffffff', border: 'none', borderRadius: '6px', fontWeight: 600 }}
         >
           View Trip →
         </button>
@@ -462,6 +488,12 @@ const LRDetails = () => {
             <div className="grid-col">
               <span className="label-text">Vehicle Number</span>
               <p className="val-text">{lr.vehicle}</p>
+            </div>
+            <div className="grid-col">
+              <span className="label-text" style={{ color: (lr.ewayBillNumber || dbLr?.trip?.ewayBillNumber) ? '#0984e3' : undefined, fontWeight: 'bold' }}>E-Way Bill No.</span>
+              <p className="val-text" style={{ color: (lr.ewayBillNumber || dbLr?.trip?.ewayBillNumber) ? '#0984e3' : '#64748b', fontSize: '13px', letterSpacing: '0.5px' }}>
+                {lr.ewayBillNumber || dbLr?.trip?.ewayBillNumber || 'Part-A Ready'}
+              </p>
             </div>
             <div className="grid-col">
               <span className="label-text">From</span>

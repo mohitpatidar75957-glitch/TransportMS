@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
-import { MdNotifications, MdAccountCircle, MdArrowDropDown, MdSettings, MdLogout, MdMenu, MdSwapHoriz, MdCheck } from 'react-icons/md';
+import { MdNotifications, MdAccountCircle, MdArrowDropDown, MdSettings, MdLogout, MdMenu, MdSwapHoriz, MdCheck, MdArrowBack } from 'react-icons/md';
 import './Header.css';
 import { useAuth } from '../context/AuthContext';
 import SmartCommandBar from './SmartCommandBar';
@@ -25,17 +25,18 @@ const Header = ({ toggleSidebar }) => {
   let breadcrumb = <span className="breadcrumb-text">Home</span>;
 
   useEffect(() => {
-    Promise.all([
-      fetch('/api/notifications').then(res => res.json()).catch(() => []),
-      fetch('/api/v1/fleet/alerts/expiring-documents').then(res => res.json()).catch(() => [])
-    ]).then(([notifs, docs]) => {
-      const safeNotifs = Array.isArray(notifs) ? notifs : [];
-      const safeDocs = Array.isArray(docs) ? docs : [];
-      const unreadNotifs = safeNotifs.filter(n => !n.read);
-      setSysAlerts(unreadNotifs);
-      setDocAlerts(safeDocs);
-      setAlertCount(unreadNotifs.length + safeDocs.length);
-    });
+    fetch('/api/notifications/centralized')
+      .then(res => res.json())
+      .then(data => {
+        if (data && typeof data.totalAlerts === 'number') {
+          setAlertCount(data.totalAlerts);
+          setSysAlerts(data.systemAlerts || []);
+          setDocAlerts(data.documentAlerts || []);
+        } else {
+          setAlertCount(0);
+        }
+      })
+      .catch(() => setAlertCount(0));
 
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -369,9 +370,48 @@ const Header = ({ toggleSidebar }) => {
         <button className="mobile-menu-btn" onClick={toggleSidebar}>
           <MdMenu size={24} />
         </button>
+        {location.pathname !== '/' && (
+          <button
+            onClick={() => navigate(-1)}
+            className="header-back-btn"
+            title="Go Back"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '32px',
+              height: '32px',
+              borderRadius: '8px',
+              background: 'var(--bg-surface, #f8fafc)',
+              border: '1px solid var(--border-color, #e2e8f0)',
+              color: 'var(--text-primary, #0f172a)',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              marginRight: '4px',
+              flexShrink: 0
+            }}
+          >
+            <MdArrowBack size={18} />
+          </button>
+        )}
         <div className="title-breadcrumb">
           <h1 className="page-title">{pageTitle}</h1>
-          <div className="breadcrumb">{breadcrumb}</div>
+          <div className="breadcrumb">
+            {breadcrumb}
+            {location.pathname !== '/' && (
+              <>
+                <span className="breadcrumb-separator"> / </span>
+                <span 
+                  onClick={() => navigate(-1)} 
+                  className="breadcrumb-link"
+                  style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
+                  title="Click to go back"
+                >
+                  Back
+                </span>
+              </>
+            )}
+          </div>
         </div>
       </div>
       

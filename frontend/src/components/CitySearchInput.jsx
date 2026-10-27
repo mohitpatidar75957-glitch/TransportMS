@@ -12,6 +12,7 @@ export const INDIAN_LOGISTICS_CITIES = [
   'Kanpur', 'Khandwa', 'Khargone', 'Kochi', 'Kolhapur', 'Kolkata', 'Kota',
   'Lucknow', 'Ludhiana', 'Madurai', 'Mangalore', 'Mathura', 'Meerut', 'Moradabad', 'Mumbai', 'Muzaffarnagar', 'Muzaffarpur',
   'Nagpur', 'Nanded', 'Nashik', 'Neemuch', 'Noida',
+  'Omkareshwar', 'Omkara',
   'Panipat', 'Patna', 'Pithampur', 'Pune',
   'Raipur', 'Rajkot', 'Ranchi', 'Ratlam', 'Rewa', 'Rohtak', 'Rourkela',
   'Sagar', 'Saharanpur', 'Salem', 'Satna', 'Sehore', 'Solapur', 'Surat',
@@ -20,19 +21,23 @@ export const INDIAN_LOGISTICS_CITIES = [
 
 /**
  * Reusable City Auto-Suggest Component with responsive dropdown,
- * keyboard support and clean styling.
+ * dynamic live OpenStreetMap / Photon geocoding for all India locations,
+ * and keyboard support.
  */
 export const CitySearchInput = ({
   value,
   onChange,
-  placeholder = 'Type city name...',
+  placeholder = '',
   onBlur,
   style = {},
   inputStyle = {},
   dropdownStyle = {}
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [liveResults, setLiveResults] = useState([]);
+  const [isSearchingLive, setIsSearchingLive] = useState(false);
   const containerRef = useRef(null);
+  const searchTimeoutRef = useRef(null);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -45,11 +50,76 @@ export const CitySearchInput = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const query = (value || '').trim().toLowerCase();
-  const matchedCities = useMemo(() => {
-    if (!query) return INDIAN_LOGISTICS_CITIES.slice(0, 15);
-    return INDIAN_LOGISTICS_CITIES.filter(c => c.toLowerCase().includes(query)).slice(0, 20);
+  const query = (value || '').trim();
+
+  // 1. Static fast match
+  const staticMatches = useMemo(() => {
+    if (!query) return INDIAN_LOGISTICS_CITIES.slice(0, 10);
+    const q = query.toLowerCase();
+    return INDIAN_LOGISTICS_CITIES.filter(c => c.toLowerCase().includes(q)).slice(0, 8);
   }, [query]);
+
+  // 2. Dynamic live geocoding for all India locations (cities, towns, villages, tehsils)
+  useEffect(() => {
+    if (!query || query.length < 2) {
+      setLiveResults([]);
+      setIsSearchingLive(false);
+      return;
+    }
+
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchTimeoutRef.current = setTimeout(async () => {
+      setIsSearchingLive(true);
+      try {
+        const res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=12`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.features) {
+            const indiaLocations = data.features
+              .filter(f => f.properties && f.properties.countrycode === 'IN')
+              .map(f => {
+                const p = f.properties;
+                const parts = [];
+                if (p.name) parts.push(p.name);
+                if (p.city && p.city !== p.name) parts.push(p.city);
+                else if (p.county && p.county !== p.name) parts.push(p.county);
+                if (p.state) parts.push(p.state);
+                return parts.join(', ');
+              })
+              .filter(Boolean);
+
+            // Deduplicate
+            const unique = Array.from(new Set(indiaLocations)).slice(0, 8);
+            setLiveResults(unique);
+          }
+        }
+      } catch (err) {
+        console.warn('Live location lookup error:', err);
+      } finally {
+        setIsSearchingLive(false);
+      }
+    }, 250);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [query]);
+
+  // Combine static and live suggestions seamlessly
+  const allSuggestions = useMemo(() => {
+    const list = [...staticMatches];
+    liveResults.forEach(item => {
+      if (!list.includes(item)) {
+        list.push(item);
+      }
+    });
+    return list;
+  }, [staticMatches, liveResults]);
 
   return (
     <div ref={containerRef} style={{ position: 'relative', width: '100%', ...style }}>
@@ -59,7 +129,8 @@ export const CitySearchInput = ({
         value={value || ''}
         onFocus={() => setIsOpen(true)}
         onChange={(e) => {
-          onChange(e.target.value);
+          const val = e.target.value.replace(/(^|\s|[.\-\/])([a-z])/g, (_, boundary, char) => boundary + char.toUpperCase());
+          onChange(val);
           setIsOpen(true);
         }}
         onBlur={onBlur}
@@ -75,47 +146,52 @@ export const CitySearchInput = ({
           ...inputStyle
         }}
       />
-      {isOpen && matchedCities.length > 0 && (
+      {isOpen && allSuggestions.length > 0 && (
         <div style={{
           position: 'absolute',
           top: 'calc(100% + 6px)',
           left: 0,
           right: 0,
           zIndex: 999999,
-          background: '#1a2332',
-          border: '1px solid rgba(255, 255, 255, 0.15)',
+          background: 'var(--bg-secondary)',
+          border: '1px solid var(--border-color)',
           borderRadius: '10px',
-          boxShadow: '0 16px 48px rgba(0,0,0,0.85)',
-          maxHeight: '240px',
+          boxShadow: '0 12px 32px rgba(0, 0, 0, 0.12)',
+          maxHeight: '260px',
           overflowY: 'auto',
           ...dropdownStyle
         }}>
-          {matchedCities.map((city) => (
+          {allSuggestions.map((loc) => (
             <div
-              key={city}
+              key={loc}
               onMouseDown={(e) => {
                 e.preventDefault();
-                onChange(city);
+                onChange(loc);
                 setIsOpen(false);
               }}
               style={{
-                padding: '9px 14px',
+                padding: '11px 14px',
                 cursor: 'pointer',
-                color: '#dfe6e9',
+                color: 'var(--text-primary)',
                 fontSize: '0.88rem',
-                borderBottom: '1px solid rgba(255,255,255,0.05)',
+                borderBottom: '1px solid var(--border-color)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
                 transition: 'background 0.15s ease'
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(9, 132, 227, 0.3)')}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--hover-color)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
               <span style={{ color: '#0984e3', fontSize: '13px' }}>📍</span>
-              <span style={{ fontWeight: 500 }}>{city}</span>
+              <span style={{ fontWeight: 500 }}>{loc}</span>
             </div>
           ))}
+          {isSearchingLive && (
+            <div style={{ padding: '8px 14px', fontSize: '0.78rem', color: 'var(--text-secondary)', fontStyle: 'italic', borderTop: '1px solid var(--border-color)' }}>
+              Searching All India locations...
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -820,4 +820,60 @@ html:has(body[style*="--bg-primary: #ffffff"]) {
   }
 }
 
+/* Universal Standard Status Badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  text-transform: capitalize;
+}
+
+.status-badge.delivered,
+.status-badge.completed,
+.status-badge.active,
+.status-badge.present,
+.status-badge.paid {
+  background-color: #dcfce7 !important;
+  color: #15803d !important;
+  border: 1px solid #bbf7d0 !important;
+}
+
+.status-badge.in-transit,
+.status-badge.transit,
+.status-badge.running {
+  background-color: #ffedd5 !important;
+  color: #c2410c !important;
+  border: 1px solid #fed7aa !important;
+}
+
+.status-badge.closed {
+  background-color: #f1f5f9 !important;
+  color: #475569 !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+.status-badge.pending,
+.status-badge.planned,
+.status-badge.scheduled,
+.status-badge.leave,
+.status-badge.draft {
+  background-color: #fef9c3 !important;
+  color: #a16207 !important;
+  border: 1px solid #fde047 !important;
+}
+
+.status-badge.cancelled,
+.status-badge.canceled,
+.status-badge.absent,
+.status-badge.inactive {
+  background-color: #fee2e2 !important;
+  color: #b91c1c !important;
+  border: 1px solid #fca5a5 !important;
+}
+
+
 

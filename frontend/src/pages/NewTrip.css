@@ -590,31 +590,19 @@
    ========================================================================== */
 .smart-eta-card {
   grid-column: 1 / -1;
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.8) 100%);
-  border: 1px solid rgba(56, 189, 248, 0.28);
-  border-radius: 14px;
-  padding: 18px 22px;
+  background: var(--bg-surface, #f8fafc);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  padding: 16px 20px;
   margin: 10px 0 18px 0;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(16px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   position: relative;
   overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.smart-eta-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #38bdf8 0%, #818cf8 50%, #34d399 100%);
-}
-
-.smart-eta-card:hover {
-  border-color: rgba(56, 189, 248, 0.45);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35), 0 0 20px rgba(56, 189, 248, 0.15);
+[data-theme="dark"] .smart-eta-card {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.8) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.28);
 }
 
 .smart-eta-main {
@@ -657,14 +645,22 @@
 
 .smart-eta-heading {
   font-weight: 700;
-  color: #f8fafc;
+  color: var(--text-primary, #0f172a);
   font-size: 1.05rem;
   letter-spacing: -0.01em;
 }
 
+[data-theme="dark"] .smart-eta-heading {
+  color: #f8fafc;
+}
+
 .smart-eta-heading .highlight {
-  color: #38bdf8;
+  color: var(--accent-color, #2563eb);
   font-weight: 800;
+}
+
+[data-theme="dark"] .smart-eta-heading .highlight {
+  color: #38bdf8;
 }
 
 .smart-eta-badge {
@@ -681,11 +677,17 @@
 
 .smart-eta-badge.high {
   background: rgba(16, 185, 129, 0.18);
-  color: #34d399;
+  color: #10b981;
   border: 1px solid rgba(52, 211, 153, 0.35);
 }
 
 .smart-eta-badge.medium {
+  background: rgba(37, 99, 235, 0.12);
+  color: #2563eb;
+  border: 1px solid rgba(37, 99, 235, 0.3);
+}
+
+[data-theme="dark"] .smart-eta-badge.medium {
   background: rgba(56, 189, 248, 0.18);
   color: #38bdf8;
   border: 1px solid rgba(56, 189, 248, 0.35);
@@ -701,17 +703,27 @@
 
 .smart-eta-chip {
   font-size: 0.8rem;
-  color: #cbd5e1;
-  background: rgba(255, 255, 255, 0.04);
-  padding: 3px 10px;
+  color: var(--text-secondary, #475569);
+  background: var(--bg-secondary, #ffffff);
+  padding: 4px 10px;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-color, #e2e8f0);
   display: inline-flex;
   align-items: center;
   gap: 5px;
 }
 
+[data-theme="dark"] .smart-eta-chip {
+  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .smart-eta-chip strong {
+  color: var(--text-primary, #0f172a);
+}
+
+[data-theme="dark"] .smart-eta-chip strong {
   color: #fff;
 }
 
@@ -828,16 +840,24 @@
 }
 
 .km-profit-distance-pill {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 600;
-  background: rgba(56, 189, 248, 0.12);
-  color: #38bdf8;
-  border: 1px solid rgba(56, 189, 248, 0.28);
-  padding: 4px 12px;
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  padding: 6px 14px;
   border-radius: 20px;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+[data-theme="dark"] .km-profit-distance-pill {
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.28);
 }
 
 .km-metrics-grid {

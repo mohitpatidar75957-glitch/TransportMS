@@ -16,6 +16,7 @@ import DriverDetails from './pages/DriverDetails';
 import Trips from './pages/Trips';
 import TripForm from './pages/TripForm';
 import TripDetails from './pages/TripDetails';
+import EWayBillDetails from './pages/EWayBillDetails';
 import LRList from './pages/LRList';
 import LRForm from './pages/LRForm';
 import LRDetails from './pages/LRDetails';
@@ -127,6 +128,8 @@ function App() {
               <Route path="trips/create" element={<TripForm />} />
               <Route path="trips/:id" element={<TripDetails />} />
               <Route path="trips/:id/edit" element={<TripForm />} />
+              <Route path="trips/:id/eway-bill" element={<EWayBillDetails />} />
+              <Route path="eway-bill/:id" element={<EWayBillDetails />} />
               
               <Route path="orders" element={<Orders />} />
 

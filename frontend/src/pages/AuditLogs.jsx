@@ -51,9 +51,9 @@ const AuditLogs = () => {
 
   const getActionCategory = (action) => {
     const act = (action || '').toUpperCase();
-    if (act.includes('CREATE') || act.includes('ADD') || act.includes('AUTO_CREATED')) return 'CREATED';
     if (act.includes('DELETE') || act.includes('REMOVE')) return 'DELETED';
     if (act.includes('EDIT') || act.includes('UPDATE') || act.includes('STATUS') || act.includes('CLOSED') || act.includes('NOTE') || act.includes('PAYMENT') || act.includes('UPLOAD') || act.includes('POD')) return 'EDITED';
+    if (act.includes('CREATE') || act.includes('ADD') || act.includes('AUTO_CREATED')) return 'CREATED';
     return 'OTHER';
   };
 

@@ -98,7 +98,7 @@ const Dashboard = () => {
         setTotalProfit(total);
         localStorage.setItem('cached_totalProfit', total);
 
-        // Chart Data (Last 6 Months)
+        // Chart Data (Last 6 Months) - Calculated dynamically from real trip records
         const today = new Date();
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         let last6Months = [];
@@ -109,33 +109,45 @@ const Dashboard = () => {
             monthIndex: d.getMonth(),
             year: d.getFullYear(),
             label: monthNames[d.getMonth()],
-            profit: 0
+            profit: 0,
+            tripCount: 0
           });
         }
 
         trips.forEach(trip => {
-          if (trip.startDate && trip.freightAmount) {
-            const tripDate = new Date(trip.startDate);
+          const dateStr = trip.startDate || trip.dispatchDate || trip.createdAt;
+          if (dateStr && trip.freightAmount) {
+            const tripDate = new Date(dateStr);
             const dataPoint = last6Months.find(m => m.monthIndex === tripDate.getMonth() && m.year === tripDate.getFullYear());
             if (dataPoint) {
-              dataPoint.profit += trip.freightAmount;
+              dataPoint.profit += Number(trip.freightAmount) || 0;
+              dataPoint.tripCount += 1;
             }
           }
         });
 
-        const max = Math.max(...last6Months.map(m => m.profit), 1000);
-        setMaxProfit(max);
+        const rawMax = Math.max(...last6Months.map(m => m.profit), 0);
+        // Clean round financial ceiling for Y-axis (avoids weird unrounded ticks)
+        let cleanMax = 100000;
+        if (rawMax > 500000) cleanMax = Math.ceil(rawMax / 100000) * 100000;
+        else if (rawMax > 250000) cleanMax = 500000;
+        else if (rawMax > 200000) cleanMax = 250000;
+        else if (rawMax > 100000) cleanMax = 200000;
+        else if (rawMax > 50000) cleanMax = 100000;
+        else cleanMax = 50000;
+
+        setMaxProfit(cleanMax);
         setChartData(last6Months);
-        localStorage.setItem('cached_maxProfit', max);
+        localStorage.setItem('cached_maxProfit', cleanMax);
         localStorage.setItem('cached_chartData', JSON.stringify(last6Months));
       })
       .catch(() => {});
 
     // 5. Fetch Alerts - Updates immediately
-    fetch('/api/v1/fleet/alerts/expiring-documents')
+    fetch('/api/notifications/centralized')
       .then(res => res.json())
       .then(data => {
-        const aList = Array.isArray(data) ? data : [];
+        const aList = Array.isArray(data?.alerts) ? data.alerts : (Array.isArray(data) ? data : []);
         setAlerts(aList);
         localStorage.setItem('cached_alerts', JSON.stringify(aList));
       })
@@ -198,46 +210,90 @@ const Dashboard = () => {
       <div className="dashboard-content">
         {!isManager ? (
           <div className="chart-section">
-            <h3>Freight Profit (Last 6 Months)</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '8px' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 600 }}>Freight Revenue & Profit (Last 6 Months)</h3>
+                <span style={{ fontSize: '12px', color: '#94a3b8' }}>Real-time revenue computed from actual trips logged in fleet database</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  gap: '6px', 
+                  backgroundColor: 'rgba(16, 185, 129, 0.12)', 
+                  color: '#10b981', 
+                  border: '1px solid rgba(16, 185, 129, 0.25)', 
+                  padding: '4px 10px', 
+                  borderRadius: '16px', 
+                  fontSize: '12px', 
+                  fontWeight: '600' 
+                }}>
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981', display: 'inline-block' }}></span>
+                  Live Fleet Trips Data ({tripsCount} Total Trips)
+                </span>
+              </div>
+            </div>
+
             <div className="chart-container">
               <div className="bar-chart" style={{ paddingBottom: '20px' }}>
-                <div className="y-axis">
-                  <span>{(maxProfit).toLocaleString('en-IN')}</span>
-                  <span>{(maxProfit * 0.75).toLocaleString('en-IN')}</span>
-                  <span>{(maxProfit * 0.5).toLocaleString('en-IN')}</span>
-                  <span>{(maxProfit * 0.25).toLocaleString('en-IN')}</span>
-                  <span>0</span>
+                <div className="y-axis" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingRight: '12px', color: '#334155', fontSize: '12px', fontWeight: '700' }}>
+                  <span>₹{(maxProfit).toLocaleString('en-IN')}</span>
+                  <span>₹{(maxProfit * 0.75).toLocaleString('en-IN')}</span>
+                  <span>₹{(maxProfit * 0.5).toLocaleString('en-IN')}</span>
+                  <span>₹{(maxProfit * 0.25).toLocaleString('en-IN')}</span>
+                  <span>₹0</span>
                 </div>
-                <div className="chart-bars-wrapper" style={{ display: 'flex', flexDirection: 'column', flex: 1, paddingLeft: '40px', height: '100%' }}>
-                  <div className="bars" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around', height: '100%', borderLeft: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                <div className="chart-bars-wrapper" style={{ display: 'flex', flexDirection: 'column', flex: 1, paddingLeft: '20px', height: '100%' }}>
+                  <div className="bars" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around', height: '100%', borderLeft: '1px solid #cbd5e1', borderBottom: '1px solid #cbd5e1', paddingBottom: '2px' }}>
                     {chartData.map((dataPoint, idx) => {
-                      const heightPercent = (dataPoint.profit / maxProfit) * 100;
+                      const heightPercent = maxProfit > 0 ? (dataPoint.profit / maxProfit) * 100 : 0;
+                      const hasRevenue = dataPoint.profit > 0;
                       return (
-                        <div key={idx} style={{ width: '12%', height: '100%', display: 'flex', alignItems: 'flex-end', position: 'relative' }}>
+                        <div key={idx} style={{ width: '13%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center', position: 'relative' }}>
+                          {hasRevenue && (
+                            <span style={{ 
+                              fontSize: '12px', 
+                              fontWeight: '700', 
+                              color: '#0369a1', 
+                              backgroundColor: '#e0f2fe',
+                              border: '1px solid #7dd3fc',
+                              padding: '2px 5px',
+                              borderRadius: '4px',
+                              marginBottom: '6px',
+                              letterSpacing: '0.2px' 
+                            }}>
+                              ₹{(dataPoint.profit >= 100000 ? (dataPoint.profit / 100000).toFixed(1) + 'L' : (dataPoint.profit / 1000).toFixed(0) + 'k')}
+                            </span>
+                          )}
                           <div 
                             className="chart-bar-hover-wrap" 
                             style={{ 
-                              height: `${Math.max(heightPercent, 2)}%`, 
+                              height: `${Math.max(heightPercent, hasRevenue ? 6 : 2)}%`, 
                               width: '100%', 
-                              backgroundColor: '#0984e3', 
-                              borderRadius: '4px 4px 0 0', 
+                              background: hasRevenue 
+                                ? 'linear-gradient(180deg, #38bdf8 0%, #0284c7 100%)' 
+                                : 'rgba(255, 255, 255, 0.04)', 
+                              border: hasRevenue ? '1px solid #38bdf8' : '1px dashed rgba(255, 255, 255, 0.1)',
+                              borderRadius: '6px 6px 0 0', 
                               position: 'relative', 
-                              transition: 'all 0.2s ease', 
+                              transition: 'all 0.25s ease', 
                               flex: 'none',
                               cursor: 'pointer'
                             }}
                           >
                             <div className="instant-bar-tooltip">
-                              ₹{dataPoint.profit.toLocaleString('en-IN')}
+                              {dataPoint.label}: ₹{dataPoint.profit.toLocaleString('en-IN')} {dataPoint.tripCount ? `(${dataPoint.tripCount} trip${dataPoint.tripCount > 1 ? 's' : ''})` : ''}
                             </div>
                           </div>
                         </div>
                       );
                     })}
                   </div>
-                  <div className="x-axis" style={{ display: 'flex', justifyContent: 'space-around', marginTop: '8px' }}>
+                  <div className="x-axis" style={{ display: 'flex', justifyContent: 'space-around', marginTop: '10px' }}>
                     {chartData.map((dataPoint, idx) => (
-                      <span key={idx} style={{ width: '12%', textAlign: 'center', fontSize: '11px', color: '#64748b', fontWeight: '600' }}>{dataPoint.label}</span>
+                      <span key={idx} style={{ width: '13%', textAlign: 'center', fontSize: '13px', color: '#475569', fontWeight: '600' }}>
+                        {dataPoint.label}
+                      </span>
                     ))}
                   </div>
                 </div>
@@ -249,25 +305,25 @@ const Dashboard = () => {
             <h3>Fleet & Operations Overview</h3>
             <div className="operational-cards" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
               <div style={{ padding: '16px', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <span style={{ fontSize: '13px', color: '#94a3b8' }}>Fleet Readiness</span>
+                <span style={{ fontSize: '14px', color: '#94a3b8', fontWeight: 600 }}>Fleet Readiness</span>
                 <h4 style={{ fontSize: '24px', margin: '8px 0', color: '#38bdf8' }}>
                   {vehicles.length > 0 ? Math.round((vehicles.filter(v => v.status === 'Active' || v.status === 'Available').length / vehicles.length) * 100) : 0}%
                 </h4>
-                <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>Vehicles available for assignment</p>
+                <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>Vehicles available for assignment</p>
               </div>
               <div style={{ padding: '16px', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <span style={{ fontSize: '13px', color: '#94a3b8' }}>Active Operations</span>
+                <span style={{ fontSize: '14px', color: '#94a3b8', fontWeight: 600 }}>Active Operations</span>
                 <h4 style={{ fontSize: '24px', margin: '8px 0', color: '#4ade80' }}>
                   {activeTripsCount} Active Trips
                 </h4>
-                <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>Out of {tripsCount} total logged trips</p>
+                <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>Out of {tripsCount} total logged trips</p>
               </div>
               <div style={{ padding: '16px', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <span style={{ fontSize: '13px', color: '#94a3b8' }}>Document Compliance</span>
+                <span style={{ fontSize: '14px', color: '#94a3b8', fontWeight: 600 }}>Document Compliance</span>
                 <h4 style={{ fontSize: '24px', margin: '8px 0', color: alerts.length > 0 ? '#ffa502' : '#4ade80' }}>
                   {alerts.length} Warnings
                 </h4>
-                <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>Document expirations pending</p>
+                <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>Document expirations pending</p>
               </div>
             </div>
           </div>
@@ -307,9 +363,9 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <div className="progress-item" style={{ marginTop: '6px', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            <div className="progress-item" style={{ marginTop: '6px', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,0.06)', cursor: 'pointer' }} onClick={() => navigate('/notifications')} title="Click to view alerts in notification center">
               <div className="progress-label">
-                <span>PUC / Document Expirations</span>
+                <span>Fleet & Document Alerts</span>
                 <span className={`value ${alerts.length > 0 ? (alerts.some(a => a.type === 'danger') ? 'red-text' : 'yellow-text') : 'green-text'}`}>
                   {alerts.length > 0 ? `${alerts.length} Pending` : 'All Valid'}
                 </span>

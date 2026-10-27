@@ -54,13 +54,13 @@ const Trips = () => {
   // Merge dummy trips with real database trips
   const allTrips = [
     ...dbTrips.map(t => ({
-      id: t.tripNumber || `TRP-DB-${t.id}`,
+      id: t.tripNumber || `TRP-${String(t.id).padStart(4, '0')}`,
       dbId: t.id,
       date: t.startDate || 'Unknown',
       customer: t.clientName || 'Unknown',
       route: t.route || 'N/A',
-      vehicle: t.vehicle ? t.vehicle.registrationNumber : 'N/A',
-      driver: t.driver ? t.driver.name : 'N/A',
+      vehicle: (t.vehicle && t.vehicle.registrationNumber) ? t.vehicle.registrationNumber : (t.vehicleRegistration || 'No vehicle assigned'),
+      driver: (t.driver && t.driver.name) ? t.driver.name : (t.driverName || 'N/A'),
       freight: `₹${(t.freightAmount || 0) + (t.gstAmount || 0) + (t.biltyCharge || 0) + (t.loadingCharge || 0)}`,
       status: t.status || 'Pending',
       isReal: true
@@ -343,13 +343,13 @@ const Trips = () => {
                   </td>
                   <td>
                     <div className="vehicle-info">
-                      <span className="vehicle-num">{t.vehicle}</span>
+                      <span className="vehicle-num" style={{ color: t.vehicle === 'No vehicle assigned' ? '#e67e22' : 'inherit' }}>{t.vehicle}</span>
                       <span className="vehicle-name">{t.driver}</span>
                     </div>
                   </td>
                   <td>{t.freight}</td>
                   <td>
-                    <span className={`status-badge ${(t.status || 'Pending').toLowerCase()}`}>
+                    <span className={`status-badge ${(t.status || 'Pending').toLowerCase().replace(/\s+/g, '-')}`}>
                       {t.status}
                     </span>
                   </td>
@@ -359,77 +359,11 @@ const Trips = () => {
                       {roleKey !== 'CUSTOMER' && (
                         <>
                           <button 
-                            className="action-icon view" 
-                            title={(t.status === 'Completed' || t.status === 'Delivered') ? "E-Way Bill cannot be generated for Completed trips" : "1-Click Generate E-Way Bill"} 
-                            style={{ 
-                              color: (t.status === 'Completed' || t.status === 'Delivered') ? 'var(--text-secondary, #888)' : '#27ae60',
-                              opacity: (t.status === 'Completed' || t.status === 'Delivered') ? 0.45 : 1,
-                              cursor: (t.status === 'Completed' || t.status === 'Delivered') ? 'not-allowed' : 'pointer'
-                            }} 
-                            disabled={t.status === 'Completed' || t.status === 'Delivered'}
-                            onClick={async () => {
-                              try {
-                                const tripIdToUse = t.dbId || t.id;
-                                const res = await fetch('/api/v1/compliance/eway-bill/generate', {
-                                  method: 'POST',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({
-                                    tripId: Number(tripIdToUse),
-                                    distanceKm: 250
-                                  })
-                                });
-                                if (res.ok) {
-                                  const data = await res.json();
-                                  showAlert(`Govt E-Way Bill Generated! No: ${data.ewayBillNumber} (Valid for ${data.validityDays} days, Exp: ${data.ewayBillExpiry})`);
-                                  fetchTrips();
-                                } else {
-                                  const err = await res.json();
-                                  showAlert(err.error || 'Failed to generate E-Way bill');
-                                }
-                              } catch(e) {
-                                console.error('E-Way Bill generation error:', e);
-                                showAlert('Could not create the E-Way Bill. Please check vehicle/trip details and try again.');
-                              }
-                            }}
+                            className="action-icon eway" 
+                            title="Government E-Way Bill (Form GST EWB-01)" 
+                            onClick={() => navigate(`/trips/${t.dbId || t.id}/eway-bill`)}
                           >
-                            🚚
-                          </button>
-                          <button 
-                            className="action-icon view" 
-                            title="Govt NIC E-Way Bill JSON Export" 
-                            style={{ color: '#e67e22' }} 
-                            onClick={async () => {
-                              try {
-                                const token = localStorage.getItem('token');
-                                const tripIdToFetch = t.dbId || t.id;
-                                const res = await fetch(`/api/v1/compliance/eway-bill/${encodeURIComponent(tripIdToFetch)}/export/json`, {
-                                  headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-                                });
-                                if (res.ok) {
-                                  const blob = await res.blob();
-                                  const url = window.URL.createObjectURL(blob);
-                                  const a = document.createElement('a');
-                                  a.href = url;
-                                  a.download = `eway_bill_${t.id}.json`;
-                                  document.body.appendChild(a);
-                                  a.click();
-                                  window.URL.revokeObjectURL(url);
-                                  document.body.removeChild(a);
-                                  showAlert('E-Way Bill NIC JSON exported successfully! Ready for direct portal upload.');
-                                } else {
-                                  let errMessage = 'Failed to download E-Way JSON.';
-                                  try {
-                                    const errJson = await res.json();
-                                    if (errJson && errJson.error) errMessage = errJson.error;
-                                  } catch (_) {}
-                                  showAlert(errMessage);
-                                }
-                              } catch(e) {
-                                showAlert('Error: ' + e.message);
-                              }
-                            }}
-                          >
-                            <MdFileDownload />
+                            <MdLocalShipping />
                           </button>
                           <button className="action-icon edit" title="Edit" onClick={() => navigate(`/trips/${t.id}/edit`)}><MdEdit /></button>
                           <button className="action-icon delete" title="Delete" onClick={() => handleDelete(t.id, t.isReal, t.dbId)}><MdDelete /></button>

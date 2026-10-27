@@ -139,6 +139,11 @@ const TripForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!formData.vehicle) {
+      showAlert("⚠️ Vehicle is compulsory! Please select a vehicle for this trip.");
+      return;
+    }
     
     const payload = {
       tripNumber: formData.tripId,
