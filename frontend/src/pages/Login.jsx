@@ -14,7 +14,7 @@ const Login = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [mounted, setMounted] = useState(false);
 
-  const { switchRole } = useAuth();
+  const { switchRole, appBranding } = useAuth();
 
   const [step, setStep] = useState(1);
   const [otp, setOtp] = useState('');
@@ -178,15 +178,21 @@ const Login = () => {
             {/* Animated Truck Icon */}
             <div className="brand-icon-wrapper">
               <div className="brand-icon-glow"></div>
-              <div className="brand-icon" style={{ backgroundColor: '#ffffff', padding: '6px' }}>
+              <div className="brand-icon">
                 <img src="/logo.png" alt="TransportMS" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </div>
             </div>
 
             <h1 className="brand-title">
-              Transport<span className="brand-highlight">MS</span>
+              {appBranding?.title ? (
+                appBranding.title
+              ) : (
+                <>Transport<span className="brand-highlight">MS</span></>
+              )}
             </h1>
-            <p className="brand-tagline">Fleet & Transport Management System</p>
+            <p className="brand-tagline">
+              {appBranding?.subtitle || 'Fleet & Transport Management System'}
+            </p>
 
             <div className="brand-divider"></div>
 
@@ -245,13 +251,6 @@ const Login = () => {
         {/* Right Login Form Panel */}
         <div className="login-form-panel">
           <div className="login-card">
-            {/* Logo for mobile */}
-            <div className="mobile-logo" style={{ display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'center' }}>
-              <div style={{ width: '36px', height: '36px', backgroundColor: '#ffffff', borderRadius: '8px', padding: '3px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <img src="/logo.png" alt="TransportMS" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-              </div>
-              <span>TransportMS</span>
-            </div>
 
             <div className="login-card-header">
               <h2>Welcome Back</h2>
