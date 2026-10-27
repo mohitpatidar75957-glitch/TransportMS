@@ -358,7 +358,7 @@ const VehicleSelect = ({ vehicles, value, onChange, placeholder = 'Select Vehicl
               alignItems: 'center', justifyContent: 'space-between'
             }}>
               <span style={{ fontSize: '0.8rem', color: '#2563eb', fontWeight: 600 }}>
-                ⚖️ Cargo: {cargoWeight} Ton — Sorted by Capacity Fit
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdScale size={16} /> Cargo: {cargoWeight} Ton — Sorted by Capacity Fit</span>
               </span>
               <button
                 type="button"
@@ -419,7 +419,7 @@ const VehicleSelect = ({ vehicles, value, onChange, placeholder = 'Select Vehicl
                           background: 'rgba(16, 185, 129, 0.15)', color: '#10b981',
                           border: '1px solid rgba(16, 185, 129, 0.3)', fontWeight: 700
                         }}>
-                          🎯 BEST FIT
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdGpsFixed size={12} /> BEST FIT</span>
                         </span>
                       )}
                       {isUnderCapacity && (
@@ -1456,7 +1456,7 @@ const NewTrip = () => {
             <div className="vehicle-info-grid">
               <div className="form-group" data-field="manualFreightRate" style={{ gridColumn: '1 / -1', background: 'rgba(9, 132, 227, 0.1)', padding: '14px', borderRadius: '10px', border: errors.manualFreightRate ? '1.5px solid #ff4757' : '1px solid rgba(9, 132, 227, 0.35)' }}>
                 <label style={{ color: '#74b9ff', fontWeight: '700', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  💰 Freight Rate / Expected Earnings (₹)
+                  <MdAccountBalanceWallet size={18} color="#38bdf8" /> Freight Rate / Expected Earnings (₹)
                 </label>
                 <input 
                   type="number" 
@@ -1485,7 +1485,7 @@ const NewTrip = () => {
                   </div>
                   {effectiveDistance > 0 && (
                     <span className="km-profit-distance-pill">
-                      📏 Distance: {effectiveDistance} KM
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdStraighten size={15} /> Distance: {effectiveDistance} KM</span>
                     </span>
                   )}
                 </div>
@@ -1497,7 +1497,7 @@ const NewTrip = () => {
                       <div className="km-metric-box earning">
                         <div className="km-metric-label">
                           <span>Earning / KM</span>
-                          <span>📈</span>
+                          <MdShowChart size={18} color="#38bdf8" />
                         </div>
                         <div className="km-metric-val blue">
                           ₹{earningPerKm} <span style={{ fontSize: '0.75rem', fontWeight: 500, color: '#94a3b8' }}>/ km</span>
@@ -1511,7 +1511,7 @@ const NewTrip = () => {
                       <div className="km-metric-box cost">
                         <div className="km-metric-label">
                           <span>Total Cost / KM</span>
-                          <span>⛽</span>
+                          <MdLocalGasStation size={18} color="#fb923c" />
                         </div>
                         <div className="km-metric-val orange">
                           ₹{costPerKm} <span style={{ fontSize: '0.75rem', fontWeight: 500, color: '#94a3b8' }}>/ km</span>
@@ -1525,7 +1525,7 @@ const NewTrip = () => {
                       <div className={`km-metric-box ${netTripProfit >= 0 ? 'profit' : 'loss-box'}`}>
                         <div className="km-metric-label">
                           <span>Net Profit / KM</span>
-                          <span>💰</span>
+                          <MdAccountBalanceWallet size={18} color="#34d399" />
                         </div>
                         <div className={`km-metric-val ${netTripProfit >= 0 ? 'green' : 'red'}`}>
                           {netTripProfit >= 0 ? `+₹${profitPerKm}` : `-₹${Math.abs(profitPerKm)}`} 
@@ -1567,19 +1567,19 @@ const NewTrip = () => {
                       <div>
                         {netTripProfit < 0 ? (
                           <span className="km-health-badge low">
-                            ⚠️ Loss Alert (Expenses Exceed Freight)
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdWarning size={14} color="#ef4444" /> Loss Alert (Expenses Exceed Freight)</span>
                           </span>
                         ) : parseFloat(profitMarginPercent) >= 25 ? (
                           <span className="km-health-badge high">
-                            ✓ Highly Profitable ({profitMarginPercent}% Margin)
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdCheckCircle size={14} color="#10b981" /> Highly Profitable ({profitMarginPercent}% Margin)</span>
                           </span>
                         ) : parseFloat(profitMarginPercent) >= 10 ? (
                           <span className="km-health-badge moderate">
-                            ⚡ Healthy Profit ({profitMarginPercent}% Margin)
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdFlashOn size={14} color="#38bdf8" /> Healthy Profit ({profitMarginPercent}% Margin)</span>
                           </span>
                         ) : (
                           <span className="km-health-badge low">
-                            ⚠️ Low Margin ({profitMarginPercent}%)
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdWarning size={14} color="#f59e0b" /> Low Margin ({profitMarginPercent}%)</span>
                           </span>
                         )}
                       </div>
@@ -1588,36 +1588,36 @@ const NewTrip = () => {
                     {/* Live Kat-Peet Deductions breakdown badges */}
                     <div className="km-breakdown-tags">
                       <span className="km-breakdown-tag">
-                        ⛽ Fuel: <strong>₹{Math.round(estFuelCost).toLocaleString('en-IN')}</strong>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdLocalGasStation size={14} color="#f97316" /> Fuel: <strong>₹{Math.round(estFuelCost).toLocaleString('en-IN')}</strong></span>
                       </span>
                       <span className="km-breakdown-tag">
                         Tolls: <strong>₹{estToll.toLocaleString('en-IN')}</strong>
                       </span>
                       {directExpenses > 0 && (
                         <span className="km-breakdown-tag">
-                          👨‍✈️ Driver & Food/Ops: <strong>₹{directExpenses.toLocaleString('en-IN')}</strong>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdPerson size={14} color="#a855f7" /> Driver & Food/Ops: <strong>₹{directExpenses.toLocaleString('en-IN')}</strong></span>
                         </span>
                       )}
                       {numHamali > 0 && (
                         <span className="km-breakdown-tag">
-                          📦 Hamali / Loading: <strong>₹{numHamali.toLocaleString('en-IN')}</strong>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdInventory size={14} color="#eab308" /> Hamali / Loading: <strong>₹{numHamali.toLocaleString('en-IN')}</strong></span>
                         </span>
                       )}
                       {numBilty > 0 && (
                         <span className="km-breakdown-tag">
-                          📄 Bilty / GR Charge: <strong>₹{numBilty.toLocaleString('en-IN')}</strong>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdDescription size={14} color="#60a5fa" /> Bilty / GR Charge: <strong>₹{numBilty.toLocaleString('en-IN')}</strong></span>
                         </span>
                       )}
                       {gstAmount > 0 && (
                         <span className="km-breakdown-tag">
-                          🏛️ GST Tax: <strong>₹{Math.round(gstAmount).toLocaleString('en-IN')}</strong>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdAccountBalance size={14} color="#c084fc" /> GST Tax: <strong>₹{Math.round(gstAmount).toLocaleString('en-IN')}</strong></span>
                         </span>
                       )}
                     </div>
                   </>
                 ) : (
                   <div className="km-prompt-box">
-                    <span>💡</span>
+                    <MdLightbulb size={20} color="#f59e0b" />
                     <span>
                       {!startLocation || !destination 
                         ? 'Enter starting location & destination to automatically fetch distance and activate live ₹/KM profit preview.'
@@ -1788,16 +1788,16 @@ const NewTrip = () => {
                             Estimated Running Time: <span className="highlight">~{deliveryEstimate.estimatedHours} hrs</span> ({deliveryEstimate.estimatedDays} Day{deliveryEstimate.estimatedDays > 1 ? 's' : ''})
                           </span>
                           <span className={`smart-eta-badge ${deliveryEstimate.confidence === 'HIGH' ? 'high' : 'medium'}`}>
-                            {deliveryEstimate.confidence === 'HIGH' ? '🎯 Past Trips Match' : '⚡ Fleet Speed Model'}
+                            {deliveryEstimate.confidence === 'HIGH' ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdGpsFixed size={13} /> Past Trips Match</span> : <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdFlashOn size={13} /> Fleet Speed Model</span>}
                           </span>
                         </div>
                         
                         <div className="smart-eta-chips">
                           <span className="smart-eta-chip">
-                            📏 <strong>{deliveryEstimate.distanceKm || liveDistanceKm || 500} KM</strong> Road Distance
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdStraighten size={14} /> <strong>{deliveryEstimate.distanceKm || liveDistanceKm || 500} KM</strong> Road Distance</span>
                           </span>
                           <span className="smart-eta-chip">
-                            📅 Target: <strong>{deliveryEstimate.estimatedDeliveryDate}</strong>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdCalendarToday size={14} /> Target: <strong>{deliveryEstimate.estimatedDeliveryDate}</strong></span>
                           </span>
                           <span className="smart-eta-chip" style={{ color: '#94a3b8' }}>
                             {deliveryEstimate.basis}
@@ -2015,7 +2015,7 @@ const NewTrip = () => {
                   }}>
                     {/* Left: Compact single-row text */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'nowrap', overflow: 'hidden' }}>
-                      <span style={{ fontSize: '0.95rem' }}>🎯</span>
+                      <MdGpsFixed size={18} color="#38bdf8" />
                       <span style={{ color: '#74b9ff', fontWeight: 600, fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
                         Best Fit:
                       </span>
@@ -2068,7 +2068,7 @@ const NewTrip = () => {
                         onMouseEnter={e => e.currentTarget.style.background = '#0070c0'}
                         onMouseLeave={e => e.currentTarget.style.background = '#0984e3'}
                       >
-                        ⚡ Auto-Select
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdFlashOn size={15} /> Auto-Select</span>
                       </button>
                     ) : (
                       <div style={{
