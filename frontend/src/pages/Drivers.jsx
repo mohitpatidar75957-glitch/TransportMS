@@ -28,7 +28,6 @@ const Drivers = () => {
     fetchDrivers();
   }, []);
 
-  const [deleteModal, setDeleteModal] = useState({ show: false, id: null, isReal: false, dbId: null });
 
   const getDateStatus = (dateStr) => {
     if (!dateStr || dateStr === 'N/A') return 'none';
@@ -63,19 +62,12 @@ const Drivers = () => {
     isReal: true
   }));
 
-  const requestDelete = (id, isReal, dbId) => {
-    setDeleteModal({ show: true, id, isReal, dbId });
-  };
-
-  const confirmDelete = async () => {
-    const { id, isReal, dbId } = deleteModal;
-    setDeleteModal({ show: false, id: null, isReal: false, dbId: null });
-    
-    if (isReal) {
+  const handleDelete = async (id, isReal, dbId) => {
+    if (await showConfirm('Are you sure you want to delete this driver?')) {
       try {
         const response = await fetch(`/api/v1/fleet/drivers/${dbId}`, { method: 'DELETE' });
         if (response.ok) {
-          setDbDrivers(dbDrivers.filter(d => d.id !== dbId));
+          setDbDrivers(prev => prev.filter(d => d.id !== dbId));
         } else {
           const errorText = await response.text();
           showAlert(errorText || 'Failed to delete from database.');
@@ -84,8 +76,6 @@ const Drivers = () => {
         console.error(error);
         showAlert('Network error connecting to database.');
       }
-    } else {
-      setDrivers(drivers.filter(d => d.id !== id));
     }
   };
 
@@ -191,7 +181,7 @@ const Drivers = () => {
                   <div className="action-buttons">
                     <button className="action-icon view" title="View" onClick={() => navigate(`/drivers/${d.id}`)}><MdVisibility /></button>
                     <button className="action-icon edit" title="Edit" onClick={() => navigate(`/drivers/${d.id}/edit`)}><MdEdit /></button>
-                    <button className="action-icon delete" title="Delete" onClick={() => requestDelete(d.id, d.isReal, d.dbId)}><MdDelete /></button>
+                    <button className="action-icon delete" title="Delete" onClick={() => handleDelete(d.id, d.isReal, d.dbId)}><MdDelete /></button>
                   </div>
                 </td>
               </tr>

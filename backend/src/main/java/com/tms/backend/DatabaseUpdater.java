@@ -211,22 +211,7 @@ public class DatabaseUpdater {
                     savedUser = userRepository.save(newUser);
                 }
 
-                if ("DRIVER".equals(savedUser.getRole())) {
-                    final Long userId = savedUser.getId();
-                    boolean driverExists = ((List<?>)driverRepository.findAll()).stream()
-                        .anyMatch(d -> userId.equals(((com.tms.backend.model.Driver)d).getUserId()));
-                    
-                    if (!driverExists) {
-                        com.tms.backend.model.Driver driver = new com.tms.backend.model.Driver();
-                        driver.setUserId(savedUser.getId());
-                        driver.setName(savedUser.getName());
-                        driver.setPhone(savedUser.getPhone());
-                        driver.setAddress(savedUser.getAddress());
-                        driver.setJoinedDate(savedUser.getJoinDate());
-                        driver.setStatus("Available");
-                        driverRepository.save(driver);
-                    }
-                }
+                // Driver user accounts are synced, but driver profile entries should not be forcibly re-inserted if user deleted them
             } catch (Exception e) {
                 System.out.println("Error processing user/driver " + userData[i][1] + ": " + e.getMessage());
             }
