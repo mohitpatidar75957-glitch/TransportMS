@@ -3,7 +3,9 @@ import {
   MdMap, MdDirectionsCar, MdPerson, MdDateRange, 
   MdLocationOn, MdAdd, MdClose, MdLocalGasStation, 
   MdAttachMoney, MdSearch, MdCheckCircle, MdArrowForward, MdInventory,
-  MdTrendingUp, MdAddRoad
+  MdTrendingUp, MdAddRoad, MdAccountBalanceWallet, MdStraighten, MdShowChart,
+  MdWarning, MdFlashOn, MdDescription, MdAccountBalance,
+  MdLightbulb, MdGpsFixed, MdCalendarToday, MdScale
 } from 'react-icons/md';
 import './NewTrip.css';
 import { 
