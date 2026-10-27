@@ -1,10 +1,15 @@
 /* Driver Portal CSS - Modern Ultra-Premium Enterprise Transport Design */
 
-.driver-portal-wrapper {
-  width: 100%;
-  box-sizing: border-box;
-  font-family: 'Inter', 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: var(--text-primary);
+.driver-portal-wrapper,
+.driver-portal-wrapper button,
+.driver-portal-wrapper input,
+.driver-portal-wrapper select,
+.driver-portal-wrapper span,
+.driver-portal-wrapper p,
+.driver-portal-wrapper h2,
+.driver-portal-wrapper h3,
+.driver-portal-wrapper h4 {
+  font-family: 'Noto Sans Devanagari', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 }
 
 .driver-portal-container {
@@ -17,7 +22,6 @@
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
-  font-family: inherit;
 }
 
 /* Background Ambient Glow */
