@@ -149,12 +149,40 @@ const LiveTracking = () => {
     fetch('/api/tracking/sessions')
       .then(res => res.json())
       .then(data => {
+        // Collapse multiple tracking links for the exact same vehicle into one latest session
+        const deduplicatedMap = new Map();
+        (data || []).forEach(session => {
+          const vehKey = (session.vehicleId || '').trim().toUpperCase();
+          if (!vehKey) {
+            deduplicatedMap.set(session.sessionId, session);
+            return;
+          }
+          const existing = deduplicatedMap.get(vehKey);
+          if (!existing) {
+            deduplicatedMap.set(vehKey, session);
+          } else {
+            // Prioritize session with active GPS coordinates or latest timestamp
+            const hasGps = !!session.latitude;
+            const existingHasGps = !!existing.latitude;
+            if (hasGps && !existingHasGps) {
+              deduplicatedMap.set(vehKey, session);
+            } else if (hasGps === existingHasGps) {
+              const sessionTime = new Date(session.lastUpdated || session.startedAt || 0).getTime();
+              const existingTime = new Date(existing.lastUpdated || existing.startedAt || 0).getTime();
+              if (sessionTime > existingTime) {
+                deduplicatedMap.set(vehKey, session);
+              }
+            }
+          }
+        });
+        const cleanData = Array.from(deduplicatedMap.values());
+
         if (roleKey === 'DRIVER') {
           if (!currentUser?.phone) {
             setSessions([]); // Driver with no phone sees nothing
           } else {
             const myPhone = currentUser.phone.replace(/\D/g, '');
-            const mySessions = data.filter(s => {
+            const mySessions = cleanData.filter(s => {
               const driverPhone = s.driverPhone ? String(s.driverPhone).replace(/\D/g, '') : '';
               if (!driverPhone || !myPhone) return false;
               return myPhone.endsWith(driverPhone) || driverPhone.endsWith(myPhone);
@@ -175,15 +203,15 @@ const LiveTracking = () => {
                 })
                 .map(t => (t.vehicle?.registrationNumber || '').toUpperCase());
 
-              const mySessions = data.filter(s => {
+              const mySessions = cleanData.filter(s => {
                 const sVeh = (s.vehicleId || '').toUpperCase();
                 return myTripVehicles.includes(sVeh);
               });
-              setSessions(mySessions.length > 0 ? mySessions : data);
+              setSessions(mySessions.length > 0 ? mySessions : cleanData);
             })
-            .catch(() => setSessions(data));
+            .catch(() => setSessions(cleanData));
         } else {
-          setSessions(data);
+          setSessions(cleanData);
         }
         setLoading(false);
       })

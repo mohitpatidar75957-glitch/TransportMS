@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TrackingSessionRepository extends JpaRepository<TrackingSession, String> {
+    java.util.Optional<TrackingSession> findFirstByVehicleIdIgnoreCaseOrderByStartedAtDesc(String vehicleId);
 }

@@ -34,16 +34,28 @@ public class TrackingController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Admin creates a tracking link for a driver
+    // Admin creates a tracking link for a driver (reuses existing vehicle session to prevent duplicates)
     @PostMapping("/start")
     public ResponseEntity<TrackingSession> startTrackingSession(@RequestBody Map<String, String> request) {
-        TrackingSession session = new TrackingSession();
-        session.setSessionId(UUID.randomUUID().toString());
-        session.setVehicleId(request.get("vehicleId"));
-        session.setDriverPhone(request.get("driverPhone"));
-        session.setDriverName(request.get("driverName"));
+        String vehicleId = request.get("vehicleId");
+        String driverPhone = request.get("driverPhone");
+        String driverName = request.get("driverName");
+
+        TrackingSession session = null;
+        if (vehicleId != null && !vehicleId.trim().isEmpty()) {
+            session = repository.findFirstByVehicleIdIgnoreCaseOrderByStartedAtDesc(vehicleId.trim()).orElse(null);
+        }
+
+        if (session == null) {
+            session = new TrackingSession();
+            session.setSessionId(UUID.randomUUID().toString());
+            session.setStartedAt(LocalDateTime.now());
+        }
+
+        session.setVehicleId(vehicleId != null ? vehicleId.trim() : "");
+        session.setDriverPhone(driverPhone);
+        session.setDriverName(driverName);
         session.setStatus("ACTIVE");
-        session.setStartedAt(LocalDateTime.now());
         session.setLastUpdated(LocalDateTime.now());
         return ResponseEntity.ok(repository.save(session));
     }
