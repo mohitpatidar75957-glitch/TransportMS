@@ -786,6 +786,7 @@ const NewTrip = () => {
   const [mapRouteData, setMapRouteData] = useState(null);
   const [validationError, setValidationError] = useState('');
   const [createdTripNum, setCreatedTripNum] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch data on mount
   useEffect(() => {
@@ -1234,7 +1235,7 @@ const NewTrip = () => {
       vehicle: { id: parseInt(vehicleId) },
       driver: { id: parseInt(driverId) },
       route: `${startLocation} → ${destination}`,
-      startDate: tripDate,
+      startDate: tripDate || dispatchDate || new Date().toISOString().split('T')[0],
       status: 'Scheduled',
       freightAmount: freightAmount,
       expectedRevenue: freightAmount,
@@ -1244,7 +1245,7 @@ const NewTrip = () => {
       goodsType: goodsType,
       clientName: clientName || consignorName || 'Client',
       customerContact: consignorContact || consigneeContact || '',
-      dispatchDate: dispatchDate || tripDate,
+      dispatchDate: dispatchDate || tripDate || new Date().toISOString().split('T')[0],
       expectedDeliveryDate: expectedDeliveryDate || '',
       pickupAddress: pickupAddress || (startLocation ? `${startLocation} Logistics Hub` : ''),
       deliveryAddress: deliveryAddress || (destination ? `${destination} Receiving Hub` : ''),
@@ -1262,6 +1263,7 @@ const NewTrip = () => {
       loadingCharge: parseFloat(loadingCharge) || 0
     };
 
+    setIsSubmitting(true);
     try {
       const response = await fetch('/api/v1/fleet/trips', {
         method: 'POST',
@@ -1274,11 +1276,14 @@ const NewTrip = () => {
         setCreatedTripNum(tripNumber);
         setTripCreated(true);
       } else {
-        setValidationError("Failed to create trip in database");
+        const errData = await response.json().catch(() => null);
+        setValidationError(errData?.error || errData?.message || "Failed to create trip in database. Please check all required fields.");
       }
     } catch (e) {
       console.error(e);
-      setValidationError("Error connecting to backend");
+      setValidationError("Backend server is temporarily unreachable or restarting. Please try again in a moment.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -2429,8 +2434,13 @@ const NewTrip = () => {
 
           {selectedRouteType && (
             <div className="create-trip-section">
-              <button className="btn-primary create-trip-btn" onClick={handleCreateTrip}>
-                CREATE TRIP <MdArrowForward />
+              <button 
+                className="btn-primary create-trip-btn" 
+                onClick={handleCreateTrip}
+                disabled={isSubmitting}
+                style={isSubmitting ? { opacity: 0.7, cursor: 'not-allowed' } : {}}
+              >
+                {isSubmitting ? 'CREATING TRIP...' : <>CREATE TRIP <MdArrowForward /></>}
               </button>
             </div>
           )}
