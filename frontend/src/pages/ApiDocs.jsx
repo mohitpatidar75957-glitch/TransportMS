@@ -35,7 +35,7 @@ const ApiDocs = () => {
   const [copiedSnippet, setCopiedSnippet] = useState(null);
 
   const getBaseUrl = () => {
-    if (targetEnv === 'railway') return 'https://tms--management.up.railway.app';
+    if (targetEnv === 'render') return 'https://transport-ms-backend.onrender.com';
     if (targetEnv === 'local') return 'http://localhost:8080';
     return window.location.origin;
   };
@@ -55,7 +55,7 @@ const ApiDocs = () => {
       'X-API-KEY': apiKey.trim()
     };
 
-    const baseUrl = targetEnv === 'auto' ? '' : (targetEnv === 'railway' ? 'https://tms--management.up.railway.app' : '');
+    const baseUrl = targetEnv === 'auto' ? '' : (targetEnv === 'render' ? 'https://transport-ms-backend.onrender.com' : (targetEnv === 'local' ? 'http://localhost:8080' : ''));
 
     try {
       let res;
@@ -134,7 +134,7 @@ const ApiDocs = () => {
               style={{ background: 'transparent', border: 'none', color: '#38bdf8', fontSize: '12px', fontWeight: 700, outline: 'none', cursor: 'pointer' }}
             >
               <option value="auto" style={{ background: '#0f172a', color: '#fff' }}>Current Server ({window.location.host})</option>
-              <option value="railway" style={{ background: '#0f172a', color: '#fff' }}>Live Railway (tms--management)</option>
+              <option value="render" style={{ background: '#0f172a', color: '#fff' }}>Live Render (transport-ms-backend)</option>
               <option value="local" style={{ background: '#0f172a', color: '#fff' }}>Local Backend (localhost:8080)</option>
             </select>
           </div>

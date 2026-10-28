@@ -29,15 +29,28 @@ const WhatsApp = () => {
   const [isSimulateModalOpen, setIsSimulateModalOpen] = useState(false);
   const [simulateData, setSimulateData] = useState({ recipient: '+91 9876543210', templateName: '' });
 
+  const getAuthHeaders = (extraHeaders = {}) => {
+    const token = localStorage.getItem('token');
+    const headers = { 'Content-Type': 'application/json', ...extraHeaders };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const compId = localStorage.getItem('activeCompanyId');
+    if (compId) {
+      headers['X-Company-Id'] = compId;
+      headers['X-Tenant-Id'] = compId;
+    }
+    return headers;
+  };
+
   const fetchWaData = async () => {
     try {
-      const templatesRes = await fetch('/api/whatsapp/templates');
+      const headers = getAuthHeaders();
+      const templatesRes = await fetch('/api/whatsapp/templates', { headers });
       if (templatesRes.ok) setTemplates(await templatesRes.json());
 
-      const logsRes = await fetch('/api/whatsapp/logs');
+      const logsRes = await fetch('/api/whatsapp/logs', { headers });
       if (logsRes.ok) setLogs(await logsRes.json());
 
-      const invoicesRes = await fetch('/api/v1/finance/invoices');
+      const invoicesRes = await fetch('/api/v1/finance/invoices', { headers });
       if (invoicesRes.ok) {
         const invs = await invoicesRes.json();
         setUnpaidInvoices(invs.filter(i => i.status !== 'Paid'));
@@ -55,7 +68,10 @@ const WhatsApp = () => {
 
   const toggleTemplate = async (id) => {
     try {
-      const res = await fetch(`/api/whatsapp/templates/${id}/toggle`, { method: 'PUT' });
+      const res = await fetch(`/api/whatsapp/templates/${id}/toggle`, { 
+        method: 'PUT',
+        headers: getAuthHeaders()
+      });
       if (res.ok) {
         const updatedTemplate = await res.json();
         setTemplates(templates.map(t => t.id === id ? updatedTemplate : t));
@@ -74,7 +90,10 @@ const WhatsApp = () => {
     e.preventDefault();
     try {
       const { recipient, templateName } = simulateData;
-      const res = await fetch(`/api/whatsapp/simulate?recipient=${encodeURIComponent(recipient)}&template=${encodeURIComponent(templateName)}`, { method: 'POST' });
+      const res = await fetch(`/api/whatsapp/simulate?recipient=${encodeURIComponent(recipient)}&template=${encodeURIComponent(templateName)}`, { 
+        method: 'POST',
+        headers: getAuthHeaders()
+      });
       if (res.ok) {
         setIsSimulateModalOpen(false);
         fetchWaData(); // Refresh logs
@@ -103,7 +122,10 @@ const WhatsApp = () => {
 
     try {
       // 1. Log it to our backend so it shows in "Recent Messages"
-      await fetch(`/api/whatsapp/simulate?recipient=${encodeURIComponent(newTemplate.phone)}&template=${encodeURIComponent(newTemplate.content)}`, { method: 'POST' });
+      await fetch(`/api/whatsapp/simulate?recipient=${encodeURIComponent(newTemplate.phone)}&template=${encodeURIComponent(newTemplate.content)}`, { 
+        method: 'POST',
+        headers: getAuthHeaders()
+      });
       
       // 2. Open WhatsApp Web/App directly
       const waUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(newTemplate.content)}`;
@@ -183,7 +205,10 @@ const WhatsApp = () => {
               style={{ backgroundColor: '#10ac84', color: '#fff', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               onClick={async () => {
                 try {
-                  const res = await fetch('/api/whatsapp/run-due-reminders', { method: 'POST' });
+                  const res = await fetch('/api/whatsapp/run-due-reminders', { 
+                    method: 'POST',
+                    headers: getAuthHeaders()
+                  });
                   if (res.ok) {
                     const result = await res.json();
                     showAlert(`Automated Reminders Processed! Total Sent: ${result.total_sent} (Upcoming: ${result.reminders_sent_before_due}, Today: ${result.reminders_sent_due_today}, Overdue: ${result.reminders_sent_overdue})`);

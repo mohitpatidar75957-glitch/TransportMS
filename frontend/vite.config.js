@@ -20,5 +20,26 @@ export default defineConfig({
         changeOrigin: true
       }
     }
+  },
+  build: {
+    chunkSizeWarningLimit: 1200,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/react-router-dom')) {
+            return 'vendor-react';
+          }
+          if (id.includes('node_modules/react-icons')) {
+            return 'vendor-icons';
+          }
+          if (id.includes('node_modules/leaflet') || id.includes('node_modules/react-leaflet')) {
+            return 'vendor-map';
+          }
+          if (id.includes('node_modules/xlsx') || id.includes('node_modules/jszip') || id.includes('node_modules/qrcode')) {
+            return 'vendor-utils';
+          }
+        }
+      }
+    }
   }
 })

@@ -79,7 +79,14 @@ const GST = () => {
 
   const getHeaders = () => {
     const token = localStorage.getItem('token');
-    return token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const compId = localStorage.getItem('activeCompanyId');
+    if (compId) {
+      headers['X-Company-Id'] = compId;
+      headers['X-Tenant-Id'] = compId;
+    }
+    return headers;
   };
 
   const fetchGstData = async () => {

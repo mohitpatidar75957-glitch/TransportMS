@@ -29,7 +29,6 @@ public class RateCard {
     
     private BigDecimal standardRate;
 
-    @org.hibernate.annotations.TenantId
-    @Column(name = "tenant_id", nullable = false)
+    @Column(name = "tenant_id", nullable = true)
     private Long tenantId;
 }
