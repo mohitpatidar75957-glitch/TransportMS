@@ -1590,13 +1590,13 @@ const NewTrip = () => {
                       <div className="km-metric-box earning">
                         <div className="km-metric-label">
                           <span>Earning / KM</span>
-                          <MdShowChart size={18} color="#38bdf8" />
+                          <MdShowChart size={18} color="#0284c7" />
                         </div>
                         <div className="km-metric-val blue">
-                          ₹{earningPerKm} <span style={{ fontSize: '0.75rem', fontWeight: 500, color: '#94a3b8' }}>/ km</span>
+                          ₹{earningPerKm} <span className="km-metric-unit">/ km</span>
                         </div>
                         <div className="km-metric-sub">
-                          Gross Freight: ₹{totalFreight.toLocaleString('en-IN')}
+                          Gross Freight: <strong>₹{totalFreight.toLocaleString('en-IN')}</strong>
                         </div>
                       </div>
 
@@ -1604,10 +1604,10 @@ const NewTrip = () => {
                       <div className="km-metric-box cost">
                         <div className="km-metric-label">
                           <span>Total Cost / KM</span>
-                          <MdLocalGasStation size={18} color="#fb923c" />
+                          <MdLocalGasStation size={18} color="#ea580c" />
                         </div>
                         <div className="km-metric-val orange">
-                          ₹{costPerKm} <span style={{ fontSize: '0.75rem', fontWeight: 500, color: '#94a3b8' }}>/ km</span>
+                          ₹{costPerKm} <span className="km-metric-unit">/ km</span>
                         </div>
                         <div className="km-metric-sub">
                           Fuel ₹{fuelCostPerKm}/km + Ops & Charges
@@ -1618,11 +1618,11 @@ const NewTrip = () => {
                       <div className={`km-metric-box ${netTripProfit >= 0 ? 'profit' : 'loss-box'}`}>
                         <div className="km-metric-label">
                           <span>Net Profit / KM</span>
-                          <MdAccountBalanceWallet size={18} color="#34d399" />
+                          <MdAccountBalanceWallet size={18} color={netTripProfit >= 0 ? '#059669' : '#dc2626'} />
                         </div>
                         <div className={`km-metric-val ${netTripProfit >= 0 ? 'green' : 'red'}`}>
                           {netTripProfit >= 0 ? `+₹${profitPerKm}` : `-₹${Math.abs(profitPerKm)}`} 
-                          <span style={{ fontSize: '0.75rem', fontWeight: 500, color: '#94a3b8' }}>/ km</span>
+                          <span className="km-metric-unit">/ km</span>
                         </div>
                         <div className="km-metric-sub">
                           {netTripProfit >= 0 ? 'Pure Net Return (Kat-Peet)' : 'Loss Per Kilometer'}
@@ -1640,18 +1640,18 @@ const NewTrip = () => {
                         {gstAmount > 0 && (
                           <div className="km-summary-item">
                             <span>GST ({numGstPct}%):</span>
-                            <strong style={{ color: '#fb923c' }}>-₹{Math.round(gstAmount).toLocaleString('en-IN')}</strong>
+                            <strong style={{ color: '#ea580c' }}>-₹{Math.round(gstAmount).toLocaleString('en-IN')}</strong>
                           </div>
                         )}
                         <div className="km-summary-item">
                           <span>Net In-Hand Profit:</span>
-                          <strong style={{ color: netTripProfit >= 0 ? '#34d399' : '#f87171', fontSize: '1.05rem' }}>
+                          <strong className={netTripProfit >= 0 ? 'km-profit-val' : 'km-loss-val'}>
                             {netTripProfit >= 0 ? `₹${netTripProfit.toLocaleString('en-IN')}` : `-₹${Math.abs(netTripProfit).toLocaleString('en-IN')}`}
                           </strong>
                         </div>
                         <div className="km-summary-item">
                           <span>Margin:</span>
-                          <strong style={{ color: netTripProfit >= 0 ? '#38bdf8' : '#f87171' }}>
+                          <strong className={netTripProfit >= 0 ? 'km-margin-val' : 'km-loss-val'}>
                             {profitMarginPercent}%
                           </strong>
                         </div>
@@ -1660,19 +1660,19 @@ const NewTrip = () => {
                       <div>
                         {netTripProfit < 0 ? (
                           <span className="km-health-badge low">
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdWarning size={14} color="#ef4444" /> Loss Alert (Expenses Exceed Freight)</span>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdWarning size={15} color="#dc2626" /> Loss Alert (Expenses Exceed Freight)</span>
                           </span>
                         ) : parseFloat(profitMarginPercent) >= 25 ? (
                           <span className="km-health-badge high">
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdCheckCircle size={14} color="#10b981" /> Highly Profitable ({profitMarginPercent}% Margin)</span>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdCheckCircle size={15} color="#059669" /> Highly Profitable ({profitMarginPercent}% Margin)</span>
                           </span>
                         ) : parseFloat(profitMarginPercent) >= 10 ? (
                           <span className="km-health-badge moderate">
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdFlashOn size={14} color="#38bdf8" /> Healthy Profit ({profitMarginPercent}% Margin)</span>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdFlashOn size={15} color="#0284c7" /> Healthy Profit ({profitMarginPercent}% Margin)</span>
                           </span>
                         ) : (
                           <span className="km-health-badge low">
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdWarning size={14} color="#f59e0b" /> Low Margin ({profitMarginPercent}%)</span>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdWarning size={15} color="#d97706" /> Low Margin ({profitMarginPercent}%)</span>
                           </span>
                         )}
                       </div>
@@ -1681,29 +1681,29 @@ const NewTrip = () => {
                     {/* Live Kat-Peet Deductions breakdown badges */}
                     <div className="km-breakdown-tags">
                       <span className="km-breakdown-tag">
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdLocalGasStation size={14} color="#f97316" /> Fuel: <strong>₹{Math.round(estFuelCost).toLocaleString('en-IN')}</strong></span>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdLocalGasStation size={14} color="#ea580c" /> Fuel: <strong>₹{Math.round(estFuelCost).toLocaleString('en-IN')}</strong></span>
                       </span>
                       <span className="km-breakdown-tag">
-                        Tolls: <strong>₹{estToll.toLocaleString('en-IN')}</strong>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdAddRoad size={14} color="#0284c7" /> Tolls: <strong>₹{estToll.toLocaleString('en-IN')}</strong></span>
                       </span>
                       {directExpenses > 0 && (
                         <span className="km-breakdown-tag">
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdPerson size={14} color="#a855f7" /> Driver & Food/Ops: <strong>₹{directExpenses.toLocaleString('en-IN')}</strong></span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdPerson size={14} color="#7c3aed" /> Driver & Food/Ops: <strong>₹{directExpenses.toLocaleString('en-IN')}</strong></span>
                         </span>
                       )}
                       {numHamali > 0 && (
                         <span className="km-breakdown-tag">
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdInventory size={14} color="#eab308" /> Hamali / Loading: <strong>₹{numHamali.toLocaleString('en-IN')}</strong></span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdInventory size={14} color="#b45309" /> Hamali / Loading: <strong>₹{numHamali.toLocaleString('en-IN')}</strong></span>
                         </span>
                       )}
                       {numBilty > 0 && (
                         <span className="km-breakdown-tag">
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdDescription size={14} color="#60a5fa" /> Bilty / GR Charge: <strong>₹{numBilty.toLocaleString('en-IN')}</strong></span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdDescription size={14} color="#2563eb" /> Bilty / GR Charge: <strong>₹{numBilty.toLocaleString('en-IN')}</strong></span>
                         </span>
                       )}
                       {gstAmount > 0 && (
                         <span className="km-breakdown-tag">
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdAccountBalance size={14} color="#c084fc" /> GST Tax: <strong>₹{Math.round(gstAmount).toLocaleString('en-IN')}</strong></span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MdAccountBalance size={14} color="#6d28d9" /> GST Tax: <strong>₹{Math.round(gstAmount).toLocaleString('en-IN')}</strong></span>
                         </span>
                       )}
                     </div>

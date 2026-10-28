@@ -768,9 +768,9 @@
    ========================================================================== */
 .km-profit-card {
   grid-column: 1 / -1;
-  background: rgba(9, 132, 227, 0.08);
-  border: 1px solid rgba(9, 132, 227, 0.28);
-  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
   padding: 18px 20px;
   margin-top: 14px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
@@ -790,11 +790,16 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 2.5px;
+  height: 3px;
   background: linear-gradient(90deg, #38bdf8 0%, #818cf8 50%, #34d399 100%);
 }
 
 .km-profit-card.profitable {
+  border-color: #a7f3d0;
+  box-shadow: 0 4px 18px rgba(16, 185, 129, 0.08);
+}
+
+[data-theme="dark"] .km-profit-card.profitable {
   border-color: rgba(52, 211, 153, 0.35);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35), 0 0 25px rgba(16, 185, 129, 0.1);
 }
@@ -804,6 +809,11 @@
 }
 
 .km-profit-card.loss {
+  border-color: #fecaca;
+  box-shadow: 0 4px 18px rgba(239, 68, 68, 0.08);
+}
+
+[data-theme="dark"] .km-profit-card.loss {
   border-color: rgba(239, 68, 68, 0.45);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35), 0 0 25px rgba(239, 68, 68, 0.12);
 }
@@ -818,7 +828,7 @@
   align-items: center;
   margin-bottom: 16px;
   padding-bottom: 12px;
-  border-bottom: 1px solid rgba(9, 132, 227, 0.18);
+  border-bottom: 1px solid #f1f5f9;
 }
 
 [data-theme="dark"] .km-profit-header {
@@ -831,7 +841,7 @@
   gap: 10px;
   font-size: 1rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #0f172a;
   letter-spacing: -0.01em;
 }
 
@@ -842,9 +852,9 @@
 .km-profit-distance-pill {
   font-size: 0.82rem;
   font-weight: 600;
-  background: rgba(37, 99, 235, 0.1);
-  color: #2563eb;
-  border: 1px solid rgba(37, 99, 235, 0.25);
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
   padding: 6px 14px;
   border-radius: 20px;
   display: inline-flex;
@@ -868,8 +878,8 @@
 }
 
 .km-metric-box {
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 14px 16px;
   display: flex;
@@ -878,30 +888,61 @@
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="dark"] .km-metric-box {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: none;
 }
 
 .km-metric-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="dark"] .km-metric-box:hover {
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(255, 255, 255, 0.16);
-  transform: translateY(-2px);
 }
 
 .km-metric-box.earning {
+  border-top: 3.5px solid #0284c7;
+  background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%);
+}
+
+[data-theme="dark"] .km-metric-box.earning {
   border-top: 3px solid #38bdf8;
   background: linear-gradient(180deg, rgba(56, 189, 248, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
 }
 
 .km-metric-box.cost {
+  border-top: 3.5px solid #ea580c;
+  background: linear-gradient(180deg, #fff7ed 0%, #ffffff 100%);
+}
+
+[data-theme="dark"] .km-metric-box.cost {
   border-top: 3px solid #fb923c;
   background: linear-gradient(180deg, rgba(251, 146, 60, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
 }
 
 .km-metric-box.profit {
+  border-top: 3.5px solid #10b981;
+  background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%);
+}
+
+[data-theme="dark"] .km-metric-box.profit {
   border-top: 3px solid #34d399;
   background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
 }
 
 .km-metric-box.loss-box {
+  border-top: 3.5px solid #ef4444;
+  background: linear-gradient(180deg, #fef2f2 0%, #ffffff 100%);
+}
+
+[data-theme="dark"] .km-metric-box.loss-box {
   border-top: 3px solid #f87171;
   background: linear-gradient(180deg, rgba(239, 68, 68, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
 }
@@ -909,7 +950,7 @@
 .km-metric-label {
   font-size: 0.76rem;
   font-weight: 700;
-  color: #94a3b8;
+  color: #475569;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   display: flex;
@@ -917,42 +958,78 @@
   justify-content: space-between;
 }
 
+[data-theme="dark"] .km-metric-label {
+  color: #94a3b8;
+}
+
 .km-metric-val {
   font-size: 1.35rem;
   font-weight: 800;
-  color: #ffffff;
+  color: #0f172a;
   letter-spacing: -0.02em;
-  margin: 2px 0;
+  margin: 3px 0;
 }
 
-.km-metric-val.green { color: #34d399; }
-.km-metric-val.blue { color: #38bdf8; }
-.km-metric-val.orange { color: #fb923c; }
-.km-metric-val.red { color: #f87171; }
+[data-theme="dark"] .km-metric-val {
+  color: #ffffff;
+}
+
+.km-metric-val.green { color: #059669; }
+.km-metric-val.blue { color: #0284c7; }
+.km-metric-val.orange { color: #ea580c; }
+.km-metric-val.red { color: #dc2626; }
+
+[data-theme="dark"] .km-metric-val.green { color: #34d399; }
+[data-theme="dark"] .km-metric-val.blue { color: #38bdf8; }
+[data-theme="dark"] .km-metric-val.orange { color: #fb923c; }
+[data-theme="dark"] .km-metric-val.red { color: #f87171; }
+
+.km-metric-unit {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+[data-theme="dark"] .km-metric-unit {
+  color: #94a3b8;
+}
 
 .km-metric-sub {
-  font-size: 0.74rem;
-  color: #64748b;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: #475569;
   line-height: 1.4;
 }
 
+[data-theme="dark"] .km-metric-sub {
+  color: #94a3b8;
+}
+
+/* --- THE SUMMARY BAR: CLEAN WHITE BASE & HIGH CONTRAST TYPOGRAPHY --- */
 .km-profit-summary-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(0, 0, 0, 0.35);
-  border-radius: 10px;
-  padding: 12px 16px;
-  font-size: 0.85rem;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 0.88rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 14px;
+}
+
+[data-theme="dark"] .km-profit-summary-bar {
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: none;
 }
 
 .km-summary-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
   flex-wrap: wrap;
 }
 
@@ -960,25 +1037,80 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  color: #475569;
+  font-size: 0.88rem;
+}
+
+[data-theme="dark"] .km-summary-item {
+  color: #94a3b8;
+}
+
+.km-summary-item span {
+  font-weight: 600;
+  color: #475569;
+}
+
+[data-theme="dark"] .km-summary-item span {
   color: #94a3b8;
 }
 
 .km-summary-item strong {
+  color: #0f172a;
+  font-weight: 800;
+}
+
+[data-theme="dark"] .km-summary-item strong {
   color: #f1f5f9;
-  font-weight: 700;
+}
+
+.km-profit-val {
+  color: #059669;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+[data-theme="dark"] .km-profit-val {
+  color: #34d399;
+}
+
+.km-loss-val {
+  color: #dc2626;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+[data-theme="dark"] .km-loss-val {
+  color: #f87171;
+}
+
+.km-margin-val {
+  color: #0284c7;
+  font-weight: 800;
+}
+
+[data-theme="dark"] .km-margin-val {
+  color: #38bdf8;
 }
 
 .km-health-badge {
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  padding: 5px 14px;
-  border-radius: 20px;
+  padding: 6px 14px;
+  border-radius: 9999px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  letter-spacing: -0.01em;
 }
 
 .km-health-badge.high {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.12);
+}
+
+[data-theme="dark"] .km-health-badge.high {
   background: rgba(16, 185, 129, 0.18);
   color: #34d399;
   border: 1px solid rgba(52, 211, 153, 0.4);
@@ -986,37 +1118,71 @@
 }
 
 .km-health-badge.moderate {
+  background: #eff6ff;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+[data-theme="dark"] .km-health-badge.moderate {
   background: rgba(245, 158, 11, 0.18);
   color: #fbbf24;
   border: 1px solid rgba(251, 191, 36, 0.4);
 }
 
 .km-health-badge.low {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+[data-theme="dark"] .km-health-badge.low {
   background: rgba(239, 68, 68, 0.18);
   color: #f87171;
   border: 1px solid rgba(248, 113, 113, 0.4);
 }
 
+/* --- LIVE BREAKDOWN TAGS: CLEAR WHITE BASE WITH DARK LABELS --- */
 .km-breakdown-tags {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px dashed rgba(255, 255, 255, 0.07);
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed #cbd5e1;
+}
+
+[data-theme="dark"] .km-breakdown-tags {
+  border-top: 1px dashed rgba(255, 255, 255, 0.1);
 }
 
 .km-breakdown-tag {
-  font-size: 0.75rem;
+  font-size: 0.78rem;
+  color: #475569;
+  font-weight: 500;
+  background: #ffffff;
+  padding: 5px 12px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+[data-theme="dark"] .km-breakdown-tag {
   color: #94a3b8;
-  background: rgba(255, 255, 255, 0.03);
-  padding: 3px 8px;
-  border-radius: 5px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: none;
 }
 
 .km-breakdown-tag strong {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+[data-theme="dark"] .km-breakdown-tag strong {
   color: #cbd5e1;
 }
 

@@ -8,8 +8,8 @@
  * - Aadhar: 12 digits
  */
 
-// GST format: 2 numbers, 5 letters, 4 numbers, 1 letter, 1 number/letter, Z, 1 number/letter
-export const GST_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+// GST format: 15 alphanumeric characters (standard Indian GSTIN format)
+export const GST_REGEX = /^[0-9A-Z]{15}$/;
 
 // PAN format: 5 letters, 4 numbers, 1 letter
 export const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
@@ -28,8 +28,8 @@ export const NAME_REGEX = /^[A-Za-z\s.'-]+$/;
  * Returns true if valid or empty (when optional). If required=true, empty returns false.
  */
 export const isValidGST = (gst, required = false) => {
-  if (!gst || !gst.trim()) return !required;
-  const clean = gst.trim().toUpperCase();
+  if (!gst || !gst.toString().trim()) return !required;
+  const clean = gst.toString().trim().replace(/[\s-]/g, '').toUpperCase();
   return clean.length === 15 && GST_REGEX.test(clean);
 };
 

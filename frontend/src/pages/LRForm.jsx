@@ -156,7 +156,7 @@ const LRForm = () => {
 
     if (formData.consignorGST && formData.consignorGST.trim()) {
       if (!isValidGST(formData.consignorGST)) {
-        errs.consignorGST = 'Invalid 15-digit GST format for Consignor (e.g. 23AADCR1234F1Z5)';
+        errs.consignorGST = 'Invalid Consignor GST (15 alphanumeric characters required)';
       }
     }
 
@@ -174,7 +174,7 @@ const LRForm = () => {
 
     if (formData.consigneeGST && formData.consigneeGST.trim()) {
       if (!isValidGST(formData.consigneeGST)) {
-        errs.consigneeGST = 'Invalid 15-digit GST format for Consignee (e.g. 23AADCR1234F1Z5)';
+        errs.consigneeGST = 'Invalid Consignee GST (15 alphanumeric characters required)';
       }
     }
 
