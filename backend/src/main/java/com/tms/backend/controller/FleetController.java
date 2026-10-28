@@ -34,6 +34,7 @@ public class FleetController {
     @Autowired private com.tms.backend.service.AuditService auditService;
     @Autowired private com.tms.backend.service.WebhookService webhookService;
     @Autowired private com.tms.backend.service.TripService tripService;
+    @Autowired private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
 
     // --- Vehicles ---
     @GetMapping("/vehicles")
@@ -629,14 +630,45 @@ public class FleetController {
     }
     
     @DeleteMapping("/trips/{id}")
+    @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<?> deleteTrip(@PathVariable Long id) {
         return tripRepository.findById(id).map(t -> {
             String tripNo = t.getTripNumber();
+
+            try {
+                // 1. Delete payments on invoices linked to this trip
+                jdbcTemplate.update("DELETE FROM payments WHERE invoice_id IN (SELECT id FROM invoices WHERE trip_id = ?)", id);
+            } catch (Exception ignored) {}
+
+            try {
+                // 2. Delete auto-generated invoices for this trip
+                jdbcTemplate.update("DELETE FROM invoices WHERE trip_id = ?", id);
+            } catch (Exception ignored) {}
+
+            try {
+                // 3. Delete auto-generated LR / Bilty for this trip
+                jdbcTemplate.update("DELETE FROM lr_bilty WHERE trip_id = ?", id);
+            } catch (Exception ignored) {}
+
+            try {
+                // 4. Unlink expenses from this trip so expense records are preserved
+                jdbcTemplate.update("UPDATE expenses SET trip_id = NULL WHERE trip_id = ?", id);
+            } catch (Exception ignored) {}
+
+            try {
+                // 5. Delete auto-generated GST invoice if matching
+                if (tripNo != null && !tripNo.isEmpty()) {
+                    jdbcTemplate.update("DELETE FROM gst_invoices WHERE invoice_number = ?", "INV-" + tripNo);
+                }
+            } catch (Exception ignored) {}
+
             tripRepository.delete(t);
+
             try {
                 auditService.logAction((HttpServletRequest) null, "DELETED", "Trip", id, tripNo, null, "Deleted trip " + tripNo);
             } catch (Exception ex) {}
-            return ResponseEntity.ok().build();
+
+            return ResponseEntity.ok(Map.of("message", "Trip deleted successfully"));
         }).orElse(ResponseEntity.notFound().build());
     }
 
