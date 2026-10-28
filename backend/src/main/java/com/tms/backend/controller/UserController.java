@@ -15,7 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "*") // Using existing CORS approach for now
+@CrossOrigin(originPatterns = "*")
 public class UserController {
 
     @Autowired

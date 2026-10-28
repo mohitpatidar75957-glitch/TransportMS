@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/whatsapp")
-@CrossOrigin(origins = "*")
+@CrossOrigin(originPatterns = "*")
 public class WhatsAppController {
     
     private final WhatsAppService whatsappService;

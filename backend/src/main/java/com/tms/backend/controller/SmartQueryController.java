@@ -9,7 +9,7 @@ import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/v1/smart-query")
-@CrossOrigin(origins = "*")
+@CrossOrigin(originPatterns = "*")
 public class SmartQueryController {
 
     @Autowired private JdbcTemplate jdbcTemplate;

@@ -10,7 +10,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/gst")
-@CrossOrigin(origins = "*")
+@CrossOrigin(originPatterns = "*")
 public class GstController {
 
     private final GstService gstService;

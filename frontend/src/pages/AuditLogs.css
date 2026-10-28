@@ -212,18 +212,48 @@
   color: #f8fafc;
 }
 
-.audit-reset-link {
-  font-size: 0.8rem;
-  color: #94a3b8;
-  background: transparent;
-  border: none;
+.audit-reset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 7px 14px;
   cursor: pointer;
-  text-decoration: underline;
-  padding: 4px 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  line-height: 1;
 }
 
-.audit-reset-link:hover {
-  color: #f8fafc;
+.audit-reset-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.audit-reset-btn svg {
+  transition: transform 0.35s ease;
+}
+
+.audit-reset-btn:hover svg {
+  transform: rotate(180deg);
+}
+
+[data-theme="dark"] .audit-reset-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] .audit-reset-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
 }
 
 /* Main Table Container - Fixed to 100% width with NO horizontal scroll */

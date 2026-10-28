@@ -293,10 +293,12 @@ const AuditLogs = () => {
 
           {(searchTerm || entityFilter !== 'ALL' || actionFilter !== 'ALL') && (
             <button 
-              className="audit-reset-link" 
+              className="audit-reset-btn" 
               onClick={() => { setSearchTerm(''); setEntityFilter('ALL'); setActionFilter('ALL'); }}
+              title="Reset all filters"
             >
-              Reset Filters
+              <MdRefresh size={16} />
+              <span>Reset Filters</span>
             </button>
           )}
         </div>

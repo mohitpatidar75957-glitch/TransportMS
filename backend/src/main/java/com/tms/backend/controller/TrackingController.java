@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/tracking")
-@CrossOrigin(origins = "*")
+@CrossOrigin(originPatterns = "*")
 public class TrackingController {
 
     private final TrackingSessionRepository repository;

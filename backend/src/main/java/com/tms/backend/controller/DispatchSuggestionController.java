@@ -10,7 +10,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/dispatch")
-@CrossOrigin(origins = "*")
+@CrossOrigin(originPatterns = "*")
 public class DispatchSuggestionController {
 
     @Autowired
