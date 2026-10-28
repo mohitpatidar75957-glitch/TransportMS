@@ -44,6 +44,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/trips/estimate-delivery-time", "/api/trips/auto-freight", "/api/trips/route-ranking").permitAll()
                 .requestMatchers("/api/v1/trips/**", "/api/v1/orders/**", "/api/v1/dispatch/**").permitAll() // Checked and rate-limited by ApiKeyFilter
                 .requestMatchers("/api/docs/**", "/api-docs/**").permitAll() // Allow docs
+                .requestMatchers("/api/fastag/**", "/api/gst/**", "/api/whatsapp/**", "/api/v1/smart-query/**").permitAll()
                 .requestMatchers("/api/v1/api-keys/**", "/api/v1/webhooks/**").authenticated()
                 .requestMatchers("/api/**").authenticated()  // Requires valid JWT token
                 .anyRequest().permitAll() // Allow static files (frontend) and unknown routes to hit index.html
