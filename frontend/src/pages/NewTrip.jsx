@@ -2250,16 +2250,19 @@ const NewTrip = () => {
               </div>
             </div>
           </div>
-
-          <button 
-            id="find-routes-btn"
-            className="btn-primary find-routes-btn" 
-            onClick={handleFindRoutes}
-            disabled={loading}
-          >
-            {loading ? 'Calculating Best Routes...' : <><MdAltRoute size={20}/> Find Best Routes</>}
-          </button>
         </div>
+      </div>
+
+      <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center' }}>
+        <button 
+          id="find-routes-btn"
+          className="btn-primary find-routes-btn" 
+          onClick={handleFindRoutes}
+          disabled={loading}
+          style={{ minWidth: '280px', padding: '14px 28px', fontSize: '1rem', fontWeight: '600' }}
+        >
+          {loading ? 'Calculating Best Routes...' : <><MdAltRoute size={20}/> Find Best Routes</>}
+        </button>
       </div>
 
       {/* RESULTS SECTION */}

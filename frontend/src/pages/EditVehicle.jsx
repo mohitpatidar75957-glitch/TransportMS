@@ -10,6 +10,7 @@ const EditVehicle = () => {
   const { showAlert, showConfirm } = useModal();
   const { id } = useParams();
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
     vehicleNumber: '',
@@ -76,6 +77,7 @@ const EditVehicle = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
     
     // Extract real ID if it has 'db-' prefix
     const realId = id.startsWith('db-') ? id.replace('db-', '') : id;
@@ -101,6 +103,7 @@ const EditVehicle = () => {
       fitnessExpiry: formData.fitnessExpiry
     };
 
+    setIsSubmitting(true);
     try {
       const response = await fetch(`/api/v1/fleet/vehicles/${realId}`, {
         method: 'PUT',
@@ -114,11 +117,14 @@ const EditVehicle = () => {
         console.log('Vehicle updated successfully');
         navigate('/vehicles');
       } else {
-        showAlert('Failed to update vehicle.');
+        const errorData = await response.json().catch(() => ({}));
+        showAlert(errorData.error || errorData.message || 'Failed to update vehicle.');
       }
     } catch (error) {
       console.error('Error updating vehicle:', error);
       showAlert('Error connecting to backend.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -333,10 +339,10 @@ const EditVehicle = () => {
           </div>
 
           <div className="form-actions">
-            <button type="submit" className="save-btn">
-              Update Vehicle
+            <button type="submit" className="save-btn" disabled={isSubmitting} style={isSubmitting ? { opacity: 0.6, cursor: 'not-allowed' } : {}}>
+              {isSubmitting ? 'Updating Vehicle...' : 'Update Vehicle'}
             </button>
-            <button type="button" className="cancel-btn" onClick={handleCancel}>
+            <button type="button" className="cancel-btn" onClick={handleCancel} disabled={isSubmitting}>
               Cancel
             </button>
           </div>

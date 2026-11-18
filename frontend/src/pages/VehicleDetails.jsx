@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MdEdit, MdDelete, MdInfoOutline, MdInsertDriveFile } from 'react-icons/md';
 import './VehicleDetails.css';
+import { useModal } from '../context/ModalContext';
 
 const VehicleDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { showAlert, showConfirm } = useModal();
   const [activeTab, setActiveTab] = useState('Recent Trips');
   const [vehicle, setVehicle] = useState(null);
   const [trips, setTrips] = useState([]);
@@ -14,6 +16,33 @@ const VehicleDetails = () => {
   const [loans, setLoans] = useState([]);
   const [maintenanceList, setMaintenanceList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (isDeleting) return;
+    const confirmed = await showConfirm(`Are you sure you want to delete vehicle ${vehicle?.registrationNumber || ''}?`);
+    if (confirmed) {
+      setIsDeleting(true);
+      try {
+        const dbId = id.startsWith('db-') ? id.replace('db-', '') : id;
+        const response = await fetch(`/api/v1/fleet/vehicles/${dbId}`, {
+          method: 'DELETE'
+        });
+
+        if (response.ok) {
+          navigate('/vehicles');
+        } else {
+          const errData = await response.json().catch(() => ({}));
+          showAlert(errData.error || errData.message || 'Failed to delete vehicle from database.');
+        }
+      } catch (error) {
+        console.error('Error deleting vehicle:', error);
+        showAlert('Error connecting to backend database.');
+      } finally {
+        setIsDeleting(false);
+      }
+    }
+  };
 
   useEffect(() => {
     const fetchRealData = async () => {
@@ -86,11 +115,19 @@ const VehicleDetails = () => {
           <p>{vehicle.name || 'Unknown'} | {vehicle.type || 'N/A'}</p>
         </div>
         <div className="header-actions">
-          <button className="action-btn edit-btn">
+          <button 
+            className="action-btn edit-btn" 
+            onClick={() => navigate(`/vehicles/${id}/edit`)}
+          >
             <MdEdit /> Edit
           </button>
-          <button className="action-btn delete-btn">
-            <MdDelete /> Delete
+          <button 
+            className="action-btn delete-btn" 
+            onClick={handleDelete}
+            disabled={isDeleting}
+            style={isDeleting ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
+          >
+            <MdDelete /> {isDeleting ? 'Deleting...' : 'Delete'}
           </button>
         </div>
       </div>

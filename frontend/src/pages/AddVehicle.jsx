@@ -15,6 +15,7 @@ const AddVehicle = () => {
   const [doubtfulFields, setDoubtfulFields] = useState([]);
   const [ocrUsed, setOcrUsed] = useState(false);
   const [ocrVerified, setOcrVerified] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
@@ -97,6 +98,8 @@ const AddVehicle = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     const formattedRegNumber = normalizeRegistrationNumber(formData.vehicleNumber);
     
     const payload = {
@@ -118,6 +121,7 @@ const AddVehicle = () => {
       fitnessExpiry: formData.fitnessExpiry
     };
 
+    setIsSubmitting(true);
     try {
       const response = await fetch('/api/v1/fleet/vehicles', {
         method: 'POST',
@@ -131,12 +135,15 @@ const AddVehicle = () => {
         console.log('Vehicle saved to database successfully');
         navigate('/vehicles');
       } else {
-        console.error('Failed to save vehicle');
-        showAlert('Failed to save vehicle to database.');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Failed to save vehicle:', errorData);
+        showAlert(errorData.error || errorData.message || 'Failed to save vehicle to database.');
       }
     } catch (error) {
       console.error('Error saving vehicle:', error);
       showAlert('Error connecting to backend database.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -388,10 +395,15 @@ const AddVehicle = () => {
           )}
 
           <div className="form-actions">
-            <button type="submit" className="save-btn" disabled={ocrUsed && !ocrVerified} style={ocrUsed && !ocrVerified ? { opacity: 0.5, cursor: 'not-allowed' } : {}}>
-              Save Vehicle
+            <button 
+              type="submit" 
+              className="save-btn" 
+              disabled={isSubmitting || (ocrUsed && !ocrVerified)} 
+              style={(isSubmitting || (ocrUsed && !ocrVerified)) ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
+            >
+              {isSubmitting ? 'Saving Vehicle...' : 'Save Vehicle'}
             </button>
-            <button type="button" className="cancel-btn" onClick={handleCancel}>
+            <button type="button" className="cancel-btn" onClick={handleCancel} disabled={isSubmitting}>
               Cancel
             </button>
           </div>
