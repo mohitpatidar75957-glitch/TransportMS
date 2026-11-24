@@ -3,12 +3,13 @@ FROM maven:3.9.6-eclipse-temurin-21 AS backend-build
 ENV MAVEN_OPTS="-Xmx512m -XX:+UseG1GC"
 WORKDIR /app/backend
 
-# Copy pom and source code
+# Copy pom, settings and source code
 COPY backend/pom.xml ./
+COPY backend/settings.xml /root/.m2/settings.xml
 COPY backend/src ./src
 
-# Package the application
-RUN mvn clean package -DskipTests -B
+# Package the application with retries and mirror support
+RUN mvn clean package -DskipTests -B -s /root/.m2/settings.xml
 
 # Stage 2: Run the application
 FROM eclipse-temurin:21-jre
@@ -17,4 +18,3 @@ COPY --from=backend-build /app/backend/target/backend-0.0.1-SNAPSHOT.jar ./app.j
 
 EXPOSE 8080
 ENTRYPOINT ["java", "-Xmx400m", "-jar", "app.jar"]
-
