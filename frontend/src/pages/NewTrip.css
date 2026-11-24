@@ -85,6 +85,18 @@
   margin-left: 12px;
   padding-left: 24px;
   border-left: 2px dashed var(--border-color);
+  max-height: 250px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.route-stops-container::-webkit-scrollbar {
+  width: 5px;
+}
+
+.route-stops-container::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
 }
 
 .route-stop-item {
