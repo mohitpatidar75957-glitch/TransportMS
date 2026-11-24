@@ -1,0 +1,28 @@
+# Node / Frontend
+node_modules/
+dist/
+.env.local
+.env.*.local
+*.log
+
+# Java / Spring Boot
+target/
+*.class
+*.jar
+*.war
+.settings/
+.project
+.classpath
+.factorypath
+bin/
+
+# IDE / OS
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
