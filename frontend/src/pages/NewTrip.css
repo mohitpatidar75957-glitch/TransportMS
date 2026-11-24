@@ -30,18 +30,33 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 24px;
-  align-items: start;
+  align-items: stretch;
   width: 100%;
   box-sizing: border-box;
 }
 
-.left-col, .right-col {
+.left-col,
+.right-col {
   display: flex;
   flex-direction: column;
   min-width: 0;
   width: 100%;
   gap: 24px;
   box-sizing: border-box;
+}
+
+.left-col > .trip-card:last-child,
+.right-col > .trip-card:last-child {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Let the grid stretch to fill the card height and push the bottom bar right to the border */
+.left-col > .trip-card:last-child .vehicle-info-grid,
+.right-col > .trip-card:last-child .vehicle-info-grid {
+  flex: 1;
+  align-content: space-between;
 }
 
 /* Common Card Style */
@@ -76,8 +91,8 @@
 /* Route Details Specifics */
 .route-stops-container {
   position: relative;
-  margin-left: 12px;
-  padding-left: 24px;
+  margin-left: 20px;
+  padding-left: 26px;
   border-left: 2px dashed var(--border-color);
 }
 
@@ -91,14 +106,15 @@
 
 .route-stop-marker {
   position: absolute;
-  left: -34px;
-  top: 10px;
+  left: -35px;
+  top: 12px;
   width: 16px;
   height: 16px;
   border-radius: 50%;
   background-color: var(--sidebar-bg);
   border: 4px solid var(--accent-color);
-  z-index: 1;
+  z-index: 2;
+  box-sizing: border-box;
 }
 
 .route-stop-marker.start {
@@ -207,7 +223,7 @@
   box-sizing: border-box;
 }
 
-.vehicle-info-grid > div,
+.vehicle-info-grid>div,
 .vehicle-info-grid .form-group {
   min-width: 0;
   width: 100%;
@@ -276,7 +292,7 @@
   padding-top: 32px;
 }
 
-.recommended-routes-section > h2 {
+.recommended-routes-section>h2 {
   font-size: 1.5rem;
   margin: 0 0 24px 0;
   text-align: center;
@@ -539,9 +555,17 @@
   font-size: 1.25rem;
 }
 
-.map-node-icon.start { background-color: #2ecc71; }
-.map-node-icon.stop { background-color: #3498db; }
-.map-node-icon.end { background-color: #e74c3c; }
+.map-node-icon.start {
+  background-color: #2ecc71;
+}
+
+.map-node-icon.stop {
+  background-color: #3498db;
+}
+
+.map-node-icon.end {
+  background-color: #e74c3c;
+}
 
 .map-node-label {
   font-size: 0.875rem;
@@ -572,6 +596,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
   }
+
   .vehicle-info-grid .form-group input,
   .vehicle-info-grid .form-group select {
     font-size: 0.84rem;
@@ -600,8 +625,9 @@
     grid-template-columns: 1fr;
     gap: 16px;
   }
-  
-  .vehicle-info-grid, .route-stats-grid {
+
+  .vehicle-info-grid,
+  .route-stats-grid {
     grid-template-columns: 1fr;
   }
 
@@ -619,14 +645,17 @@
 .custom-scrollbar::-webkit-scrollbar {
   width: 8px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 4px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 4px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.4);
 }
@@ -1020,15 +1049,37 @@
   color: #ffffff;
 }
 
-.km-metric-val.green { color: #059669; }
-.km-metric-val.blue { color: #0284c7; }
-.km-metric-val.orange { color: #ea580c; }
-.km-metric-val.red { color: #dc2626; }
+.km-metric-val.green {
+  color: #059669;
+}
 
-[data-theme="dark"] .km-metric-val.green { color: #34d399; }
-[data-theme="dark"] .km-metric-val.blue { color: #38bdf8; }
-[data-theme="dark"] .km-metric-val.orange { color: #fb923c; }
-[data-theme="dark"] .km-metric-val.red { color: #f87171; }
+.km-metric-val.blue {
+  color: #0284c7;
+}
+
+.km-metric-val.orange {
+  color: #ea580c;
+}
+
+.km-metric-val.red {
+  color: #dc2626;
+}
+
+[data-theme="dark"] .km-metric-val.green {
+  color: #34d399;
+}
+
+[data-theme="dark"] .km-metric-val.blue {
+  color: #38bdf8;
+}
+
+[data-theme="dark"] .km-metric-val.orange {
+  color: #fb923c;
+}
+
+[data-theme="dark"] .km-metric-val.red {
+  color: #f87171;
+}
 
 .km-metric-unit {
   font-size: 0.78rem;
@@ -1289,4 +1340,3 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   background: transparent !important;
   cursor: pointer !important;
 }
-
