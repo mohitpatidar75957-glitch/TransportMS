@@ -30,7 +30,7 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 24px;
-  align-items: stretch;
+  align-items: start;
   width: 100%;
   box-sizing: border-box;
 }
@@ -42,12 +42,6 @@
   width: 100%;
   gap: 24px;
   box-sizing: border-box;
-}
-
-/* Ensure both columns bottom cards align cleanly to the same bottom baseline */
-.left-col > .trip-card:last-child,
-.right-col > .trip-card:last-child {
-  flex: 1;
 }
 
 /* Common Card Style */
@@ -85,18 +79,6 @@
   margin-left: 12px;
   padding-left: 24px;
   border-left: 2px dashed var(--border-color);
-  max-height: 250px;
-  overflow-y: auto;
-  padding-right: 6px;
-}
-
-.route-stops-container::-webkit-scrollbar {
-  width: 5px;
-}
-
-.route-stops-container::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 4px;
 }
 
 .route-stop-item {

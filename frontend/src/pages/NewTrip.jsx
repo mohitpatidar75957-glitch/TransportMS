@@ -1877,24 +1877,6 @@ const NewTrip = () => {
                   onChange={e => { if (!e.target.value.includes('-')) setAdvanceAmount(e.target.value); }} 
                 />
               </div>
-
-              {/* Balance To Pay / Payment Status Badge (Aligns with Right Total Amount) */}
-              <div className="form-group" style={{ gridColumn: '1 / -1', background: 'rgba(59, 130, 246, 0.08)', padding: '12px 14px', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.25)', marginTop: '4px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                    Balance To Collect / Pay (Total - Advance):
-                  </span>
-                  <span style={{ fontSize: '1.15rem', fontWeight: 800, color: '#3b82f6' }}>
-                    ₹{Math.max(0, (
-                      (parseFloat(manualFreightRate) || 0) + 
-                      (parseFloat(biltyCharge) || 0) + 
-                      (parseFloat(loadingCharge) || 0) + 
-                      (gstAmount || 0) - 
-                      (parseFloat(advanceAmount) || 0)
-                    )).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
