@@ -31,6 +31,7 @@ public class FleetController {
     @Autowired private PayrollRepository payrollRepository;
     @Autowired private ExpenseRepository expenseRepository;
     @Autowired private VehicleMaintenanceRepository maintenanceRepository;
+    @Autowired private com.tms.backend.repository.DocumentVaultRepository documentVaultRepository;
     @Autowired private com.tms.backend.service.AuditService auditService;
     @Autowired private com.tms.backend.service.WebhookService webhookService;
     @Autowired private com.tms.backend.service.TripService tripService;
@@ -291,6 +292,7 @@ public class FleetController {
     public ResponseEntity<?> deleteDriver(@PathVariable Long id) {
         return driverRepository.findById(id).map(d -> {
             try {
+                // 1. Unlink trips
                 List<Trip> trips = tripRepository.findAll();
                 for (Trip t : trips) {
                     if (t.getDriver() != null && id.equals(t.getDriver().getId())) {
@@ -298,6 +300,33 @@ public class FleetController {
                         tripRepository.save(t);
                     }
                 }
+
+                // 2. Unlink fuel records
+                List<FuelRecord> fuels = fuelRepository.findAll();
+                for (FuelRecord f : fuels) {
+                    if (f.getDriver() != null && id.equals(f.getDriver().getId())) {
+                        f.setDriver(null);
+                        fuelRepository.save(f);
+                    }
+                }
+
+                // 3. Unlink document vaults
+                if (documentVaultRepository != null) {
+                    List<com.tms.backend.model.DocumentVault> docs = documentVaultRepository.findAll();
+                    for (com.tms.backend.model.DocumentVault doc : docs) {
+                        if (doc.getDriver() != null && id.equals(doc.getDriver().getId())) {
+                            doc.setDriver(null);
+                            documentVaultRepository.save(doc);
+                        }
+                    }
+                }
+
+                // 4. Delete attendance & payroll for this driver
+                try {
+                    jdbcTemplate.update("DELETE FROM attendance WHERE employee_type = 'Driver' AND employee_id = ?", id);
+                    jdbcTemplate.update("DELETE FROM payroll WHERE employee_type = 'Driver' AND employee_id = ?", id);
+                } catch (Exception ex) {}
+
                 String driverName = d.getName();
                 driverRepository.delete(d);
                 try {

@@ -317,7 +317,7 @@ const DriverSelect = ({ drivers = [], value, onChange, placeholder = 'Select Dri
                     </span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                    <span>DL: {d.licenseNumber || 'License verified'}</span>
+                    <span>License: {d.licenseNumber || 'License verified'}</span>
                     {d.address && <span style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.address}</span>}
                   </div>
                 </div>

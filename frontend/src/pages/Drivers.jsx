@@ -142,9 +142,9 @@ const Drivers = () => {
                 <td colSpan="9" style={{textAlign: 'center', padding: '20px'}}>No drivers found.</td>
               </tr>
             ) : (
-              filteredDrivers.map((d) => (
+              filteredDrivers.map((d, index) => (
               <tr key={d.id}>
-                <td>{d.displayId || d.id}</td>
+                <td>{index + 1}</td>
                 <td>
                   <div className="vehicle-info">
                     <span className="vehicle-num">{d.name}</span>
