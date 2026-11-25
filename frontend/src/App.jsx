@@ -102,7 +102,7 @@ const PageLoader = () => (
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/landing" replace />;
   }
   return children;
 };
