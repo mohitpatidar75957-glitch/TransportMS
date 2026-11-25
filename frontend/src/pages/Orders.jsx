@@ -177,7 +177,7 @@ const Orders = () => {
       </div>
 
       <div className="table-container panel">
-        <table className="data-table">
+        <table className="data-table orders-table">
           <thead>
             <tr>
               <th>ORDER #</th>
@@ -197,11 +197,17 @@ const Orders = () => {
               filteredOrders.map(order => (
                 <tr key={order.id}>
                   <td><span className="vehicle-num link-text">{order.orderNumber}</span></td>
-                  <td><strong>{order.customerName}</strong></td>
-                  <td>{order.cargoDetails || '-'} {order.weight ? `(${order.weight})` : ''}</td>
+                  <td><strong className="order-customer-text">{order.customerName}</strong></td>
+                  <td>
+                    <span className="order-cargo-text" title={`${order.cargoDetails || '-'} ${order.weight ? `(${order.weight})` : ''}`}>
+                      {order.cargoDetails || '-'} {order.weight ? `(${order.weight})` : ''}
+                    </span>
+                  </td>
                   <td>
                     {order.pickupLocation || order.dropLocation ? (
-                      <span>{order.pickupLocation || '-'} ➔ {order.dropLocation || '-'}</span>
+                      <span className="order-route-text" title={`${order.pickupLocation || '-'} ➔ ${order.dropLocation || '-'}`}>
+                        {order.pickupLocation || '-'} ➔ {order.dropLocation || '-'}
+                      </span>
                     ) : '-'}
                   </td>
                   <td>{order.expectedDate || '-'}</td>
@@ -212,22 +218,14 @@ const Orders = () => {
                     </span>
                   </td>
                   <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div className="order-actions-wrapper">
                       {(order.status !== 'COMPLETED') && (
                         <button
                           onClick={() => handleGetSuggestion(order.id)}
-                          style={{
-                            display: 'flex', alignItems: 'center', gap: '6px',
-                            padding: '6px 14px', borderRadius: '8px', border: 'none',
-                            background: '#0984e3',
-                            color: '#fff', fontWeight: '600', fontSize: '12px',
-                            cursor: 'pointer', whiteSpace: 'nowrap',
-                            boxShadow: '0 2px 8px rgba(9, 132, 227, 0.4)',
-                            transition: 'all 0.2s'
-                          }}
+                          className="order-suggest-btn"
                           title="Get best truck & driver suggestion"
                         >
-                          <MdAutoAwesome size={16} /> Suggest
+                          <MdAutoAwesome size={15} /> Suggest
                         </button>
                       )}
                       <button
@@ -245,18 +243,7 @@ const Orders = () => {
                             }
                           }
                         }}
-                        style={{
-                          background: 'rgba(239, 68, 68, 0.15)',
-                          border: '1px solid rgba(239, 68, 68, 0.3)',
-                          color: '#f87171',
-                          padding: '6px 10px',
-                          borderRadius: '8px',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '13px'
-                        }}
+                        className="order-delete-btn"
                         title="Delete this order"
                       >
                         <MdClose size={14} />
