@@ -73,27 +73,24 @@ const ContactMessageDetails = () => {
     fetchDetails();
   }, [id]);
 
-  const handleDelete = () => {
-    showConfirm(
-      'Delete Contact Message',
-      'Are you sure you want to delete this message?',
-      async () => {
-        const dbId = String(id).replace('db-', '');
-        try {
-          try {
-            localStorage.removeItem('tms_cache_/api/v1/management/contact-messages');
-          } catch {}
+  const handleDelete = async () => {
+    const confirmed = await showConfirm('Are you sure you want to delete this message?');
+    if (!confirmed) return;
 
-          await fetch(`/api/v1/management/contact-messages/${dbId}`, { method: 'DELETE' });
-          showAlert('Message deleted successfully.');
-          navigate('/contact-messages');
-        } catch (err) {
-          console.error('Error deleting message:', err);
-          showAlert('Message removed.');
-          navigate('/contact-messages');
-        }
-      }
-    );
+    const dbId = String(id).replace('db-', '');
+    try {
+      try {
+        localStorage.removeItem('tms_cache_/api/v1/management/contact-messages');
+      } catch {}
+
+      await fetch(`/api/v1/management/contact-messages/${dbId}`, { method: 'DELETE' });
+      showAlert('Message deleted successfully.');
+      navigate('/contact-messages');
+    } catch (err) {
+      console.error('Error deleting message:', err);
+      showAlert('Message removed.');
+      navigate('/contact-messages');
+    }
   };
 
   if (loading) {

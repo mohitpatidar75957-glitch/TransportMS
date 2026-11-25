@@ -21,8 +21,8 @@ const LandingPage = () => {
     };
   }, []);
 
-  // Active Tab: 'product' | 'solutions' | 'pricing' | 'company' | 'book-demo'
-  const [activeTab, setActiveTab] = useState('product');
+  // Active Tab: 'home' | 'product' | 'solutions' | 'pricing' | 'company' | 'book-demo'
+  const [activeTab, setActiveTab] = useState('home');
 
   // Pricing cycle
   const [billingCycle, setBillingCycle] = useState('monthly');
@@ -100,7 +100,7 @@ const LandingPage = () => {
       <header className="landing-header">
         <div className="landing-header-inner">
           {/* Brand Logo */}
-          <div className="landing-brand" onClick={() => setActiveTab('product')}>
+          <div className="landing-brand" onClick={() => { setActiveTab('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
             <span className="brand-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M5 16L11 9L15 13L19 7" stroke="#111317" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -163,6 +163,214 @@ const LandingPage = () => {
           </div>
         </div>
       </header>
+
+      {/* =========================================================================
+          TAB 0: HOME / DEFAULT LANDING (ON CLICKING FREIGHTLANE)
+         ========================================================================= */}
+      {activeTab === 'home' && (
+        <main className="landing-main-content">
+          {/* Hero Section */}
+          <section className="home-hero-section">
+            <div className="container">
+              <div className="home-tagline-badge">
+                <span className="dot-pulse"></span>
+                <span>OPERATIONS-FIRST TMS 2026</span>
+              </div>
+              <h1 className="home-hero-title">
+                ONE CONNECTED PLATFORM<br />
+                FOR FLEET OPERATIONS.
+              </h1>
+              <p className="home-hero-desc">
+                From dispatch to settlement — replace fragmented spreadsheets, WhatsApp messages, 
+                and disconnected tools with one unified operational backbone built for Indian logistics.
+              </p>
+              
+              <div className="home-hero-buttons">
+                <button type="button" className="btn-book-demo large" onClick={() => handleOpenModal('demo')}>
+                  Schedule a Demo
+                </button>
+                <button type="button" className="btn-plan-action outline home-outline-btn" onClick={() => { setActiveTab('product'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+                  Explore Modules →
+                </button>
+              </div>
+
+              {/* Interactive Operations Dispatch Snapshot Board */}
+              <div className="home-dispatch-board-card">
+                <div className="dispatch-board-header">
+                  <div className="board-header-left">
+                    <span className="live-indicator-dot"></span>
+                    <span className="board-header-title">LIVE OPERATIONS OVERVIEW</span>
+                    <span className="board-timestamp">TODAY • REAL-TIME SYNC</span>
+                  </div>
+                  <div className="board-header-right">
+                    <span className="board-badge active">ALL WORKSPACES ACTIVE</span>
+                  </div>
+                </div>
+
+                <div className="dispatch-board-metrics-row">
+                  <div className="dispatch-metric-item">
+                    <div className="metric-num">38</div>
+                    <div className="metric-label">TRIPS IN TRANSIT</div>
+                    <div className="metric-trend green">↑ 98.4% on schedule</div>
+                  </div>
+                  <div className="dispatch-metric-item">
+                    <div className="metric-num">92%</div>
+                    <div className="metric-label">FLEET UTILIZATION</div>
+                    <div className="metric-trend">48 / 52 Active Vehicles</div>
+                  </div>
+                  <div className="dispatch-metric-item">
+                    <div className="metric-num">2</div>
+                    <div className="metric-label">EXCEPTIONS FLAGGED</div>
+                    <div className="metric-trend orange">Route delay & toll queue</div>
+                  </div>
+                  <div className="dispatch-metric-item">
+                    <div className="metric-num">₹ 14.8L</div>
+                    <div className="metric-label">SETTLED TODAY</div>
+                    <div className="metric-trend green">Zero spreadsheet gap</div>
+                  </div>
+                </div>
+
+                <div className="dispatch-board-sample-table">
+                  <div className="sample-table-header">
+                    <span>TRIP ID</span>
+                    <span>ORIGIN → DESTINATION</span>
+                    <span>VEHICLE / DRIVER</span>
+                    <span>LIVE STATUS</span>
+                    <span>ETA & ALERTS</span>
+                  </div>
+                  <div className="sample-table-row">
+                    <span className="mono-tag">TRP-8492</span>
+                    <span>Indore Hub → Bhiwandi Hub</span>
+                    <span>NL-01-AB-4921 (Ramesh K.)</span>
+                    <span className="status-pill in-transit">In Transit • 58 km/h</span>
+                    <span className="eta-tag green">On Time (08:30 PM)</span>
+                  </div>
+                  <div className="sample-table-row">
+                    <span className="mono-tag">TRP-8488</span>
+                    <span>Pune MIDC → Chennai Port</span>
+                    <span>MH-12-PQ-9104 (Sunil V.)</span>
+                    <span className="status-pill exception">FASTag Toll Queue</span>
+                    <span className="eta-tag orange">+15 min delay</span>
+                  </div>
+                  <div className="sample-table-row">
+                    <span className="mono-tag">TRP-8481</span>
+                    <span>Delhi NCR → Jaipur North</span>
+                    <span>HR-55-XY-3011 (Vikram S.)</span>
+                    <span className="status-pill delivered">POD Uploaded (GPS OK)</span>
+                    <span className="eta-tag blue">Ready to Invoice</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          {/* Value Props 4 Pillars */}
+          <section className="home-pillars-section">
+            <div className="container">
+              <div className="home-section-tag">BUILT FOR SCALE</div>
+              <h2 className="home-section-heading">WHY FORWARDING & FLEET BUSINESSES CHOOSE FREIGHTLANE.</h2>
+
+              <div className="home-pillars-grid">
+                <div className="home-pillar-card">
+                  <div className="pillar-num">01</div>
+                  <h3 className="pillar-title">REAL-TIME VISIBILITY</h3>
+                  <p className="pillar-desc">
+                    GPS tracking, FASTag toll sync, speed monitoring, and customer tracking links — all without relying on calls or driver check-ins.
+                  </p>
+                </div>
+
+                <div className="home-pillar-card">
+                  <div className="pillar-num">02</div>
+                  <h3 className="pillar-title">DIGITAL LR & POD</h3>
+                  <p className="pillar-desc">
+                    Generate instant LR/Bilty, e-Way bills, and capture driver POD photos with automatic GPS & timestamp verification upon delivery.
+                  </p>
+                </div>
+
+                <div className="home-pillar-card">
+                  <div className="pillar-num">03</div>
+                  <h3 className="pillar-title">ZERO RECONCILIATION GAP</h3>
+                  <p className="pillar-desc">
+                    Eliminate spreadsheet leaks. Trips automatically feed freight billing, driver settlements, fuel card deductions, and customer receivables.
+                  </p>
+                </div>
+
+                <div className="home-pillar-card">
+                  <div className="pillar-num">04</div>
+                  <h3 className="pillar-title">ROLE-SPECIFIC WORKSPACES</h3>
+                  <p className="pillar-desc">
+                    Business Owner, Operations Manager, Driver, and Accountant — each gets a tailored interface with zero irrelevant clutter.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Quick Module Navigation Grid */}
+          <section className="home-modules-preview-section">
+            <div className="container">
+              <div className="home-section-tag">COMPLETE TMS LIFECYCLE</div>
+              <div className="flex-between-heading">
+                <h2 className="home-section-heading">SIX INTEGRATED MODULES.</h2>
+                <button type="button" className="btn-inline-link" onClick={() => { setActiveTab('product'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+                  See all 6 modules details →
+                </button>
+              </div>
+
+              <div className="home-preview-grid">
+                <div className="home-module-preview-card" onClick={() => { setActiveTab('product'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+                  <span className="card-index">01</span>
+                  <h4>Fleet Management</h4>
+                  <p>RC, insurance, PUC, fitness expiry tracking, maintenance, and vehicle master.</p>
+                </div>
+                <div className="home-module-preview-card" onClick={() => { setActiveTab('product'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+                  <span className="card-index">02</span>
+                  <h4>Trip Operations</h4>
+                  <p>Load planning, driver assignment, LR generation, and multi-stop dispatching.</p>
+                </div>
+                <div className="home-module-preview-card" onClick={() => { setActiveTab('product'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+                  <span className="card-index">03</span>
+                  <h4>Live Tracking</h4>
+                  <p>Real-time vehicle location, route deviations, and shareable customer tracking.</p>
+                </div>
+                <div className="home-module-preview-card" onClick={() => { setActiveTab('product'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+                  <span className="card-index">04</span>
+                  <h4>Document Management</h4>
+                  <p>Digital LR, digital POD with GPS stamps, e-way bills, and approval flows.</p>
+                </div>
+                <div className="home-module-preview-card" onClick={() => { setActiveTab('product'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+                  <span className="card-index">05</span>
+                  <h4>Finance & Billing</h4>
+                  <p>Automated invoicing from trip actuals, vendor settlement, and fuel reconciliation.</p>
+                </div>
+                <div className="home-module-preview-card" onClick={() => { setActiveTab('product'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+                  <span className="card-index">06</span>
+                  <h4>Analytics & Reports</h4>
+                  <p>Per-trip profit & loss, vehicle utilization, driver efficiency, and revenue.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* CTA Banner */}
+          <section className="product-cta-banner-section">
+            <div className="container">
+              <div className="cta-banner-box">
+                <div className="cta-banner-text">
+                  <h3 className="cta-banner-title">READY TO EMPOWER YOUR FLEET OPERATIONS?</h3>
+                  <p className="cta-banner-desc">
+                    Book a tailored 30-minute operational walkthrough. We will review your fleet workflow, show live modules, and answer questions.
+                  </p>
+                </div>
+                <button type="button" className="btn-book-demo large" onClick={() => handleOpenModal('demo')}>
+                  Schedule a Demo
+                </button>
+              </div>
+            </div>
+          </section>
+        </main>
+      )}
 
       {/* =========================================================================
           TAB 1: PRODUCT (THE COMPLETE TMS PLATFORM)

@@ -6,7 +6,13 @@ import MainLayout from './layouts/MainLayout';
 
 // Route-based code splitting (Lazy Loading) for ultra-fast initial page loads
 const Login = lazy(() => import('./pages/Login'));
-const LandingPage = lazy(() => import('./pages/LandingPage'));
+const LandingLayout = lazy(() => import('./landing/components/Layout'));
+const HomePage = lazy(() => import('./landing/pages/HomePage'));
+const ProductPage = lazy(() => import('./landing/pages/ProductPage'));
+const SolutionsPage = lazy(() => import('./landing/pages/SolutionsPage'));
+const PricingPage = lazy(() => import('./landing/pages/PricingPage'));
+const CompanyPage = lazy(() => import('./landing/pages/CompanyPage'));
+const BookDemoPage = lazy(() => import('./landing/pages/BookDemoPage'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const NewTrip = lazy(() => import('./pages/NewTrip'));
 const Vehicles = lazy(() => import('./pages/Vehicles'));
@@ -127,7 +133,16 @@ function App() {
         <BrowserRouter>
           <Suspense fallback={<PageLoader />}>
             <Routes>
-              <Route path="/landing" element={<LandingPage />} />
+              {/* Freightlane Marketing / Landing Routes matching Figma 1:1 */}
+              <Route element={<LandingLayout />}>
+                <Route path="/landing" element={<HomePage />} />
+                <Route path="/product" element={<ProductPage />} />
+                <Route path="/solutions" element={<SolutionsPage />} />
+                <Route path="/pricing" element={<PricingPage />} />
+                <Route path="/company" element={<CompanyPage />} />
+                <Route path="/book-demo" element={<BookDemoPage />} />
+              </Route>
+
               <Route path="/login" element={<Login />} />
               <Route path="/track/:sessionId" element={<DriverTrackingView />} />
               <Route path="/public-track/:trackingId" element={<PublicTracking />} />

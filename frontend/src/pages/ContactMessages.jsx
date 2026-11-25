@@ -57,34 +57,24 @@ const ContactMessages = () => {
     fetchMessages();
   }, []);
 
-  const handleDelete = (id, senderName) => {
-    showConfirm(
-      'Delete Contact Message',
-      `Are you sure you want to delete the message from "${senderName || 'this sender'}"?`,
-      async () => {
-        const dbId = String(id).replace('db-', '');
-        try {
-          // Clear any local cache for contact messages
-          try {
-            localStorage.removeItem('tms_cache_/api/v1/management/contact-messages');
-          } catch {}
+  const handleDelete = async (id, senderName) => {
+    const confirmed = await showConfirm(`Are you sure you want to delete the message from "${senderName || 'this sender'}"?`);
+    if (!confirmed) return;
 
-          const res = await fetch(`/api/v1/management/contact-messages/${dbId}`, { method: 'DELETE' });
-          if (res.ok || res.status === 200 || res.status === 204) {
-            setMessages(prev => prev.filter(m => String(m.id) !== String(id) && String(m.dbId) !== String(dbId)));
-            showAlert('Message deleted successfully.');
-          } else {
-            // Still remove from UI if record was already deleted
-            setMessages(prev => prev.filter(m => String(m.id) !== String(id) && String(m.dbId) !== String(dbId)));
-            showAlert('Message removed.');
-          }
-        } catch (err) {
-          console.error('Error deleting message:', err);
-          setMessages(prev => prev.filter(m => String(m.id) !== String(id) && String(m.dbId) !== String(dbId)));
-          showAlert('Message removed.');
-        }
-      }
-    );
+    const dbId = String(id).replace('db-', '');
+    try {
+      try {
+        localStorage.removeItem('tms_cache_/api/v1/management/contact-messages');
+      } catch {}
+
+      const res = await fetch(`/api/v1/management/contact-messages/${dbId}`, { method: 'DELETE' });
+      setMessages(prev => prev.filter(m => String(m.id) !== String(id) && String(m.dbId) !== String(dbId)));
+      showAlert('Message deleted successfully.');
+    } catch (err) {
+      console.error('Error deleting message:', err);
+      setMessages(prev => prev.filter(m => String(m.id) !== String(id) && String(m.dbId) !== String(dbId)));
+      showAlert('Message removed.');
+    }
   };
 
   return (
