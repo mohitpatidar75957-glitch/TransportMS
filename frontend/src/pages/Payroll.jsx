@@ -834,16 +834,7 @@ const Payroll = () => {
                   <td>{rec.date}</td>
                   <td>
                     <div className="action-buttons" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                      {rec.status === 'Paid' ? (
-                        <button 
-                          className="action-icon" 
-                          title="Click to Mark as Unpaid / Pending" 
-                          onClick={() => handleToggleStatus(rec)} 
-                          style={{ color: '#f39c12', background: 'rgba(243, 156, 18, 0.1)', padding: '5px 8px', borderRadius: '6px', border: '1px solid rgba(243, 156, 18, 0.3)', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}
-                        >
-                          <MdUndo size={14} /> Unpay
-                        </button>
-                      ) : (
+                      {rec.status !== 'Paid' && (
                         <button 
                           className="action-icon" 
                           title="Click to Pay Salary Now" 
@@ -853,9 +844,13 @@ const Payroll = () => {
                           <MdPayment size={14} /> Pay Now
                         </button>
                       )}
-                      <button className="action-icon" title="Edit Allowances & Salary" onClick={() => openPayModal(rec)} style={{ color: '#0984e3' }}><MdEdit size={16} /></button>
+                      {rec.status !== 'Paid' && (
+                        <button className="action-icon" title="Edit Allowances & Salary" onClick={() => openPayModal(rec)} style={{ color: '#0984e3' }}><MdEdit size={16} /></button>
+                      )}
                       <button className="action-icon delete" title="Download Salary Slip PDF" onClick={() => handleDownloadPdf(rec)} style={{ color: '#e74c3c' }}><MdPictureAsPdf size={16} /></button>
-                      <button className="action-icon" title="Delete" onClick={() => handleDelete(rec.id, rec.isReal, rec.dbId)} style={{ color: 'var(--text-secondary)' }}><MdDelete size={16} /></button>
+                      {rec.status !== 'Paid' && (
+                        <button className="action-icon" title="Delete" onClick={() => handleDelete(rec.id, rec.isReal, rec.dbId)} style={{ color: 'var(--text-secondary)' }}><MdDelete size={16} /></button>
+                      )}
                     </div>
                   </td>
                 </tr>
