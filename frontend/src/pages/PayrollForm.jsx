@@ -15,7 +15,7 @@ import './AddVehicle.css';
 const PayrollForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { showAlert } = useAlert();
+  const { showAlert } = useModal();
   const isEdit = Boolean(id);
 
   const [loading, setLoading] = useState(true);
