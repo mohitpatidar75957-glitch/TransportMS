@@ -103,21 +103,15 @@ const ContactMessageDetails = () => {
   }
 
   return (
-    <div className="vehicles-container" style={{ display: 'flex', justifyContent: 'center', paddingTop: '20px' }}>
-      <div className="panel" style={{ width: '100%', maxWidth: '800px', padding: '0', overflow: 'hidden' }}>
+    <div className="vehicles-container" style={{ width: '100%', maxWidth: '100%', padding: '24px 32px' }}>
+      <div className="panel" style={{ width: '100%', maxWidth: '100%', margin: 0, padding: '0', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
         
         {/* Panel Header */}
-        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <MdEmail size={20} style={{ color: '#0984e3' }} />
+            <MdEmail size={22} style={{ color: '#0984e3' }} />
             <h3 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>Message Details</h3>
           </div>
-          <button 
-            onClick={() => navigate('/contact-messages')}
-            style={{ display: 'flex', alignItems: 'center', gap: '4px', backgroundColor: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }}
-          >
-            <MdArrowBack size={16} /> Back
-          </button>
         </div>
 
         {/* Message Content */}
