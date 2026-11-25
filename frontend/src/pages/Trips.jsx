@@ -51,10 +51,21 @@ const Trips = () => {
     fetchTrips();
   }, []);
 
+  // Format trip number strictly to TRP-0001 format
+  const formatTripNumber = (t) => {
+    if (t.tripNumber && /^TRP-\d{4}$/.test(t.tripNumber)) {
+      return t.tripNumber;
+    }
+    // If it's a test trip or odd format like TRP-TEST-..., format by db id
+    const num = t.id || (t.tripNumber ? String(t.tripNumber).replace(/\D/g, '') : '1');
+    const cleanSeq = parseInt(num) || 1;
+    return `TRP-${String(cleanSeq).padStart(4, '0')}`;
+  };
+
   // Merge dummy trips with real database trips
   const allTrips = [
     ...dbTrips.map(t => ({
-      id: t.tripNumber || `TRP-${String(t.id).padStart(4, '0')}`,
+      id: formatTripNumber(t),
       dbId: t.id,
       date: t.startDate || 'Unknown',
       customer: t.clientName || 'Unknown',
@@ -313,7 +324,7 @@ const Trips = () => {
         </div>
       ) : (
         <div className="table-container panel">
-          <table className="data-table">
+          <table className="data-table trips-table">
             <thead>
               <tr>
                 <th>TRIP #</th>

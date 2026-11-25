@@ -396,7 +396,7 @@ public class FleetController {
             List<Trip> trips = tripRepository.findAll();
             boolean changed = false;
             for (Trip t : trips) {
-                if (t.getTripNumber() == null || t.getTripNumber().matches("TRP-\\d{5,}") || t.getTripNumber().startsWith("TRP-DB-")) {
+                if (t.getTripNumber() == null || !t.getTripNumber().matches("TRP-\\d{4}")) {
                     String cleanNum = String.format("TRP-%04d", t.getId() != null ? t.getId() : 1);
                     String oldNum = t.getTripNumber();
                     t.setTripNumber(cleanNum);

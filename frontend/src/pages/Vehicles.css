@@ -139,6 +139,38 @@
   background-color: var(--hover-color);
 }
 
+.trips-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  table-layout: auto;
+}
+
+.trips-table th {
+  padding: 10px 10px !important;
+  font-size: 0.74rem !important;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 700;
+  background-color: var(--bg-surface-elevated, #f8fafc);
+  border-bottom: 2px solid var(--border-color);
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+.trips-table td {
+  padding: 10px 10px !important;
+  font-size: 0.82rem !important;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.trips-table tbody tr:hover {
+  background-color: var(--hover-color, #f1f5f9);
+}
+
 .table-container {
   overflow-x: auto;
   padding: 0;
