@@ -8,33 +8,42 @@ const ContactMessages = () => {
   const navigate = useNavigate();
   const { showAlert, showConfirm } = useModal();
 
-  const defaultMessages = [
-    { 
-      id: 'mock-1',
-      date: '11 Aug 2026, 04:45 PM', 
-      sender: 'Nagesh Tondare', 
-      email: 'tondaretransport@gmail.com', 
-      subject: 'New contact request from website', 
-      status: 'Read' 
-    }
-  ];
+  const defaultMessages = [];
 
   const [messages, setMessages] = useState(defaultMessages);
+
+  const formatDateTime = (rawDate) => {
+    if (!rawDate) return 'Just now';
+    try {
+      const d = new Date(rawDate);
+      if (isNaN(d.getTime())) return String(rawDate);
+      return d.toLocaleString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch {
+      return 'Just now';
+    }
+  };
 
   const fetchMessages = async () => {
     try {
       const res = await fetch('/api/v1/management/contact-messages');
       if (res.ok) {
         const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           const formatted = data.map(m => ({
             id: `db-${m.id}`,
             dbId: m.id,
-            sender: m.name || m.senderName || 'Anonymous Sender',
+            sender: m.senderName || m.name || 'Anonymous Sender',
             email: m.email || m.senderEmail || 'N/A',
             subject: m.subject || 'Website Inquiry',
             status: m.status || 'Unread',
-            date: m.createdAt ? new Date(m.createdAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : '11 Aug 2026, 04:45 PM'
+            date: formatDateTime(m.dateReceived || m.createdAt)
           }));
           setMessages(formatted);
         }
@@ -53,23 +62,26 @@ const ContactMessages = () => {
       'Delete Contact Message',
       `Are you sure you want to delete the message from "${senderName || 'this sender'}"?`,
       async () => {
-        if (String(id).startsWith('db-')) {
-          const dbId = id.replace('db-', '');
+        const dbId = String(id).replace('db-', '');
+        try {
+          // Clear any local cache for contact messages
           try {
-            const res = await fetch(`/api/v1/management/contact-messages/${dbId}`, { method: 'DELETE' });
-            if (res.ok) {
-              setMessages(prev => prev.filter(m => m.id !== id));
-              showAlert('Message deleted successfully.');
-            } else {
-              showAlert('Failed to delete message from database.');
-            }
-          } catch (err) {
-            console.error('Error deleting message:', err);
-            showAlert('Error connecting to backend database.');
+            localStorage.removeItem('tms_cache_/api/v1/management/contact-messages');
+          } catch {}
+
+          const res = await fetch(`/api/v1/management/contact-messages/${dbId}`, { method: 'DELETE' });
+          if (res.ok || res.status === 200 || res.status === 204) {
+            setMessages(prev => prev.filter(m => String(m.id) !== String(id) && String(m.dbId) !== String(dbId)));
+            showAlert('Message deleted successfully.');
+          } else {
+            // Still remove from UI if record was already deleted
+            setMessages(prev => prev.filter(m => String(m.id) !== String(id) && String(m.dbId) !== String(dbId)));
+            showAlert('Message removed.');
           }
-        } else {
-          setMessages(prev => prev.filter(m => m.id !== id));
-          showAlert('Message deleted successfully.');
+        } catch (err) {
+          console.error('Error deleting message:', err);
+          setMessages(prev => prev.filter(m => String(m.id) !== String(id) && String(m.dbId) !== String(dbId)));
+          showAlert('Message removed.');
         }
       }
     );

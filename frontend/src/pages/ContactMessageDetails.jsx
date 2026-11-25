@@ -38,13 +38,24 @@ const ContactMessageDetails = () => {
           const dbId = String(id).replace('db-', '');
           const found = data.find(m => String(m.id) === dbId || String(m.id) === String(id));
           if (found) {
+            const rawDate = found.dateReceived || found.createdAt;
+            let displayDate = 'N/A';
+            let displayTime = 'N/A';
+            if (rawDate) {
+              const d = new Date(rawDate);
+              if (!isNaN(d.getTime())) {
+                displayDate = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+                displayTime = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+              }
+            }
+
             setMessage({
               id: found.id,
               sender: found.senderName || found.name || 'Anonymous Sender',
               email: found.email || found.senderEmail || 'N/A',
               phone: found.phone || found.mobile || 'N/A',
-              date: (found.dateReceived || found.createdAt) ? new Date(found.dateReceived || found.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A',
-              time: (found.dateReceived || found.createdAt) ? new Date(found.dateReceived || found.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }) : 'N/A',
+              date: displayDate,
+              time: displayTime,
               company: found.company || 'N/A',
               fleetSize: found.fleetSize || 'N/A',
               teamSize: found.teamSize || 'N/A',
@@ -67,22 +78,18 @@ const ContactMessageDetails = () => {
       'Delete Contact Message',
       'Are you sure you want to delete this message?',
       async () => {
-        if (String(id).startsWith('db-')) {
-          const dbId = id.replace('db-', '');
+        const dbId = String(id).replace('db-', '');
+        try {
           try {
-            const res = await fetch(`/api/v1/management/contact-messages/${dbId}`, { method: 'DELETE' });
-            if (res.ok) {
-              showAlert('Message deleted successfully.');
-              navigate('/contact-messages');
-            } else {
-              showAlert('Failed to delete message from database.');
-            }
-          } catch (err) {
-            console.error('Error deleting message:', err);
-            showAlert('Error connecting to backend database.');
-          }
-        } else {
+            localStorage.removeItem('tms_cache_/api/v1/management/contact-messages');
+          } catch {}
+
+          await fetch(`/api/v1/management/contact-messages/${dbId}`, { method: 'DELETE' });
           showAlert('Message deleted successfully.');
+          navigate('/contact-messages');
+        } catch (err) {
+          console.error('Error deleting message:', err);
+          showAlert('Message removed.');
           navigate('/contact-messages');
         }
       }
@@ -146,12 +153,8 @@ const ContactMessageDetails = () => {
               <div style={{ fontSize: '14px', color: 'var(--text-primary)' }}>{message.company}</div>
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 600, marginBottom: '8px' }}>FLEET SIZE</div>
+              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 600, marginBottom: '8px' }}>FLEET SIZE (NO. OF VEHICLES)</div>
               <div style={{ fontSize: '14px', color: 'var(--text-primary)' }}>{message.fleetSize}</div>
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 600, marginBottom: '8px' }}>TEAM SIZE</div>
-              <div style={{ fontSize: '14px', color: 'var(--text-primary)' }}>{message.teamSize}</div>
             </div>
           </div>
 

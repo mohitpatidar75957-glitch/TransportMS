@@ -507,9 +507,9 @@ input[type="date"] {
 /* ==========================================================================
    LIGHT MODE OVERRIDES FOR CUSTOM PANELS (Driver Portal, Audit Logs, Settings)
    ========================================================================== */
-html[data-theme="light"],
-html:has(body[style*="--bg-primary: #f4f6f9"]),
-html:has(body[style*="--bg-primary: #ffffff"]) {
+html[data-theme="light"]:not(:has(.landing-wrapper)),
+html:has(body[style*="--bg-primary: #f4f6f9"]):not(:has(.landing-wrapper)),
+html:has(body[style*="--bg-primary: #ffffff"]):not(:has(.landing-wrapper)) {
   /* Global Page Background in Light Mode */
   body {
     background-color: #f4f6f9 !important;

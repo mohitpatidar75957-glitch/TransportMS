@@ -6,6 +6,7 @@ import MainLayout from './layouts/MainLayout';
 
 // Route-based code splitting (Lazy Loading) for ultra-fast initial page loads
 const Login = lazy(() => import('./pages/Login'));
+const LandingPage = lazy(() => import('./pages/LandingPage'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const NewTrip = lazy(() => import('./pages/NewTrip'));
 const Vehicles = lazy(() => import('./pages/Vehicles'));
@@ -126,6 +127,7 @@ function App() {
         <BrowserRouter>
           <Suspense fallback={<PageLoader />}>
             <Routes>
+              <Route path="/landing" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/track/:sessionId" element={<DriverTrackingView />} />
               <Route path="/public-track/:trackingId" element={<PublicTracking />} />
