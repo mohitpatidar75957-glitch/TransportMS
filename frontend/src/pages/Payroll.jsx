@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MdAdd, MdPictureAsPdf, MdDelete, MdAccountBalanceWallet, MdCheckCircle, MdLock, MdHourglassEmpty, MdEdit } from 'react-icons/md';
+import { 
+  MdAdd, MdPictureAsPdf, MdDelete, MdAccountBalanceWallet, MdCheckCircle, 
+  MdLock, MdHourglassEmpty, MdEdit, MdSearch, MdPayment, MdUndo
+} from 'react-icons/md';
 import './Vehicles.css';
 import { useModal } from '../context/ModalContext';
 import { useAuth } from '../context/AuthContext';
@@ -16,7 +19,10 @@ const Payroll = () => {
   const [driverProfile, setDriverProfile] = useState(null);
   const [loggedInDriverId, setLoggedInDriverId] = useState(null);
   
-  const [records, setRecords] = useState([]);
+  const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL' | 'PAID' | 'PENDING'
+  const [searchQuery, setSearchQuery] = useState('');
+  const [roleFilter, setRoleFilter] = useState('ALL');
+
   const [employeeMap, setEmployeeMap] = useState({});
 
   const [allDriversList, setAllDriversList] = useState([]);
@@ -56,10 +62,14 @@ const Payroll = () => {
         
         if (resUsers.ok) {
           users = await resUsers.json();
-          setAllManagersList(users.filter(u => u.role === 'MANAGER' || u.role === 'SUPER_ADMIN'));
+          // Filter valid managers / admins without duplicate old IDs
+          const managersOnly = users.filter(u => u.role === 'MANAGER' || u.role === 'SUPER_ADMIN');
+          setAllManagersList(managersOnly);
           users.forEach(u => {
             const type = u.role === 'SUPER_ADMIN' ? 'Admin' : 'Manager';
             map[`${type}-${u.id}`] = u.name;
+            // Also store Manager-key in case db has Manager
+            map[`Manager-${u.id}`] = u.name;
           });
         }
         
@@ -81,15 +91,25 @@ const Payroll = () => {
     fetchEmployeesAndProfile();
   }, [isDriver, currentUser]);
 
-  // 1. Existing DB Payroll Records
+  // 1. Existing DB Payroll Records (only show valid existing drivers/managers)
   const dbMappedRecords = dbRecords
     .filter(r => !isDriver || (r.employeeType === 'Driver' && r.employeeId === loggedInDriverId))
+    .filter(r => {
+      // Hide orphan records where driver or manager no longer exists
+      if (r.employeeType === 'Driver') {
+        return allDriversList.some(d => Number(d.id) === Number(r.employeeId));
+      }
+      if (r.employeeType === 'Manager' || r.employeeType === 'Admin') {
+        return allManagersList.some(m => Number(m.id) === Number(r.employeeId));
+      }
+      return true;
+    })
     .map(r => ({
       id: `PAY-DB-${r.id}`,
       dbId: r.id,
-      name: employeeMap[`${r.employeeType}-${r.employeeId}`] || `EMP ID: ${r.employeeId || 'Unknown'}`,
+      name: employeeMap[`${r.employeeType}-${r.employeeId}`] || employeeMap[`Manager-${r.employeeId}`] || `EMP ID: ${r.employeeId || 'Unknown'}`,
       role: r.employeeType || 'Unknown',
-      month: r.monthYear || 'October/2026',
+      month: r.monthYear || '10/2026',
       basic: r.baseSalary || 0,
       allowances: (r.netPayable || 0) - (r.baseSalary || 0) + (r.deductions || 0),
       deductions: r.deductions || 0,
@@ -109,7 +129,7 @@ const Payroll = () => {
       dbId: null,
       name: d.name,
       role: 'Driver',
-      month: 'October/2026',
+      month: '10/2026',
       basic: d.salaryAmount || 25000,
       allowances: 0,
       deductions: 0,
@@ -129,7 +149,7 @@ const Payroll = () => {
       dbId: null,
       name: m.name,
       role: m.role === 'SUPER_ADMIN' ? 'Admin' : 'Manager',
-      month: 'October/2026',
+      month: '10/2026',
       basic: 45000,
       allowances: 0,
       deductions: 0,
@@ -142,6 +162,76 @@ const Payroll = () => {
     }));
 
   const allRecords = [...dbMappedRecords, ...pendingDriverRecords, ...pendingManagerRecords];
+
+  // Quick toggle between Paid and Pending
+  const handleToggleStatus = async (rec) => {
+    const newStatus = rec.status === 'Paid' ? 'Pending' : 'Paid';
+    const confirmMsg = newStatus === 'Paid' 
+      ? `Mark salary as PAID for ${rec.name} (₹${Number(rec.netPaid).toLocaleString()})?`
+      : `Revert salary to UNPAID / PENDING for ${rec.name}?`;
+
+    if (await showConfirm(confirmMsg)) {
+      try {
+        if (rec.dbId) {
+          const res = await fetch(`/api/v1/hr/payroll/${rec.dbId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus })
+          });
+          if (res.ok) {
+            fetchPayroll();
+            showAlert(`Status updated to ${newStatus} for ${rec.name}!`);
+          } else {
+            showAlert('Failed to update status.');
+          }
+        } else {
+          // Record was pending without db entry, create it in DB
+          const res = await fetch(`/api/v1/hr/payroll`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              employeeId: rec.employeeId,
+              employeeType: rec.employeeType,
+              monthYear: rec.month || '10/2026',
+              baseSalary: rec.basic,
+              allowances: rec.allowances || 0,
+              deductions: rec.deductions || 0,
+              netPayable: rec.netPaid,
+              status: newStatus
+            })
+          });
+          if (res.ok) {
+            fetchPayroll();
+            showAlert(`Status updated to ${newStatus} for ${rec.name}!`);
+          } else {
+            showAlert('Failed to create payroll entry.');
+          }
+        }
+      } catch (err) {
+        showAlert('Error updating salary status: ' + err.message);
+      }
+    }
+  };
+
+  // Filtered records based on active tabs & search
+  const filteredRecords = allRecords.filter(r => {
+    // Status filter
+    if (statusFilter === 'PAID' && r.status !== 'Paid') return false;
+    if (statusFilter === 'PENDING' && r.status === 'Paid') return false;
+
+    // Role filter
+    if (roleFilter !== 'ALL' && r.role !== roleFilter) return false;
+
+    // Search query
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const matchName = String(r.name || '').toLowerCase().includes(q);
+      const matchRole = String(r.role || '').toLowerCase().includes(q);
+      const matchMonth = String(r.month || '').toLowerCase().includes(q);
+      if (!matchName && !matchRole && !matchMonth) return false;
+    }
+    return true;
+  });
 
   // For Manager or Driver personal view
   const myRecords = isDriver ? allRecords 
@@ -548,22 +638,123 @@ const Payroll = () => {
 
       {!isDriver && !isManager && (
         <div className="summary-cards-container" style={{ marginBottom: '24px' }}>
-          <div className="panel" style={{ padding: '24px', borderLeft: '4px solid #3498db' }}>
+          <div className="panel" style={{ padding: '24px', borderLeft: '4px solid #3498db', cursor: 'pointer' }} onClick={() => setStatusFilter('ALL')}>
             <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', color: 'var(--text-secondary)' }}>Total Payroll</h3>
             <p style={{ margin: 0, fontSize: '24px', fontWeight: 'bold' }}>₹{totalPayroll.toLocaleString()}</p>
           </div>
-          <div className="panel" style={{ padding: '24px', borderLeft: '4px solid #4cd137' }}>
+          <div className="panel" style={{ padding: '24px', borderLeft: '4px solid #4cd137', cursor: 'pointer' }} onClick={() => setStatusFilter('PAID')}>
             <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', color: 'var(--text-secondary)' }}>Processed (Paid)</h3>
             <p style={{ margin: 0, fontSize: '24px', fontWeight: 'bold' }}>₹{totalPaid.toLocaleString()}</p>
           </div>
-          <div className="panel" style={{ padding: '24px', borderLeft: '4px solid #fbc531' }}>
+          <div className="panel" style={{ padding: '24px', borderLeft: '4px solid #fbc531', cursor: 'pointer' }} onClick={() => setStatusFilter('PENDING')}>
             <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', color: 'var(--text-secondary)' }}>Pending Payments</h3>
             <p style={{ margin: 0, fontSize: '24px', fontWeight: 'bold' }}>₹{totalPending.toLocaleString()}</p>
           </div>
         </div>
       )}
 
-      <h3 style={{ marginBottom: '16px', color: 'var(--text-primary)', fontSize: '16px' }}>All Salary Records</h3>
+      {/* Filter and Search Bar with Paid / Unpaid Tabs */}
+      <div className="panel" style={{ padding: '16px', marginBottom: '20px', display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center', justifyContent: 'space-between' }}>
+        {/* Status Tabs */}
+        <div style={{ display: 'flex', gap: '8px', background: 'var(--bg-secondary)', padding: '4px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+          <button 
+            onClick={() => setStatusFilter('ALL')}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '8px',
+              border: 'none',
+              fontWeight: '600',
+              fontSize: '13px',
+              cursor: 'pointer',
+              background: statusFilter === 'ALL' ? '#0984e3' : 'transparent',
+              color: statusFilter === 'ALL' ? '#ffffff' : 'var(--text-secondary)',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            All Records ({allRecords.length})
+          </button>
+          <button 
+            onClick={() => setStatusFilter('PAID')}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '8px',
+              border: 'none',
+              fontWeight: '600',
+              fontSize: '13px',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: statusFilter === 'PAID' ? '#00b894' : 'transparent',
+              color: statusFilter === 'PAID' ? '#ffffff' : 'var(--text-secondary)',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <MdCheckCircle size={15} /> Paid ({allRecords.filter(r => r.status === 'Paid').length})
+          </button>
+          <button 
+            onClick={() => setStatusFilter('PENDING')}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '8px',
+              border: 'none',
+              fontWeight: '600',
+              fontSize: '13px',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: statusFilter === 'PENDING' ? '#f39c12' : 'transparent',
+              color: statusFilter === 'PENDING' ? '#ffffff' : 'var(--text-secondary)',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <MdHourglassEmpty size={15} /> Unpaid / Pending ({allRecords.filter(r => r.status !== 'Paid').length})
+          </button>
+        </div>
+
+        {/* Search & Role Filter */}
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flex: 1, maxWidth: '450px', minWidth: '260px' }}>
+          <div className="search-box" style={{ flex: 1 }}>
+            <input 
+              type="text" 
+              placeholder="Search employee name, role or month..." 
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              style={{ width: '100%' }}
+            />
+          </div>
+          <select 
+            className="filter-select"
+            value={roleFilter}
+            onChange={e => setRoleFilter(e.target.value)}
+            style={{ padding: '8px 28px 8px 12px' }}
+          >
+            <option value="ALL">All Roles</option>
+            <option value="Driver">Drivers</option>
+            <option value="Manager">Managers</option>
+            <option value="Admin">Admins</option>
+          </select>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '16px' }}>
+          Salary Records ({filteredRecords.length})
+        </h3>
+        {statusFilter !== 'ALL' && (
+          <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+            Showing: <strong style={{ color: statusFilter === 'PAID' ? '#00b894' : '#f39c12' }}>{statusFilter}</strong>
+            <button 
+              onClick={() => { setStatusFilter('ALL'); setSearchQuery(''); setRoleFilter('ALL'); }}
+              style={{ marginLeft: '10px', background: 'none', border: 'none', color: '#0984e3', cursor: 'pointer', textDecoration: 'underline', fontSize: '12px' }}
+            >
+              Clear filter
+            </button>
+          </span>
+        )}
+      </div>
+
       <div className="table-container panel">
         <table className="data-table">
           <thead>
@@ -575,21 +766,26 @@ const Payroll = () => {
               <th>Net Paid</th>
               <th>Status</th>
               <th>Date</th>
-              <th>Actions</th>
+              <th style={{ textAlign: 'center' }}>Pay / Actions</th>
             </tr>
           </thead>
           <tbody>
-            {allRecords.length === 0 ? (
+            {filteredRecords.length === 0 ? (
               <tr>
-                <td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>No payroll records found.</td>
+                <td colSpan="8" style={{ textAlign: 'center', padding: '30px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)' }}>
+                    <MdAccountBalanceWallet size={36} style={{ opacity: 0.4 }} />
+                    <span>No salary records found for the selected filter.</span>
+                  </div>
+                </td>
               </tr>
             ) : (
-              allRecords.map(rec => (
+              filteredRecords.map(rec => (
                 <tr key={rec.id}>
                   <td>
                     <div className="vehicle-info">
                       <span className="vehicle-num">{rec.name}</span>
-                      <span className="vehicle-name" style={{ color: '#3742fa', fontSize: '11px' }}>{rec.role}</span>
+                      <span className="vehicle-name" style={{ color: '#0984e3', fontSize: '11px', fontWeight: 'bold' }}>{rec.role}</span>
                     </div>
                   </td>
                   <td>{rec.month}</td>
@@ -599,71 +795,67 @@ const Payroll = () => {
                     {' / '}
                     <span style={{ color: '#ff4757' }}>-₹{Number(rec.deductions).toLocaleString()}</span>
                   </td>
-                  <td style={{ color: '#2ed573', fontWeight: 600 }}>₹{Number(rec.netPaid).toLocaleString()}</td>
+                  <td style={{ color: '#2ed573', fontWeight: 700 }}>₹{Number(rec.netPaid).toLocaleString()}</td>
                   <td>
                     {rec.status === 'Paid' ? (
                       <span style={{
                         backgroundColor: 'rgba(46, 213, 115, 0.15)',
                         color: '#2ed573',
                         border: '1px solid #2ed573',
-                        padding: '6px 14px',
+                        padding: '4px 10px',
                         borderRadius: '20px',
-                        fontWeight: '600',
-                        fontSize: '12px',
+                        fontWeight: '700',
+                        fontSize: '11px',
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '6px',
-                        whiteSpace: 'nowrap',
-                        cursor: 'default'
+                        gap: '4px',
+                        whiteSpace: 'nowrap'
                       }}>
-                        <MdCheckCircle size={14} /> Paid <MdLock size={12} style={{ opacity: 0.7 }} />
+                        <MdCheckCircle size={13} /> Paid
                       </span>
                     ) : (
-                      <button 
-                        onClick={() => openPayModal(rec)}
-                        style={{
-                          padding: '7px 15px',
-                          borderRadius: '20px',
-                          border: '1px solid rgba(251, 197, 49, 0.6)',
-                          background: 'linear-gradient(135deg, rgba(251, 197, 49, 0.15) 0%, rgba(230, 126, 34, 0.2) 100%)',
-                          color: '#f39c12',
-                          fontWeight: '600',
-                          fontSize: '12px',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          whiteSpace: 'nowrap',
-                          outline: 'none',
-                          cursor: 'pointer',
-                          boxShadow: '0 2px 8px rgba(251, 197, 49, 0.15)',
-                          transition: 'all 0.25s ease'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = 'linear-gradient(135deg, #2ed573 0%, #26af5f 100%)';
-                          e.currentTarget.style.color = '#ffffff';
-                          e.currentTarget.style.borderColor = '#2ed573';
-                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(46, 213, 115, 0.35)';
-                          e.currentTarget.style.transform = 'translateY(-1px)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = 'linear-gradient(135deg, rgba(251, 197, 49, 0.15) 0%, rgba(230, 126, 34, 0.2) 100%)';
-                          e.currentTarget.style.color = '#f39c12';
-                          e.currentTarget.style.borderColor = 'rgba(251, 197, 49, 0.6)';
-                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(251, 197, 49, 0.15)';
-                          e.currentTarget.style.transform = 'translateY(0)';
-                        }}
-                        title="Click to Add Allowances & Pay Salary"
-                      >
-                        <MdHourglassEmpty size={14} /> Pending · Pay Now
-                      </button>
+                      <span style={{
+                        backgroundColor: 'rgba(251, 197, 49, 0.15)',
+                        color: '#f39c12',
+                        border: '1px solid rgba(251, 197, 49, 0.6)',
+                        padding: '4px 10px',
+                        borderRadius: '20px',
+                        fontWeight: '700',
+                        fontSize: '11px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        <MdHourglassEmpty size={13} /> Unpaid
+                      </span>
                     )}
                   </td>
                   <td>{rec.date}</td>
                   <td>
-                    <div className="action-buttons">
-                      <button className="action-icon" title="Edit Allowances & Salary" onClick={() => openPayModal(rec)} style={{ color: '#0984e3' }}><MdEdit /></button>
-                      <button className="action-icon delete" title="Download PDF" onClick={() => handleDownloadPdf(rec)} style={{ color: '#ff4757' }}><MdPictureAsPdf /></button>
-                      <button className="action-icon" title="Delete" onClick={() => handleDelete(rec.id, rec.isReal, rec.dbId)} style={{ color: 'var(--text-secondary)' }}><MdDelete /></button>
+                    <div className="action-buttons" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
+                      {rec.status === 'Paid' ? (
+                        <button 
+                          className="action-icon" 
+                          title="Click to Mark as Unpaid / Pending" 
+                          onClick={() => handleToggleStatus(rec)} 
+                          style={{ color: '#f39c12', background: 'rgba(243, 156, 18, 0.1)', padding: '5px 8px', borderRadius: '6px', border: '1px solid rgba(243, 156, 18, 0.3)', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}
+                        >
+                          <MdUndo size={14} /> Unpay
+                        </button>
+                      ) : (
+                        <button 
+                          className="action-icon" 
+                          title="Click to Pay Salary Now" 
+                          onClick={() => openPayModal(rec)} 
+                          style={{ color: '#fff', background: '#2ed573', padding: '5px 10px', borderRadius: '6px', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 2px 6px rgba(46, 213, 115, 0.3)' }}
+                        >
+                          <MdPayment size={14} /> Pay Now
+                        </button>
+                      )}
+                      <button className="action-icon" title="Edit Allowances & Salary" onClick={() => openPayModal(rec)} style={{ color: '#0984e3' }}><MdEdit size={16} /></button>
+                      <button className="action-icon delete" title="Download Salary Slip PDF" onClick={() => handleDownloadPdf(rec)} style={{ color: '#e74c3c' }}><MdPictureAsPdf size={16} /></button>
+                      <button className="action-icon" title="Delete" onClick={() => handleDelete(rec.id, rec.isReal, rec.dbId)} style={{ color: 'var(--text-secondary)' }}><MdDelete size={16} /></button>
                     </div>
                   </td>
                 </tr>
