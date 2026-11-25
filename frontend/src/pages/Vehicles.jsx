@@ -92,20 +92,22 @@ const Vehicles = () => {
             const rawReg = getRowValue(row, 'Registration Number', 'registrationNumber', 'Vehicle Number', 'Vehicle No', 'Vehicle_No', 'Reg No', 'regNumber', 'Vehicle');
             const regNumber = normalizeRegistrationNumber(rawReg);
 
-            const name = getRowValue(row, 'Name', 'Vehicle Name', 'name', 'vehicleName', 'Model Name');
-            const type = getRowValue(row, 'Type', 'type', 'Vehicle Type', 'vehicleType') || 'Truck';
+            const name = getRowValue(row, 'Name', 'Vehicle Name', 'Vehicle Model', 'Model Name', 'name', 'vehicleName');
+            const type = getRowValue(row, 'Type', 'type', 'Vehicle Type', 'vehicleType', 'Category') || 'Truck';
             const capacity = getRowValue(row, 'Capacity', 'capacity', 'Tonnage', 'Weight Capacity');
             const status = getRowValue(row, 'Status', 'status', 'Vehicle Status') || 'Active';
             const ownership = getRowValue(row, 'Ownership', 'ownership', 'Owner Type') || 'Owned';
-            const mileage = parseFloat(getRowValue(row, 'Mileage', 'mileage', 'Avg Mileage', 'KM/L')) || 0;
-            const model = getRowValue(row, 'Model', 'model', 'Year', 'Make / Model');
+            const mileage = parseFloat(getRowValue(row, 'Mileage', 'mileage', 'Mileage (km/l)', 'Avg Mileage', 'KM/L')) || 0;
+            const model = getRowValue(row, 'Model', 'model', 'Year', 'Model Year', 'Make / Model');
             const chassis = getRowValue(row, 'Chassis Number', 'chassisNumber', 'Chassis No', 'Chassis_No');
             const engine = getRowValue(row, 'Engine Number', 'engineNumber', 'Engine No', 'Engine_No');
 
-            const insurance = parseExcelDate(getRowValue(row, 'Insurance Expiry', 'insuranceExpiry', 'Insurance', 'Insurance Valid Till'));
-            const puc = parseExcelDate(getRowValue(row, 'PUC Expiry', 'pucExpiry', 'PUC', 'PUC Valid Till'));
-            const permit = parseExcelDate(getRowValue(row, 'Permit Expiry', 'permitExpiry', 'Permit', 'Permit Valid Till'));
-            const fitness = parseExcelDate(getRowValue(row, 'Fitness Expiry', 'fitnessExpiry', 'Fitness', 'Fitness Valid Till'));
+            // Support both individual expiry columns and common single 'Expiry Date' column
+            const generalExpiry = parseExcelDate(getRowValue(row, 'Expiry Date', 'expiryDate', 'Validity', 'Valid Till', 'Expiry'));
+            const insurance = parseExcelDate(getRowValue(row, 'Insurance Expiry', 'insuranceExpiry', 'Insurance', 'Insurance Valid Till')) || generalExpiry;
+            const puc = parseExcelDate(getRowValue(row, 'PUC Expiry', 'pucExpiry', 'PUC', 'PUC Valid Till')) || generalExpiry;
+            const permit = parseExcelDate(getRowValue(row, 'Permit Expiry', 'permitExpiry', 'Permit', 'Permit Valid Till')) || generalExpiry;
+            const fitness = parseExcelDate(getRowValue(row, 'Fitness Expiry', 'fitnessExpiry', 'Fitness', 'Fitness Valid Till')) || generalExpiry;
 
             return {
                 registrationNumber: regNumber,
