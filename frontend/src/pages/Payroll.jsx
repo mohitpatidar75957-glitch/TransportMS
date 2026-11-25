@@ -844,13 +844,16 @@ const Payroll = () => {
                           <MdPayment size={14} /> Pay Now
                         </button>
                       )}
-                      {rec.status !== 'Paid' && (
-                        <button className="action-icon" title="Edit Allowances & Salary" onClick={() => openPayModal(rec)} style={{ color: '#0984e3' }}><MdEdit size={16} /></button>
-                      )}
+                      <button 
+                        className="action-icon" 
+                        title="Full Edit Salary Details" 
+                        onClick={() => navigate(rec.dbId ? `/payroll/${rec.dbId}/edit` : `/payroll/create?empId=${rec.employeeId}&type=${rec.employeeType}`)} 
+                        style={{ color: '#0984e3' }}
+                      >
+                        <MdEdit size={16} />
+                      </button>
                       <button className="action-icon delete" title="Download Salary Slip PDF" onClick={() => handleDownloadPdf(rec)} style={{ color: '#e74c3c' }}><MdPictureAsPdf size={16} /></button>
-                      {rec.status !== 'Paid' && (
-                        <button className="action-icon" title="Delete" onClick={() => handleDelete(rec.id, rec.isReal, rec.dbId)} style={{ color: 'var(--text-secondary)' }}><MdDelete size={16} /></button>
-                      )}
+                      <button className="action-icon" title="Delete" onClick={() => handleDelete(rec.id, rec.isReal, rec.dbId)} style={{ color: 'var(--text-secondary)' }}><MdDelete size={16} /></button>
                     </div>
                   </td>
                 </tr>
