@@ -47,15 +47,15 @@ public class DispatchSuggestionController {
             double orderWeight = parseWeight(weightStr);  // extract numeric tons
             String freight  = str(order.get("amount"));   // e.g. "₹45000"
 
-            // 2. Filter VALID vehicles belonging ONLY to this company (Active + all docs valid > 30 days)
-            String today30 = LocalDate.now().plusDays(30).toString();
+            // 2. Filter VALID vehicles belonging ONLY to this company (Active + all docs valid > 30 days or not strictly expired)
+            LocalDate cutoffDate = LocalDate.now().plusDays(30);
             List<Map<String, Object>> vehicles = jdbcTemplate.queryForList(
                 "SELECT * FROM vehicles WHERE tenant_id = ? AND status = 'Active' " +
-                "AND insurance_expiry > ? " +
-                "AND permit_expiry > ? " +
-                "AND puc_expiry > ? " +
-                "AND fitness_expiry > ?",
-                tenantId, today30, today30, today30, today30
+                "AND (insurance_expiry IS NULL OR insurance_expiry > ?) " +
+                "AND (permit_expiry IS NULL OR permit_expiry > ?) " +
+                "AND (puc_expiry IS NULL OR puc_expiry > ?) " +
+                "AND (fitness_expiry IS NULL OR fitness_expiry > ?)",
+                tenantId, cutoffDate, cutoffDate, cutoffDate, cutoffDate
             );
 
         // 3. Filter AVAILABLE vehicles (no active/scheduled trip)
@@ -79,7 +79,7 @@ public class DispatchSuggestionController {
 
         // 4. Filter AVAILABLE drivers belonging ONLY to this company (status=Available + license valid > 30 days)
         List<Map<String, Object>> drivers = jdbcTemplate.queryForList(
-            "SELECT * FROM drivers WHERE tenant_id = ? AND status = 'Available' AND license_expiry > ?", tenantId, today30
+            "SELECT * FROM drivers WHERE tenant_id = ? AND status = 'Available' AND (license_expiry IS NULL OR license_expiry > ?)", tenantId, cutoffDate
         );
 
         // 5. Estimate realistic Route Distance
