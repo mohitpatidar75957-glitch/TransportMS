@@ -14,24 +14,42 @@ const ContactMessageDetails = () => {
   useEffect(() => {
     const fetchDetails = async () => {
       try {
+        if (id === 'mock-1') {
+          setMessage({
+            id: 'mock-1',
+            sender: 'Nagesh Tondare',
+            email: 'tondaretransport@gmail.com',
+            phone: '+91 98765 43210',
+            date: '11 Aug 2026',
+            time: '04:45 PM',
+            company: 'Tondare Transport Logistics',
+            fleetSize: '25 Trucks',
+            teamSize: '40 Drivers & Staff',
+            subject: 'New contact request from website',
+            body: 'Hello Team, We are looking for an integrated Fleet & Transport Management solution to manage our interstate routes, e-way bills, fastag tracking and trip billing. Please share your commercial quote and arrange a product demonstration.'
+          });
+          setLoading(false);
+          return;
+        }
+
         const res = await fetch('/api/v1/management/contact-messages');
         if (res.ok) {
           const data = await res.json();
           const dbId = String(id).replace('db-', '');
-          const found = data.find(m => String(m.id) === dbId);
+          const found = data.find(m => String(m.id) === dbId || String(m.id) === String(id));
           if (found) {
             setMessage({
               id: found.id,
-              sender: found.senderName || 'Anonymous',
-              email: found.email || 'N/A',
-              phone: found.phone || 'N/A',
-              date: found.dateReceived ? new Date(found.dateReceived).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A',
-              time: found.dateReceived ? new Date(found.dateReceived).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }) : 'N/A',
+              sender: found.senderName || found.name || 'Anonymous Sender',
+              email: found.email || found.senderEmail || 'N/A',
+              phone: found.phone || found.mobile || 'N/A',
+              date: (found.dateReceived || found.createdAt) ? new Date(found.dateReceived || found.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A',
+              time: (found.dateReceived || found.createdAt) ? new Date(found.dateReceived || found.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }) : 'N/A',
               company: found.company || 'N/A',
               fleetSize: found.fleetSize || 'N/A',
               teamSize: found.teamSize || 'N/A',
-              subject: found.subject || 'No Subject',
-              body: found.messageBody || 'No Content'
+              subject: found.subject || 'Website Inquiry',
+              body: found.messageBody || found.message || 'No Content'
             });
           }
         }
